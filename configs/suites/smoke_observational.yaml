@@ -1,0 +1,43 @@
+manifest_id: smoke_obs_v1
+name: smoke_observational
+description: Tiny observational-mode smoke benchmark (CSV-backed series).
+mode: observational
+source:
+  type: csv_series_index
+  series:
+    - record_id: obs_s1
+      path: data/smoke_series.csv
+      value_column: value
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 32
+      bootstrap_block_len: 12
+      ci_levels: [0.95]
+metrics:
+  - validity_rate
+  - runtime
+  - name: ci_width
+    levels: [0.95]
+  - instability
+  - preprocessing_sensitivity
+preprocessing:
+  sensitivity_eps: 1.0e-4
+leaderboards:
+  - name: observational_robustness
+    mode: observational
+    component_metrics: [instability, validity_rate, runtime]
+    weights:
+      instability: 0.5
+      validity_rate: 0.3
+      runtime: 0.2
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  export_root: reports
+seeds:
+  global_seed: 11

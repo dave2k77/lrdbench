@@ -1,0 +1,65 @@
+# MkDocs site (local: mkdocs serve; Read the Docs: .readthedocs.yaml)
+site_name: lrdbench
+site_description: Reproducible benchmarking for long-range dependence estimators
+site_url: https://lrdbench.readthedocs.io/
+repo_url: https://github.com/dave2k77/lrdbench
+repo_name: GitHub
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.footer
+    - content.code.copy
+    - search.suggest
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_root_heading: true
+            show_source: true
+            members_order: source
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      check_paths: true
+      base_path: [.]
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - User guide:
+      - Installation: installation.md
+      - Research usage: research_usage.md
+      - Benchmark protocol: benchmark_protocol.md
+      - Estimator contract: estimator_contract.md
+  - Architecture: architecture.md
+  - Reference:
+      - Python API: reference/api.md
+  - Read the Docs: readthedocs.md
+  - Meta:
+      - Contributing: contributing.md
+      - Changelog: changelog.md

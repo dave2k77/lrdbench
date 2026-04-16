@@ -1,0 +1,12 @@
+name: release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Note
+        run: echo "Wire PyPI trusted publishing or twine upload when ready for releases."

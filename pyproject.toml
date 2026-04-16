@@ -1,0 +1,214 @@
+[build-system]
+requires = ["hatchling>=1.21.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lrdbench"
+version = "0.1.0"
+description = "A reproducible benchmark framework for evaluating long-range dependence estimators on canonical, contaminated, and observational time series."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "Davian Chin" }
+]
+keywords = [
+  "long-range dependence",
+  "hurst exponent",
+  "time series",
+  "benchmarking",
+  "scientific computing",
+  "biomedical signal processing",
+  "fractional processes",
+  "uncertainty quantification"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "pandas>=2.1",
+  "PyYAML>=6.0",
+  "typing-extensions>=4.8"
+]
+
+[project.urls]
+Homepage = "https://github.com/dave2k77/lrdbench"
+Documentation = "https://lrdbench.readthedocs.io/"
+Repository = "https://github.com/dave2k77/lrdbench"
+Issues = "https://github.com/dave2k77/lrdbench/issues"
+
+[project.optional-dependencies]
+reports = [
+  "matplotlib>=3.8",
+  "jinja2>=3.1",
+  "tabulate>=0.9"
+]
+
+parquet = [
+  "pyarrow>=14.0"
+]
+
+docs = [
+  "mkdocs>=1.5",
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.24"
+]
+
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=4.1",
+  "hypothesis>=6.98"
+]
+
+dev = [
+  "ruff>=0.4",
+  "mypy>=1.8",
+  "build>=1.0",
+  "twine>=5.0",
+  "pre-commit>=3.6"
+]
+
+all = [
+  "lrdbench[reports,parquet,docs,test,dev]"
+]
+
+[project.scripts]
+lrdbench = "lrdbench.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lrdbench"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/docs",
+  "/configs",
+  "/examples",
+  "/paper_support",
+  "/.github",
+  "/README.md",
+  "/LICENSE",
+  "/CHANGELOG.md",
+  "/CITATION.cff",
+  "/RESEARCH_USAGE.md",
+  "/CONTRIBUTING.md",
+  "/SPECIFICATION.md",
+  "/lrdbench_repo_schema.txt",
+  "/mkdocs.yml",
+  "/.readthedocs.yaml"
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "--cov=lrdbench",
+  "--cov-report=term-missing",
+  "--cov-report=xml"
+]
+markers = [
+  "slow: marks slow tests",
+  "statistical: marks statistical validation tests",
+  "integration: marks end-to-end integration tests"
+]
+
+[tool.coverage.run]
+source = ["src/lrdbench"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+  "@abstractmethod"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+  "N",
+  "SIM",
+  "C4"
+]
+ignore = [
+  "E501"
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+packages = ["lrdbench"]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+strict_equality = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+  "yaml",
+  "yaml.*",
+  "scipy.*",
+  "pandas",
+  "pandas.*"
+]
+ignore_missing_imports = true
+
+[tool.hatch.envs.default]
+features = ["reports", "parquet", "test", "dev"]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest"
+lint = "ruff check ."
+format = "ruff format ."
+typecheck = "mypy src"
+check = [
+  "ruff check .",
+  "mypy src",
+  "pytest"
+]
+
+[tool.hatch.envs.docs]
+features = ["docs", "reports"]
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build"
+serve = "mkdocs serve"
+
+[tool.hatch.version]
+path = "src/lrdbench/__init__.py"

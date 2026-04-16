@@ -1,0 +1,59 @@
+manifest_id: smoke_stress_v1
+name: smoke_stress_test
+description: Tiny stress_test smoke benchmark (clean + contaminated series).
+mode: stress_test
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.5]
+        n: [128]
+        sigma: [1.0]
+      replicates: 1
+contamination:
+  operators:
+    - name: level_shift
+      params:
+        shift: [0.25]
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 32
+      bootstrap_block_len: 12
+      ci_levels: [0.95]
+metrics:
+  - mae
+  - bias
+  - estimate_drift
+  - relative_degradation_ratio
+  - validity_rate
+  - runtime
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+  - name: coverage_collapse
+    levels: [0.95]
+leaderboards:
+  - name: stress_robustness
+    mode: stress_test
+    component_metrics: [mae, estimate_drift, validity_rate, runtime]
+    weights:
+      mae: 0.35
+      estimate_drift: 0.35
+      validity_rate: 0.2
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports
+seeds:
+  global_seed: 7

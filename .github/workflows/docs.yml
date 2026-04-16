@@ -1,0 +1,28 @@
+name: docs
+
+on:
+  push:
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".readthedocs.yaml"
+      - "src/lrdbench/**"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".readthedocs.yaml"
+      - "src/lrdbench/**"
+
+jobs:
+  mkdocs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install with docs extras
+        run: pip install ".[docs]"
+      - name: MkDocs strict build
+        run: mkdocs build --strict

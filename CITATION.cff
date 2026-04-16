@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: "lrdbench"
+message: >-
+  If you use this software in your research, please cite the software itself
+  and, where applicable, the associated benchmark or methods paper.
+type: software
+authors:
+  - family-names: "Chin"
+    given-names: "Davian"
+repository-code: "https://github.com/dave2k77/lrdbench"
+url: "https://github.com/dave2k77/lrdbench"
+license: "MIT"
+version: "0.1.0"
+abstract: >-
+  lrdbench is a reproducible benchmark framework for evaluating long-range
+  dependence estimators on canonical synthetic, contaminated synthetic, and
+  observational time series. The framework supports estimator enrolment,
+  uncertainty-aware evaluation, calibration assessment, robustness stress
+  testing, and provenance-complete reporting.
+keywords:
+  - "long-range dependence"
+  - "Hurst exponent"
+  - "time series"
+  - "benchmarking"
+  - "uncertainty quantification"
+  - "fractional processes"
+  - "biomedical signal processing"
+preferred-citation:
+  type: software
+  authors:
+    - family-names: "Chin"
+      given-names: "Davian"
+  title: "lrdbench"
+  version: "0.1.0"
+  url: "https://github.com/dave2k77/lrdbench"

@@ -1,0 +1,125 @@
+# Target repository layout (aspirational for src/; root folders below match current repo)
+lrdbench/
+├── pyproject.toml
+├── README.md
+├── LICENSE
+├── CITATION.cff
+├── CHANGELOG.md
+├── RESEARCH_USAGE.md
+├── CONTRIBUTING.md
+├── .github/
+│   └── workflows/
+│       ├── tests.yml
+│       ├── docs.yml
+│       └── release.yml
+├── configs/
+│   ├── suites/                    # runnable benchmark YAML (+ bundled small data)
+│   │   ├── smoke_ground_truth.yaml
+│   │   ├── smoke_stress_test.yaml
+│   │   ├── smoke_observational.yaml
+│   │   └── data/                  # e.g. CSV referenced by suite manifests
+│   ├── estimators/                # (reserved) shared estimator fragment YAML
+│   ├── generators/
+│   ├── contaminations/
+│   └── reports/
+├── docs/
+│   ├── index.md
+│   ├── architecture.md
+│   ├── benchmark_protocol.md
+│   ├── estimator_contract.md
+│   ├── tutorials/
+│   ├── theory/
+│   └── api/
+├── examples/
+│   ├── quickstart_pure.py
+│   ├── quickstart_contaminated.py
+│   ├── quickstart_observational.py
+│   ├── custom_estimator.py
+│   └── custom_csv_data.py
+├── src/
+│   └── lrdbench/
+│       ├── __init__.py
+│       ├── core/
+│       │   ├── types.py
+│       │   ├── protocols.py
+│       │   ├── enums.py
+│       │   ├── registry.py
+│       │   ├── config.py
+│       │   ├── metadata.py
+│       │   ├── provenance.py
+│       │   └── exceptions.py
+│       ├── generators/
+│       │   ├── base.py
+│       │   ├── fgn.py
+│       │   ├── fbm.py
+│       │   ├── arfima.py
+│       │   ├── mrw.py
+│       │   ├── fou.py
+│       │   └── utils.py
+│       ├── contaminations/
+│       │   ├── base.py
+│       │   ├── heavy_tail.py
+│       │   ├── artefacts.py
+│       │   ├── level_shift.py
+│       │   ├── outliers.py
+│       │   ├── trends.py
+│       │   ├── low_frequency.py
+│       │   ├── bursts.py
+│       │   └── composition.py
+│       ├── datasets/
+│       │   ├── base.py
+│       │   ├── csv.py
+│       │   ├── api.py
+│       │   ├── biomedical.py
+│       │   ├── segmentation.py
+│       │   └── preprocessing.py
+│       ├── estimators/
+│       │   ├── base.py
+│       │   ├── wrappers/
+│       │   ├── spectral/
+│       │   ├── time_domain/
+│       │   ├── wavelet/
+│       │   ├── geometric/
+│       │   └── multifractal/
+│       ├── benchmark/
+│       │   ├── manifest.py
+│       │   ├── scenarios.py
+│       │   ├── runner.py
+│       │   ├── orchestration.py
+│       │   ├── caching.py
+│       │   └── parallel.py
+│       ├── evaluation/
+│       │   ├── accuracy.py
+│       │   ├── robustness.py
+│       │   ├── calibration.py
+│       │   ├── coverage.py
+│       │   ├── stability.py
+│       │   ├── validity.py
+│       │   ├── efficiency.py
+│       │   ├── scoring.py
+│       │   └── stats.py
+│       ├── reports/
+│       │   ├── builder.py
+│       │   ├── tables.py
+│       │   ├── plots.py
+│       │   ├── latex.py
+│       │   ├── html.py
+│       │   └── markdown.py
+│       ├── io/
+│       │   ├── results.py
+│       │   ├── manifests.py
+│       │   └── serialisation.py
+│       └── cli/
+│           ├── main.py
+│           └── commands.py
+├── tests/
+│   ├── conftest.py
+│   ├── unit/
+│   ├── integration/
+│   ├── regression/
+│   ├── statistical/
+│   └── fixtures/
+└── paper_support/
+    ├── report_templates/
+    ├── latex_macros/
+    └── benchmark_manifests/
