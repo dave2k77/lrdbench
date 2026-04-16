@@ -40,6 +40,7 @@ dependencies = [
   "numpy>=1.26",
   "scipy>=1.11",
   "pandas>=2.1",
+  "PyWavelets>=1.5",
   "PyYAML>=6.0",
   "typing-extensions>=4.8"
 ]
@@ -98,7 +99,6 @@ include = [
   "/docs",
   "/configs",
   "/examples",
-  "/paper_support",
   "/.github",
   "/README.md",
   "/LICENSE",
@@ -185,7 +185,9 @@ module = [
   "yaml.*",
   "scipy.*",
   "pandas",
-  "pandas.*"
+  "pandas.*",
+  "pywt",
+  "pywt.*"
 ]
 ignore_missing_imports = true
 

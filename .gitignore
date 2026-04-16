@@ -15,5 +15,6 @@ venv/
 coverage.xml
 .benchmarks/
 reports/
+paper_support/
 *.swp
 .DS_Store
