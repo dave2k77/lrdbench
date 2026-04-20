@@ -59,3 +59,10 @@ def test_reporter_per_stratum_metrics_includes_all_aggregate_rows(tmp_path: Path
     strata = [json.loads(raw) for raw in rows["stratum_json"]]
     assert {"process_family": "fGn", "H": 0.5} in strata
     assert {"level": "balanced_global"} in strata
+
+    failure_map_path = Path(bundle.summary_table_path or "").parent / "failure_map.csv"
+    failure_rows = pd.read_csv(failure_map_path)
+    assert len(failure_rows) == 1
+    assert failure_rows.loc[0, "estimator_name"] == "RS"
+    assert failure_rows.loc[0, "stratum__process_family"] == "fGn"
+    assert failure_rows.loc[0, "metric__mae"] == 0.1

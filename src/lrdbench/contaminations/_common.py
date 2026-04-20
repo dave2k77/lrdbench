@@ -11,6 +11,18 @@ from lrdbench.enums import SourceType
 from lrdbench.schema import ProvenanceRecord, SeriesRecord, TransformationRecord
 
 
+def contamination_severity_label(op_name: str, op_params: Mapping[str, Any]) -> str:
+    """Stable severity tag for stratum labels and failure-map exports."""
+    if op_params.get("severity") is not None:
+        return str(op_params["severity"])
+    if not op_params:
+        return "default"
+    parts = []
+    for key, value in sorted(op_params.items(), key=lambda kv: kv[0]):
+        parts.append(f"{key}={value}")
+    return ";".join(parts)
+
+
 def build_contaminated_series(
     record: SeriesRecord,
     *,
@@ -22,11 +34,12 @@ def build_contaminated_series(
     op_params: Mapping[str, Any],
     op_version: str,
 ) -> SeriesRecord:
+    severity = contamination_severity_label(op_name, op_params)
     trans = TransformationRecord(
         name=op_name,
         family=op_family,
         params=dict(op_params),
-        severity=None,
+        severity=severity,
         version=op_version,
         parent_id=record.record_id,
     )
@@ -38,6 +51,8 @@ def build_contaminated_series(
         "pair_group_id": clean_gid,
         "clean_record_id": record.record_id,
         "contamination_operator": op_name,
+        "contamination_family": op_family,
+        "contamination_severity": severity,
     }
     prov = ProvenanceRecord(
         record_id=new_record_id,

@@ -51,6 +51,18 @@ def _ci_interval(est: EstimateResult, alpha: float) -> tuple[float, float] | Non
     return None
 
 
+def _default_false_positive_threshold(target_estimand: str) -> float:
+    if target_estimand == "long_memory_parameter":
+        return 0.1
+    return 0.6
+
+
+def _default_false_positive_null_max(target_estimand: str) -> float:
+    if target_estimand == "long_memory_parameter":
+        return 0.0
+    return 0.5
+
+
 class GroundTruthEvaluator(BaseEvaluator):
     """Truth-backed metrics (ground truth + stress_test) and paired stress diagnostics."""
 
@@ -375,6 +387,45 @@ class GroundTruthEvaluator(BaseEvaluator):
                             metadata={**meta_base, "nominal": alpha},
                         )
                     )
+            return rows
+
+        if ms.name == "false_positive_lrd_rate":
+            if not compatible or truth is None or truth.target_value is None:
+                return rows
+            if not est.valid or est.point is None:
+                return rows
+            params = dict(ms.parameters)
+            threshold = float(
+                params.get(
+                    "threshold",
+                    _default_false_positive_threshold(estimator_spec.target_estimand),
+                )
+            )
+            null_max = float(
+                params.get(
+                    "null_max",
+                    _default_false_positive_null_max(estimator_spec.target_estimand),
+                )
+            )
+            if float(truth.target_value) > null_max:
+                return rows
+            val = 1.0 if float(est.point) >= threshold else 0.0
+            rows.append(
+                MetricValue(
+                    run_id=run_id,
+                    record_id=record.record_id,
+                    estimator_name=estimator_spec.name,
+                    metric_name=ms.name,
+                    value=val,
+                    stratum=stratum_dict,
+                    metadata={
+                        **meta_base,
+                        "threshold": threshold,
+                        "null_max": null_max,
+                        "truth_target_value": float(truth.target_value),
+                    },
+                )
+            )
             return rows
 
         if ms.name == "instability":

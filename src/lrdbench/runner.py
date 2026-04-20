@@ -221,6 +221,9 @@ class BenchmarkRunner:
                     **dict(rec.annotations),
                     "stress_role": "clean",
                     "pair_group_id": rec.record_id,
+                    "contamination_operator": "clean",
+                    "contamination_family": "clean",
+                    "contamination_severity": "clean",
                 },
             )
             records.append(clean)

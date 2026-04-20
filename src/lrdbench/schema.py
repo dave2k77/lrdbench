@@ -106,6 +106,7 @@ class MetricSpec:
     null_policy: str = "explicit_null"
     # Nominal levels (e.g. 0.95) for coverage / ci_width / coverage_error; empty () uses defaults in evaluator
     nominal_levels: tuple[float, ...] = ()
+    parameters: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

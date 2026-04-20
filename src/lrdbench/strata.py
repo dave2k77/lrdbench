@@ -15,6 +15,8 @@ def stratum_from_record(record: SeriesRecord) -> Mapping[str, Any]:
         "sigma",
         "stress_role",
         "contamination_operator",
+        "contamination_family",
+        "contamination_severity",
         "source_kind",
         "source_path",
         "series_index",

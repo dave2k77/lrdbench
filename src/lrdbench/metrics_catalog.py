@@ -146,6 +146,16 @@ METRIC_SPECS: dict[str, MetricSpec] = {
         optimisation_direction=OptimisationDirection.MINIMISE,
         unit="1",
     ),
+    "false_positive_lrd_rate": MetricSpec(
+        name="false_positive_lrd_rate",
+        symbol="FPR",
+        requires_truth=True,
+        admissible_modes=(BenchmarkMode.GROUND_TRUTH, BenchmarkMode.STRESS_TEST),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MINIMISE,
+        unit="1",
+        null_policy="skip_non_null_truth",
+    ),
 }
 
 _LEVEL_METRICS = frozenset({"coverage", "ci_width", "coverage_error", "coverage_collapse"})
@@ -171,6 +181,13 @@ def metric_specs_from_manifest_entries(entries: list[Any]) -> tuple[MetricSpec, 
                 raise ValueError(f"unknown metric: {key!r}")
             base = METRIC_SPECS[key]
             levels_raw = raw.get("levels")
+            params = {
+                str(k): v
+                for k, v in raw.items()
+                if k not in {"name", "levels"}
+            }
+            if params:
+                base = replace(base, parameters=params)
             if levels_raw is not None:
                 levels = tuple(float(x) for x in levels_raw)
                 out.append(replace(base, nominal_levels=levels))

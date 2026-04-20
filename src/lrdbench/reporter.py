@@ -29,6 +29,30 @@ _STRESS_METRIC_NAMES = frozenset(
 )
 
 
+def _failure_map_rows(metrics: MetricBundle) -> list[dict[str, Any]]:
+    rows: dict[tuple[str, str], dict[str, Any]] = {}
+    for m in metrics.aggregate:
+        if m.stratum.get("level") == "balanced_global":
+            continue
+        stratum = dict(m.stratum)
+        stratum_key = json.dumps(stratum, sort_keys=True)
+        key = (m.estimator_name, stratum_key)
+        row = rows.setdefault(
+            key,
+            {
+                "estimator_name": m.estimator_name,
+                "stratum_json": stratum_key,
+                **{f"stratum__{k}": v for k, v in sorted(stratum.items())},
+            },
+        )
+        metric_key = f"metric__{m.metric_name}"
+        nominal = m.metadata.get("nominal")
+        if nominal is not None:
+            metric_key = f"{metric_key}__nominal_{nominal}"
+        row[metric_key] = m.value
+    return list(rows.values())
+
+
 class SimpleHtmlCsvReporter(BaseReporter):
     def build(
         self,
@@ -119,6 +143,23 @@ class SimpleHtmlCsvReporter(BaseReporter):
                 artefact_type="metric_export",
                 format="csv",
                 path=str(agg_path.as_posix()),
+                created_at=datetime.now(UTC).isoformat(),
+            )
+        )
+
+        failure_map_path = tables / "failure_map.csv"
+        failure_rows = _failure_map_rows(metrics)
+        if failure_rows:
+            pd.DataFrame(failure_rows).to_csv(failure_map_path, index=False)
+        else:
+            failure_map_path.write_text("", encoding="utf-8")
+        artefacts.append(
+            ArtefactRecord(
+                artefact_id=f"{run_id}_failure_map_csv",
+                run_id=run_id,
+                artefact_type="metric_export",
+                format="csv",
+                path=str(failure_map_path.as_posix()),
                 created_at=datetime.now(UTC).isoformat(),
             )
         )
