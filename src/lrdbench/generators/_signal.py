@@ -86,3 +86,79 @@ def simulate_arfima_zero_d_zero(
     eps = rng.standard_normal(n + trunc)
     x = np.convolve(eps, psi, mode="valid")[:n]
     return float(sigma) * x
+
+
+def simulate_mrw(
+    n: int,
+    hurst: float,
+    rng: np.random.Generator,
+    *,
+    sigma: float = 1.0,
+    lambda2: float = 0.02,
+    integral_scale: int | None = None,
+) -> np.ndarray:
+    """Approximate lognormal multifractal random walk increments.
+
+    The implementation uses fGn innovations modulated by a correlated lognormal
+    volatility field. It is intended as a reproducible benchmark generator, not
+    an exact Bacry-Muzy simulation.
+    """
+    if n < 2:
+        raise ValueError("n must be at least 2 for MRW")
+    if not (0.0 < hurst < 1.0):
+        raise ValueError("H must lie in (0, 1) for MRW")
+    if lambda2 < 0.0:
+        raise ValueError("lambda2 must be non-negative for MRW")
+    if integral_scale is None:
+        integral_scale = max(8, n // 4)
+    scale_len = int(np.clip(integral_scale, 2, n))
+
+    base = simulate_fgn(n, hurst, rng, sigma=1.0)
+    if lambda2 == 0.0:
+        return float(sigma) * base
+
+    kernel = 1.0 / np.sqrt(np.arange(1, scale_len + 1, dtype=float))
+    kernel = kernel / float(np.sqrt(np.sum(kernel * kernel)))
+    white = rng.standard_normal(n + scale_len - 1)
+    field = np.convolve(white, kernel, mode="valid")[:n]
+    field = field - float(np.mean(field))
+    sd = float(np.std(field))
+    if sd < 1e-12:
+        raise ValueError("failed to construct non-degenerate MRW volatility field")
+    field = field / sd
+
+    omega = np.sqrt(float(lambda2)) * field - 0.5 * float(lambda2)
+    return float(sigma) * base * np.exp(omega)
+
+
+def simulate_fou(
+    n: int,
+    hurst: float,
+    theta: float,
+    rng: np.random.Generator,
+    *,
+    sigma: float = 1.0,
+    dt: float = 1.0,
+    burnin: int | None = None,
+) -> np.ndarray:
+    """Discrete fractional Ornstein-Uhlenbeck path driven by fGn innovations."""
+    if n < 2:
+        raise ValueError("n must be at least 2 for fOU")
+    if not (0.0 < hurst < 1.0):
+        raise ValueError("H must lie in (0, 1) for fOU")
+    if theta <= 0.0:
+        raise ValueError("theta must be positive for fOU")
+    if dt <= 0.0:
+        raise ValueError("dt must be positive for fOU")
+    if burnin is None:
+        burnin = min(max(4 * n, 64), 4096)
+    burn = max(0, int(burnin))
+
+    total = n + burn
+    innovations = simulate_fgn(total, hurst, rng, sigma=float(sigma) * (float(dt) ** hurst))
+    rho = float(np.exp(-float(theta) * float(dt)))
+    x = np.zeros(total, dtype=float)
+    for i in range(1, total):
+        x[i] = rho * x[i - 1] + innovations[i]
+    out = x[burn:]
+    return out - float(np.mean(out))

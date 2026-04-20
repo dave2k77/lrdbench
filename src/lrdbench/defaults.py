@@ -24,6 +24,8 @@ from lrdbench.estimators.wavelet import (
 from lrdbench.generators.arfima import ARFIMAGenerator
 from lrdbench.generators.fbm import FBMGenerator
 from lrdbench.generators.fgn import FGNGenerator
+from lrdbench.generators.fou import FOUGenerator
+from lrdbench.generators.mrw import MRWGenerator
 from lrdbench.interfaces import BaseEstimator
 from lrdbench.registries import ContaminationRegistry, EstimatorRegistry, GeneratorRegistry
 from lrdbench.schema import EstimatorSpec
@@ -34,6 +36,8 @@ def build_default_generator_registry() -> GeneratorRegistry:
     reg.register("fGn", FGNGenerator())
     reg.register("fBm", FBMGenerator())
     reg.register("ARFIMA", ARFIMAGenerator())
+    reg.register("MRW", MRWGenerator())
+    reg.register("fOU", FOUGenerator())
     return reg
 
 

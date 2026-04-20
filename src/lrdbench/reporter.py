@@ -97,8 +97,8 @@ class SimpleHtmlCsvReporter(BaseReporter):
             )
         )
 
-        # Aggregate metrics table
-        agg = [m for m in metrics.aggregate if m.stratum.get("level") == "balanced_global"]
+        # Aggregate metrics table: per-stratum rows plus balanced-global summaries.
+        agg = list(metrics.aggregate)
         agg_path = tables / "per_stratum_metrics.csv"
         pd.DataFrame(
             [

@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from collections.abc import Mapping
+from datetime import UTC, datetime
+from typing import Any
+
+import numpy as np
+
+from lrdbench.enums import SourceType
+from lrdbench.generators._signal import simulate_mrw
+from lrdbench.interfaces import BaseGenerator
+from lrdbench.schema import ProvenanceRecord, SeriesRecord, TruthSpec
+
+
+class MRWGenerator(BaseGenerator):
+    @property
+    def family(self) -> str:
+        return "MRW"
+
+    @property
+    def version(self) -> str:
+        return "0.1.0"
+
+    def generate(
+        self,
+        *,
+        record_id: str,
+        params: Mapping[str, Any],
+        seed: int | None,
+        manifest_id: str | None,
+    ) -> SeriesRecord:
+        n = int(params["n"])
+        hurst = float(params["H"])
+        sigma = float(params.get("sigma", 1.0))
+        lambda2 = float(params.get("lambda2", params.get("intermittency", 0.02)))
+        integral_scale = (
+            int(params["integral_scale"]) if params.get("integral_scale") is not None else None
+        )
+        rng = np.random.default_rng(seed)
+        x = simulate_mrw(
+            n,
+            hurst,
+            rng,
+            sigma=sigma,
+            lambda2=lambda2,
+            integral_scale=integral_scale,
+        )
+        truth = TruthSpec(
+            process_family=self.family,
+            generating_params=dict(params),
+            target_estimand="hurst_scaling_proxy",
+            target_value=hurst,
+            validity_domain={
+                "lambda2": lambda2,
+                "integral_scale": integral_scale,
+            },
+            notes=(
+                "Approximate lognormal multifractal random walk. The declared target is the "
+                "baseline Hurst scaling proxy; intermittency is recorded separately as lambda2."
+            ),
+        )
+        prov = ProvenanceRecord(
+            record_id=record_id,
+            parent_id=None,
+            manifest_id=manifest_id,
+            created_at=datetime.now(UTC).isoformat(),
+            source_version=self.version,
+            software_version=None,
+            git_commit=None,
+            seed=seed,
+        )
+        ann: dict[str, Any] = {
+            "process_family": self.family,
+            "n": n,
+            "H": hurst,
+            "sigma": sigma,
+            "lambda2": lambda2,
+        }
+        if integral_scale is not None:
+            ann["integral_scale"] = integral_scale
+        return SeriesRecord(
+            record_id=record_id,
+            values=x,
+            time_axis=None,
+            sampling_rate=None,
+            source_type=SourceType.SYNTHETIC,
+            source_name="MRW",
+            truth=truth,
+            annotations=ann,
+            provenance=prov,
+        )

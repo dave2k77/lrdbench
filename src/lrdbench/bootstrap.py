@@ -40,14 +40,15 @@ def bootstrap_statistic_distribution(
 def symmetric_percentile_cis(
     samples: np.ndarray, alphas: tuple[float, ...]
 ) -> tuple[tuple[float, float, float], ...]:
-    """For each nominal alpha, CI = [q_{alpha/2}, q_{1-alpha/2}] on bootstrap samples."""
+    """For each nominal alpha, CI = [q_{(1-alpha)/2}, q_{1-(1-alpha)/2}]."""
     if samples.size == 0:
         return ()
     out: list[tuple[float, float, float]] = []
     for alpha in sorted({float(a) for a in alphas}):
         if not 0.0 < alpha < 1.0:
             continue
-        lo = float(np.quantile(samples, alpha / 2.0))
-        hi = float(np.quantile(samples, 1.0 - alpha / 2.0))
+        tail = (1.0 - alpha) / 2.0
+        lo = float(np.quantile(samples, tail))
+        hi = float(np.quantile(samples, 1.0 - tail))
         out.append((alpha, lo, hi))
     return tuple(out)

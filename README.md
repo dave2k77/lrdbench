@@ -83,10 +83,10 @@ See [`RESEARCH_USAGE.md`](RESEARCH_USAGE.md) for the full policy.
   - stability leaderboards
 
 ### Supported data sources
-- synthetic generators:
+- implemented synthetic generators:
   - fGn
   - fBm
-  - ARFIMA
+  - ARFIMA(0,d,0)
   - MRW
   - fOU
 - contaminated synthetic pipelines
