@@ -3,15 +3,14 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import shutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from lrdbench.manifest import load_manifest_yaml
 from lrdbench.runner import run_manifest_mapping
-
 
 DEFAULT_MANIFESTS = (
     Path("configs/suites/paper/canonical_ground_truth.yaml"),
@@ -97,6 +96,10 @@ def run_suites(
     export_root: Path,
     artefact_root: Path,
 ) -> list[SuiteRunSummary]:
+    mpl_config_dir = repo_root / ".lrdbench_cache" / "matplotlib"
+    mpl_config_dir.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(mpl_config_dir))
+
     summaries: list[SuiteRunSummary] = []
     for manifest_path in manifest_paths:
         data = load_manifest_yaml(manifest_path)
@@ -104,7 +107,7 @@ def run_suites(
         report["export_root"] = str(export_root)
         data["report"] = report
 
-        output = run_manifest_mapping(data, base_dir=manifest_path.parent)
+        output = run_manifest_mapping(data, base_dir=repo_root)
         bundle = output.report_bundle
         figure_paths = bundle.figure_paths if bundle is not None else ()
         latex_paths = bundle.latex_table_paths if bundle is not None else ()
