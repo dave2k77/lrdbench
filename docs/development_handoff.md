@@ -6,7 +6,7 @@ Last updated: 2026-04-21
 
 The repository is on `main`.
 
-Recent commits:
+Recent commits (library / reporting; paper asset paths are **local-only**—see below):
 
 - `f147529` - Harden paper workflow cache handling
 - `7e2453f` - Add paper benchmark workflow scaffolding
@@ -14,106 +14,105 @@ Recent commits:
 - `db8239d` - Add failure maps and false-positive LRD metric
 - `b2d0840` - Add MRW and fOU generators
 
-The only local untracked path at handoff is `.codex`, which was pre-existing and intentionally left
-alone.
+**Tracked in Git:** library source, `configs/suites/` smoke and shared benchmarks, `docs/`
+(including this file), `CHANGELOG.md`, tests under `tests/` except the optional paper integration
+test listed under “Local-only paths”.
 
-Generated benchmark outputs and caches are intentionally ignored:
+**This file (`development_handoff.md`) and `CHANGELOG.md` are meant to stay synced with the remote**
+so you can continue planning and execution notes on any machine after `git pull`.
 
-- `reports/`
-- `paper_support/artefacts/`
-- `.lrdbench_cache/`
+## Local-only paths (not synced to the remote)
 
-## Completed Today
+The following are listed in `.gitignore` and remain on your workstation only—copy or recreate them
+when you set up a new environment for publication runs:
 
-- Promoted publication plotting to a core reporting capability:
-  - `matplotlib` and `seaborn` are now core dependencies;
-  - requested figures no longer silently skip when plotting imports fail;
+- `paper_support/` — entire directory (runner package, optional `artefacts/` staging).
+- `configs/suites/paper/` — paper-oriented YAML manifests.
+- `tests/integration/test_paper_workflow.py` — optional smoke test for the local runner.
+- `reports/` — all benchmark HTML/CSV/LaTeX outputs (including `reports/paper/<run_id>/`).
+- `.lrdbench_cache/` — estimate cache and matplotlib config dir used by local paper runs.
+
+Other common ignores: `.codex`, `.venv/`, etc., per `.gitignore`.
+
+## Completed recently (core library)
+
+- Publication plotting is a core reporting capability:
+  - `matplotlib` and `seaborn` are core dependencies;
+  - requested figures are not silently skipped when plotting imports fail;
   - disagreement and sensitivity heatmaps use `seaborn`.
-- Added estimator disagreement metrics:
+- Estimator disagreement metrics:
   - `cross_estimator_dispersion`;
   - `pairwise_estimator_disagreement`;
   - `family_level_disagreement`;
   - `estimator_disagreement.csv`.
-- Added estimator parameter variants for scale/window sensitivity:
+- Estimator parameter variants for scale/window sensitivity:
   - manifest `variants`;
   - `parameter_variant_sensitivity`;
   - `max_variant_drift`;
   - `scale_window_sensitivity.csv`.
-- Added benchmark-level uncertainty:
+- Benchmark-level uncertainty:
   - aggregate bootstrap CIs;
   - paired bootstrap estimator differences;
   - raw result-store uncertainty scope;
   - `benchmark_uncertainty.csv`.
-- Added report completeness exports:
+- Report completeness exports:
   - `estimator_metadata.csv`;
   - `failures.csv`;
   - `environment.json`;
   - `artefact_index.csv`;
   - raw `artefacts.csv`.
-- Added richer HTML sections and publication-oriented LaTeX tables for disagreement, sensitivity,
-  benchmark uncertainty, and failures.
-- Added opt-in report figures:
+- Richer HTML and publication-oriented LaTeX tables for disagreement, sensitivity, benchmark
+  uncertainty, and failures.
+- Opt-in report figures:
   - `degradation_curve`;
   - `disagreement_heatmap`;
   - `sensitivity_heatmap`;
   - `benchmark_uncertainty_intervals`;
   - `false_positive_lrd`.
-- Added paper-oriented benchmark manifests:
-  - `configs/suites/paper/canonical_ground_truth.yaml`;
-  - `configs/suites/paper/stress_contamination.yaml`;
-  - `configs/suites/paper/null_false_positive.yaml`;
-  - `configs/suites/paper/sensitivity_disagreement.yaml`.
-- Added the paper-support runner:
-  - `python -m paper_support.run_paper_suites`;
-  - writes normal reports under `reports/paper/<run_id>/`;
-  - copies LaTeX tables and figures under `paper_support/artefacts/`;
-  - writes `paper_support/artefacts/run_index.csv`.
-- Hardened paper workflow cache/config behavior:
-  - repo-root relative estimate caches under `.lrdbench_cache/...`;
-  - `MPLCONFIGDIR` set to `.lrdbench_cache/matplotlib` to avoid unwritable home-config warnings.
 
-## Paper Suite Run
+## Local paper workflow (reproduce on each machine)
 
-Ran the null false-positive paper suite successfully:
+When you maintain `paper_support/` and `configs/suites/paper/` locally, a typical layout is:
+
+- Manifests (examples): `canonical_ground_truth.yaml`, `stress_contamination.yaml`,
+  `null_false_positive.yaml`, `sensitivity_disagreement.yaml` under `configs/suites/paper/`.
+- Runner: `python -m paper_support.run_paper_suites <manifest> [...]` from the repo root.
+- Writes: normal reports under `reports/paper/<run_id>/`; copies LaTeX and figures to
+  `paper_support/artefacts/`; appends `paper_support/artefacts/run_index.csv`.
+- Cache/config: repo-root-relative estimate caches under `.lrdbench_cache/...`; set
+  `MPLCONFIGDIR` to `.lrdbench_cache/matplotlib` in the runner to avoid unwritable home-config
+  warnings.
+
+Example command (paths exist only after you create or copy the local kit):
 
 ```bash
 python -m paper_support.run_paper_suites configs/suites/paper/null_false_positive.yaml
 ```
 
-Latest run:
+Example outcomes from a prior local run (IDs will differ on your machine):
 
-- run ID: `f9af4751-0514-4fee-b534-6b7cc12f94ff`
-- HTML report:
-  `reports/paper/f9af4751-0514-4fee-b534-6b7cc12f94ff/html/report.html`
-- run index: `paper_support/artefacts/run_index.csv`
-- copied artefacts: 8 files
-  - 5 LaTeX tables;
-  - 3 figures: disagreement heatmap, benchmark uncertainty intervals, false-positive LRD plot.
+- HTML report: `reports/paper/<run_id>/html/report.html`
+- Run index: `paper_support/artefacts/run_index.csv`
+- Typical staged count: several LaTeX tables plus figures (disagreement heatmap, benchmark
+  uncertainty intervals, false-positive LRD plot when requested).
 
-An earlier null-suite run also exists:
+## Verification (CI vs local)
 
-- run ID: `8726f2e8-b882-488b-9813-a2e0cc93db92`
-
-The later run is preferred because it used the hardened cache/config behavior.
-
-## Verification At Handoff
-
-The following passed:
+On the remote / CI, the following are representative:
 
 ```bash
 python -m ruff check .
-python -m pytest tests/integration/test_paper_workflow.py
 python -m pytest
 ```
 
-Full suite result:
+Optional **local** check after (re)creating `paper_support` and the paper integration test:
 
-```text
-58 passed
+```bash
+python -m pytest tests/integration/test_paper_workflow.py
 ```
 
-The null paper suite also completed successfully after the hardening patch, with no Matplotlib
-configuration warning.
+Full `pytest` pass counts move with the test suite; run `pytest` after each pull for the current
+number.
 
 ## Research Direction
 
@@ -127,18 +126,19 @@ The project has two linked roles:
 This benchmark paper is intended to precede a theory paper arguing that the failure is structural
 rather than estimator-specific.
 
-## Next Recommended Step
+## Next recommended steps
 
-Run the canonical ground-truth paper suite next:
+1. On a machine where the **local** paper kit exists, run the canonical ground-truth manifest:
 
-```bash
-python -m paper_support.run_paper_suites configs/suites/paper/canonical_ground_truth.yaml
-```
+   ```bash
+   python -m paper_support.run_paper_suites configs/suites/paper/canonical_ground_truth.yaml
+   ```
 
-Then proceed in this order:
+2. Inspect the canonical report, figures, and `paper_support/artefacts/run_index.csv`.
+3. Run `stress_contamination.yaml` and `sensitivity_disagreement.yaml` from the same local kit.
+4. Compare tables and figures across runs; adjust manifest grids, estimators, or `report.figure_set`
+   before longer benchmark campaigns.
 
-1. Inspect the canonical report, generated figures, and `run_index.csv`.
-2. Run `configs/suites/paper/stress_contamination.yaml`.
-3. Run `configs/suites/paper/sensitivity_disagreement.yaml`.
-4. Compare paper-suite tables and figures across runs to decide whether manifest grid sizes,
-   estimator sets, or figure/table outputs need refinement before longer benchmark runs.
+When working **only** from a clean clone without the local paper kit, use `lrdbench run` with tracked
+manifests under `configs/suites/` (e.g. smoke suites) and the same reporting options supported by
+`docs/benchmark_protocol.md`.

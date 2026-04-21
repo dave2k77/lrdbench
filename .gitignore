@@ -16,6 +16,9 @@ coverage.xml
 .benchmarks/
 .lrdbench_cache/
 reports/
-paper_support/artefacts/
+# Paper workflow: keep locally only (not synced to the remote repo).
+paper_support/
+configs/suites/paper/
+tests/integration/test_paper_workflow.py
 *.swp
 .DS_Store
