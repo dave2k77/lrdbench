@@ -159,7 +159,6 @@ class BenchmarkRunner:
         store.write_estimates(estimates)
         store.write_metrics(metrics)
         store.write_leaderboards(boards)
-        store_path = store.finalise()
 
         bundle = self._reporter.build(
             manifest,
@@ -169,6 +168,8 @@ class BenchmarkRunner:
             run_id=run_id,
         )
 
+        store.write_artefacts(bundle.artefacts)
+        store_path = store.finalise()
         bundle = replace(bundle, result_store_path=store_path)
 
         return BenchmarkRunOutput(

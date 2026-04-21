@@ -8,7 +8,7 @@ import yaml
 
 from lrdbench.enums import BenchmarkMode
 from lrdbench.metrics_catalog import metric_specs_from_manifest_entries
-from lrdbench.schema import BenchmarkManifest
+from lrdbench.schema import BenchmarkManifest, EstimatorSpec
 from lrdbench.validation import (
     ManifestValidationError,
     estimator_spec_from_mapping,
@@ -27,9 +27,50 @@ def load_manifest_yaml(path: str | Path) -> dict[str, Any]:
     return data
 
 
+def _estimator_specs_from_manifest_entries(entries: list[Any]) -> tuple[EstimatorSpec, ...]:
+    out: list[EstimatorSpec] = []
+    for raw in entries:
+        if not isinstance(raw, Mapping):
+            raise ManifestValidationError("each estimator entry must be a mapping")
+        base = estimator_spec_from_mapping(raw)
+        variants = raw.get("variants")
+        if variants is None:
+            out.append(base)
+            continue
+        if not isinstance(variants, list) or not variants:
+            raise ManifestValidationError("estimator variants must be a non-empty list")
+        base_params = dict(base.parameter_schema)
+        for variant_raw in variants:
+            if not isinstance(variant_raw, Mapping):
+                raise ManifestValidationError("each estimator variant must be a mapping")
+            variant_name = str(variant_raw["name"])
+            variant_params = dict(variant_raw.get("params") or {})
+            merged_params = {
+                **base_params,
+                **variant_params,
+                "_base_estimator_name": base.name,
+                "_variant_name": variant_name,
+            }
+            out.append(
+                EstimatorSpec(
+                    name=f"{base.name}::{variant_name}",
+                    family=base.family,
+                    target_estimand=base.target_estimand,
+                    assumptions=base.assumptions,
+                    supports_ci=base.supports_ci,
+                    supports_diagnostics=base.supports_diagnostics,
+                    input_requirements=base.input_requirements,
+                    parameter_schema=merged_params,
+                    reference_citations=base.reference_citations,
+                    version=base.version,
+                )
+            )
+    return tuple(out)
+
+
 def manifest_from_mapping(data: Mapping[str, Any]) -> BenchmarkManifest:
     mode = BenchmarkMode(str(data["mode"]))
-    estimators = tuple(estimator_spec_from_mapping(x) for x in data["estimators"])
+    estimators = _estimator_specs_from_manifest_entries(list(data["estimators"]))
     metrics_list: list[Any] = list(data["metrics"])
     try:
         metric_specs = metric_specs_from_manifest_entries(metrics_list)
@@ -56,6 +97,7 @@ def manifest_from_mapping(data: Mapping[str, Any]) -> BenchmarkManifest:
         leaderboard_specs=leaderboard_specs,
         report_spec=report_spec,
         execution_spec=dict(data.get("execution") or {}),
+        uncertainty_spec=dict(data.get("uncertainty") or {}),
         seed_spec=dict(data.get("seeds") or {}),
         raw_yaml=dict(data),
     )

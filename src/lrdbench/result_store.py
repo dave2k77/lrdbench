@@ -26,6 +26,7 @@ class CsvResultStore(BaseResultStore):
         self._estimates_rows: list[dict[str, Any]] = []
         self._metrics_rows: list[dict[str, Any]] = []
         self._leader_rows: list[dict[str, Any]] = []
+        self._artefact_rows: list[dict[str, Any]] = []
 
     def write_run_metadata(self, manifest: BenchmarkManifest, run_id: str) -> None:
         meta = {
@@ -104,6 +105,18 @@ class CsvResultStore(BaseResultStore):
                     "metadata_json": json.dumps(dict(m.metadata), sort_keys=True),
                 }
             )
+        for m in metrics.uncertainty:
+            self._metrics_rows.append(
+                {
+                    "scope": "uncertainty",
+                    "record_id": m.record_id,
+                    "estimator_name": m.estimator_name,
+                    "metric_name": m.metric_name,
+                    "value": m.value,
+                    "stratum_json": json.dumps(dict(m.stratum), sort_keys=True),
+                    "metadata_json": json.dumps(dict(m.metadata), sort_keys=True),
+                }
+            )
 
     def write_leaderboards(self, rows: Sequence[Any]) -> None:
         for r in rows:
@@ -116,6 +129,21 @@ class CsvResultStore(BaseResultStore):
                 }
             )
 
+    def write_artefacts(self, rows: Sequence[Any]) -> None:
+        for a in rows:
+            self._artefact_rows.append(
+                {
+                    "artefact_id": a.artefact_id,
+                    "run_id": a.run_id,
+                    "artefact_type": a.artefact_type,
+                    "format": a.format,
+                    "path": a.path,
+                    "hash": a.hash,
+                    "created_at": a.created_at,
+                    "depends_on_json": json.dumps(tuple(a.depends_on)),
+                }
+            )
+
     def finalise(self) -> str:
         if self._records_rows:
             pd.DataFrame(self._records_rows).to_csv(self.raw / "records.csv", index=False)
@@ -125,4 +153,6 @@ class CsvResultStore(BaseResultStore):
             pd.DataFrame(self._metrics_rows).to_csv(self.raw / "metrics.csv", index=False)
         if self._leader_rows:
             pd.DataFrame(self._leader_rows).to_csv(self.raw / "leaderboards.csv", index=False)
+        if self._artefact_rows:
+            pd.DataFrame(self._artefact_rows).to_csv(self.raw / "artefacts.csv", index=False)
         return str(self.root.resolve())

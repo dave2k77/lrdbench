@@ -156,6 +156,71 @@ METRIC_SPECS: dict[str, MetricSpec] = {
         unit="1",
         null_policy="skip_non_null_truth",
     ),
+    "cross_estimator_dispersion": MetricSpec(
+        name="cross_estimator_dispersion",
+        symbol="XDisp",
+        requires_truth=False,
+        admissible_modes=(
+            BenchmarkMode.GROUND_TRUTH,
+            BenchmarkMode.STRESS_TEST,
+            BenchmarkMode.OBSERVATIONAL,
+        ),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MINIMISE,
+        unit=None,
+    ),
+    "pairwise_estimator_disagreement": MetricSpec(
+        name="pairwise_estimator_disagreement",
+        symbol="PairDis",
+        requires_truth=False,
+        admissible_modes=(
+            BenchmarkMode.GROUND_TRUTH,
+            BenchmarkMode.STRESS_TEST,
+            BenchmarkMode.OBSERVATIONAL,
+        ),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MINIMISE,
+        unit=None,
+    ),
+    "family_level_disagreement": MetricSpec(
+        name="family_level_disagreement",
+        symbol="FamDis",
+        requires_truth=False,
+        admissible_modes=(
+            BenchmarkMode.GROUND_TRUTH,
+            BenchmarkMode.STRESS_TEST,
+            BenchmarkMode.OBSERVATIONAL,
+        ),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MINIMISE,
+        unit=None,
+    ),
+    "parameter_variant_sensitivity": MetricSpec(
+        name="parameter_variant_sensitivity",
+        symbol="VarSens",
+        requires_truth=False,
+        admissible_modes=(
+            BenchmarkMode.GROUND_TRUTH,
+            BenchmarkMode.STRESS_TEST,
+            BenchmarkMode.OBSERVATIONAL,
+        ),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MINIMISE,
+        unit=None,
+    ),
+    "max_variant_drift": MetricSpec(
+        name="max_variant_drift",
+        symbol="MaxVarDrift",
+        requires_truth=False,
+        admissible_modes=(
+            BenchmarkMode.GROUND_TRUTH,
+            BenchmarkMode.STRESS_TEST,
+            BenchmarkMode.OBSERVATIONAL,
+        ),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MINIMISE,
+        unit=None,
+    ),
 }
 
 _LEVEL_METRICS = frozenset({"coverage", "ci_width", "coverage_error", "coverage_collapse"})

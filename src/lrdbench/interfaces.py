@@ -136,5 +136,9 @@ class BaseResultStore(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def write_artefacts(self, rows: Sequence[Any]) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def finalise(self) -> str:
         raise NotImplementedError

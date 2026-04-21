@@ -121,7 +121,8 @@ def _fit_one(
         )
         if hit is not None:
             return idx, hit
-    builder = estimators.get(espec.name)
+    registry_name = str(dict(espec.parameter_schema).get("_base_estimator_name", espec.name))
+    builder = estimators.get(registry_name)
     est_obj: BaseEstimator = builder(espec)
     est = est_obj.fit(record)
     if cache_write and cpath is not None:

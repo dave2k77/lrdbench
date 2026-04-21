@@ -3,7 +3,11 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import replace
+from itertools import combinations
+from math import sqrt
 from typing import Any
+
+import numpy as np
 
 from lrdbench.enums import BenchmarkMode
 from lrdbench.interfaces import BaseEvaluator
@@ -34,6 +38,21 @@ STRESS_PAIR_METRICS = frozenset(
     }
 )
 
+DISAGREEMENT_METRICS = frozenset(
+    {
+        "cross_estimator_dispersion",
+        "pairwise_estimator_disagreement",
+        "family_level_disagreement",
+    }
+)
+
+SENSITIVITY_METRICS = frozenset(
+    {
+        "parameter_variant_sensitivity",
+        "max_variant_drift",
+    }
+)
+
 
 def _index_estimates(estimates: Sequence[EstimateResult]) -> dict[tuple[str, str], EstimateResult]:
     out: dict[tuple[str, str], EstimateResult] = {}
@@ -61,6 +80,38 @@ def _default_false_positive_null_max(target_estimand: str) -> float:
     if target_estimand == "long_memory_parameter":
         return 0.0
     return 0.5
+
+
+def _valid_point(est: EstimateResult | None) -> float | None:
+    if est is None or not est.valid or est.point is None:
+        return None
+    return float(est.point)
+
+
+def _population_std(vals: Sequence[float]) -> float:
+    if not vals:
+        return 0.0
+    mean = sum(vals) / len(vals)
+    return sqrt(sum((x - mean) ** 2 for x in vals) / len(vals))
+
+
+def _mean_abs_pairwise(vals: Sequence[float]) -> float:
+    pairs = list(combinations(vals, 2))
+    if not pairs:
+        return 0.0
+    return float(sum(abs(a - b) for a, b in pairs) / len(pairs))
+
+
+def _metric_aggregate_value(metric_name: str, vals: Sequence[float]) -> float:
+    if metric_name == "rmse":
+        return float((sum(vals) / len(vals)) ** 0.5)
+    return float(sum(vals) / len(vals))
+
+
+def _percentile_interval(samples: Sequence[float], level: float) -> tuple[float, float]:
+    arr = np.asarray(samples, dtype=float)
+    tail = (1.0 - float(level)) / 2.0
+    return (float(np.quantile(arr, tail)), float(np.quantile(arr, 1.0 - tail)))
 
 
 class GroundTruthEvaluator(BaseEvaluator):
@@ -128,8 +179,42 @@ class GroundTruthEvaluator(BaseEvaluator):
                     ):
                         per_series.append(row)
 
+            sk = stratum_key(rec)
+            stratum_dict = dict(stratum_from_record(rec))
+            for ms in manifest.metric_specs:
+                if ms.name in DISAGREEMENT_METRICS or ms.name in SENSITIVITY_METRICS:
+                    validate_metric_admissibility(ms, manifest.mode, rec)
+            per_series.extend(
+                self._estimator_disagreement_rows(
+                    run_id=run_id,
+                    record=rec,
+                    metric_specs=manifest.metric_specs,
+                    estimator_specs=manifest.estimator_specs,
+                    idx=idx,
+                    stratum_dict=stratum_dict,
+                    sk=sk,
+                )
+            )
+            per_series.extend(
+                self._parameter_variant_sensitivity_rows(
+                    run_id=run_id,
+                    record=rec,
+                    metric_specs=manifest.metric_specs,
+                    estimator_specs=manifest.estimator_specs,
+                    idx=idx,
+                    stratum_dict=stratum_dict,
+                    sk=sk,
+                )
+            )
+
         aggregate = self._aggregate(run_id, per_series, manifest)
-        return MetricBundle(per_series=tuple(per_series), aggregate=tuple(aggregate), metadata={})
+        uncertainty = self._benchmark_uncertainty(run_id, per_series, aggregate, manifest)
+        return MetricBundle(
+            per_series=tuple(per_series),
+            aggregate=tuple(aggregate),
+            uncertainty=tuple(uncertainty),
+            metadata={},
+        )
 
     def _stress_pair_rows(
         self,
@@ -449,6 +534,209 @@ class GroundTruthEvaluator(BaseEvaluator):
             raise ValueError(f"unsupported metric: {ms.name}")
         return rows
 
+    def _estimator_disagreement_rows(
+        self,
+        *,
+        run_id: str,
+        record: SeriesRecord,
+        metric_specs: Sequence[MetricSpec],
+        estimator_specs: Sequence[EstimatorSpec],
+        idx: dict[tuple[str, str], EstimateResult],
+        stratum_dict: dict[str, Any],
+        sk: tuple[tuple[str, Any], ...],
+    ) -> list[MetricValue]:
+        requested = {m.name: m for m in metric_specs if m.name in DISAGREEMENT_METRICS}
+        if not requested:
+            return []
+
+        valid: list[tuple[EstimatorSpec, float]] = []
+        missing: list[str] = []
+        for es in estimator_specs:
+            point = _valid_point(idx.get((record.record_id, es.name)))
+            if point is None:
+                missing.append(es.name)
+            else:
+                valid.append((es, point))
+
+        min_estimators = min(
+            int(dict(ms.parameters).get("min_estimators", 2)) for ms in requested.values()
+        )
+        if len(valid) < min_estimators:
+            return []
+
+        rows: list[MetricValue] = []
+        meta_base: dict[str, Any] = {
+            "stratum_key": sk,
+            "n_estimators": len(valid),
+            "estimator_names": tuple(es.name for es, _ in valid),
+            "estimator_families": tuple(es.family for es, _ in valid),
+        }
+        if missing:
+            meta_base["missing_estimator_names"] = tuple(missing)
+
+        if "cross_estimator_dispersion" in requested:
+            points = [point for _, point in valid]
+            rows.append(
+                MetricValue(
+                    run_id=run_id,
+                    record_id=record.record_id,
+                    estimator_name="__all_estimators__",
+                    metric_name="cross_estimator_dispersion",
+                    value=_population_std(points),
+                    stratum=stratum_dict,
+                    metadata={**meta_base, "center": sum(points) / len(points)},
+                )
+            )
+
+        if "pairwise_estimator_disagreement" in requested:
+            for (es_a, point_a), (es_b, point_b) in combinations(valid, 2):
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=record.record_id,
+                        estimator_name=f"{es_a.name}__vs__{es_b.name}",
+                        metric_name="pairwise_estimator_disagreement",
+                        value=abs(point_a - point_b),
+                        stratum=stratum_dict,
+                        metadata={
+                            **meta_base,
+                            "estimator_a": es_a.name,
+                            "estimator_b": es_b.name,
+                            "family_a": es_a.family,
+                            "family_b": es_b.family,
+                        },
+                    )
+                )
+
+        if "family_level_disagreement" in requested:
+            by_family: dict[str, list[tuple[EstimatorSpec, float]]] = defaultdict(list)
+            for es, point in valid:
+                by_family[es.family].append((es, point))
+
+            for family, family_vals in by_family.items():
+                if len(family_vals) < min_estimators:
+                    continue
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=record.record_id,
+                        estimator_name=f"family:{family}",
+                        metric_name="family_level_disagreement",
+                        value=_mean_abs_pairwise([point for _, point in family_vals]),
+                        stratum=stratum_dict,
+                        metadata={
+                            **meta_base,
+                            "comparison_scope": "within_family",
+                            "family": family,
+                            "family_estimator_names": tuple(es.name for es, _ in family_vals),
+                        },
+                    )
+                )
+
+            for family_a, family_b in combinations(sorted(by_family), 2):
+                vals_a = by_family[family_a]
+                vals_b = by_family[family_b]
+                disagreements = [
+                    abs(point_a - point_b)
+                    for _, point_a in vals_a
+                    for _, point_b in vals_b
+                ]
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=record.record_id,
+                        estimator_name=f"family:{family_a}__vs__{family_b}",
+                        metric_name="family_level_disagreement",
+                        value=float(sum(disagreements) / len(disagreements)),
+                        stratum=stratum_dict,
+                        metadata={
+                            **meta_base,
+                            "comparison_scope": "between_family",
+                            "family_a": family_a,
+                            "family_b": family_b,
+                            "family_a_estimator_names": tuple(es.name for es, _ in vals_a),
+                            "family_b_estimator_names": tuple(es.name for es, _ in vals_b),
+                        },
+                    )
+                )
+
+        return rows
+
+    def _parameter_variant_sensitivity_rows(
+        self,
+        *,
+        run_id: str,
+        record: SeriesRecord,
+        metric_specs: Sequence[MetricSpec],
+        estimator_specs: Sequence[EstimatorSpec],
+        idx: dict[tuple[str, str], EstimateResult],
+        stratum_dict: dict[str, Any],
+        sk: tuple[tuple[str, Any], ...],
+    ) -> list[MetricValue]:
+        requested = {m.name: m for m in metric_specs if m.name in SENSITIVITY_METRICS}
+        if not requested:
+            return []
+
+        grouped: dict[str, list[tuple[EstimatorSpec, str, float]]] = defaultdict(list)
+        for es in estimator_specs:
+            params = dict(es.parameter_schema)
+            base_name = params.get("_base_estimator_name")
+            variant_name = params.get("_variant_name")
+            if base_name is None or variant_name is None:
+                continue
+            point = _valid_point(idx.get((record.record_id, es.name)))
+            if point is None:
+                continue
+            grouped[str(base_name)].append((es, str(variant_name), point))
+
+        if not grouped:
+            return []
+
+        min_variants = min(
+            int(dict(ms.parameters).get("min_variants", 2)) for ms in requested.values()
+        )
+        rows: list[MetricValue] = []
+        for base_name, variants in sorted(grouped.items()):
+            if len(variants) < min_variants:
+                continue
+            points = [point for _, _, point in variants]
+            meta_base: dict[str, Any] = {
+                "stratum_key": sk,
+                "base_estimator_name": base_name,
+                "n_variants": len(variants),
+                "variant_estimator_names": tuple(es.name for es, _, _ in variants),
+                "variant_names": tuple(name for _, name, _ in variants),
+            }
+
+            if "parameter_variant_sensitivity" in requested:
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=record.record_id,
+                        estimator_name=base_name,
+                        metric_name="parameter_variant_sensitivity",
+                        value=_population_std(points),
+                        stratum=stratum_dict,
+                        metadata={**meta_base, "center": sum(points) / len(points)},
+                    )
+                )
+
+            if "max_variant_drift" in requested:
+                drift = max(abs(a - b) for a, b in combinations(points, 2))
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=record.record_id,
+                        estimator_name=base_name,
+                        metric_name="max_variant_drift",
+                        value=float(drift),
+                        stratum=stratum_dict,
+                        metadata=meta_base,
+                    )
+                )
+
+        return rows
+
     def _aggregate(
         self,
         run_id: str,
@@ -541,6 +829,238 @@ class GroundTruthEvaluator(BaseEvaluator):
             )
         return out + global_rows
 
+    def _benchmark_uncertainty(
+        self,
+        run_id: str,
+        per_series: list[MetricValue],
+        aggregate: list[MetricValue],
+        manifest: BenchmarkManifest,
+    ) -> list[MetricValue]:
+        spec = dict(manifest.uncertainty_spec)
+        if not spec or spec.get("enabled") is False:
+            return []
+
+        n_boot = int(spec.get("n_bootstrap", 200))
+        levels = tuple(float(x) for x in spec.get("ci_levels", (0.95,)))
+        seed = int(spec.get("seed", manifest.seed_spec.get("global_seed", 0)))
+        rng = np.random.default_rng(seed)
+
+        metric_filter = {str(x) for x in spec.get("metrics", ())}
+        paired_filter = {str(x) for x in spec.get("paired_metrics", ())}
+
+        rows: list[MetricValue] = []
+        rows.extend(
+            self._aggregate_bootstrap_uncertainty(
+                run_id=run_id,
+                per_series=per_series,
+                aggregate=aggregate,
+                rng=rng,
+                n_boot=n_boot,
+                levels=levels,
+                metric_filter=metric_filter,
+            )
+        )
+        if bool(spec.get("paired", False)):
+            rows.extend(
+                self._paired_difference_uncertainty(
+                    run_id=run_id,
+                    per_series=per_series,
+                    rng=rng,
+                    n_boot=n_boot,
+                    levels=levels,
+                    metric_filter=paired_filter or metric_filter,
+                )
+            )
+        return rows
+
+    def _aggregate_bootstrap_uncertainty(
+        self,
+        *,
+        run_id: str,
+        per_series: list[MetricValue],
+        aggregate: list[MetricValue],
+        rng: np.random.Generator,
+        n_boot: int,
+        levels: tuple[float, ...],
+        metric_filter: set[str],
+    ) -> list[MetricValue]:
+        grouped: dict[tuple[str, str, Any, Any], list[float]] = defaultdict(list)
+        strata: dict[tuple[str, str, Any, Any], dict[str, Any]] = {}
+        for mv in per_series:
+            if mv.value is None or mv.record_id is None:
+                continue
+            if metric_filter and mv.metric_name not in metric_filter:
+                continue
+            sk_t = mv.metadata.get("stratum_key")
+            if not isinstance(sk_t, tuple):
+                continue
+            key = (mv.estimator_name, mv.metric_name, sk_t, mv.metadata.get("nominal"))
+            grouped[key].append(float(mv.value))
+            strata[key] = dict(mv.stratum)
+
+        rows: list[MetricValue] = []
+        for key, vals in grouped.items():
+            if not vals:
+                continue
+            ename, metric_name, sk_t, nominal = key
+            samples: list[float] = []
+            values = np.asarray(vals, dtype=float)
+            for _ in range(n_boot):
+                idx = rng.integers(0, values.size, size=values.size)
+                samples.append(_metric_aggregate_value(metric_name, values[idx].tolist()))
+            point = _metric_aggregate_value(metric_name, vals)
+            for level in levels:
+                lo, hi = _percentile_interval(samples, level)
+                metadata: dict[str, Any] = {
+                    "uncertainty_type": "aggregate_bootstrap",
+                    "aggregation": "bootstrap_within_stratum",
+                    "stratum_key": sk_t,
+                    "n_bootstrap": n_boot,
+                    "n_observations": len(vals),
+                    "nominal": level,
+                    "ci_low": lo,
+                    "ci_high": hi,
+                }
+                if nominal is not None:
+                    metadata["metric_nominal"] = nominal
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=None,
+                        estimator_name=ename,
+                        metric_name=metric_name,
+                        value=point,
+                        stratum=strata[key],
+                        metadata=metadata,
+                    )
+                )
+
+        global_grouped: dict[tuple[str, str, Any], list[MetricValue]] = defaultdict(list)
+        for mv in aggregate:
+            if mv.value is None:
+                continue
+            if metric_filter and mv.metric_name not in metric_filter:
+                continue
+            if mv.stratum.get("level") == "balanced_global":
+                continue
+            global_grouped[(mv.estimator_name, mv.metric_name, mv.metadata.get("nominal"))].append(mv)
+
+        for (ename, metric_name, metric_nominal), mvs in global_grouped.items():
+            values = np.asarray([float(mv.value) for mv in mvs], dtype=float)
+            if values.size == 0:
+                continue
+            samples = []
+            for _ in range(n_boot):
+                idx = rng.integers(0, values.size, size=values.size)
+                samples.append(float(np.mean(values[idx])))
+            point = float(np.mean(values))
+            for level in levels:
+                lo, hi = _percentile_interval(samples, level)
+                metadata = {
+                    "uncertainty_type": "aggregate_bootstrap",
+                    "aggregation": "bootstrap_over_strata",
+                    "n_bootstrap": n_boot,
+                    "n_strata": int(values.size),
+                    "nominal": level,
+                    "ci_low": lo,
+                    "ci_high": hi,
+                }
+                if metric_nominal is not None:
+                    metadata["metric_nominal"] = metric_nominal
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=None,
+                        estimator_name=ename,
+                        metric_name=metric_name,
+                        value=point,
+                        stratum={"level": "balanced_global"},
+                        metadata=metadata,
+                    )
+                )
+        return rows
+
+    def _paired_difference_uncertainty(
+        self,
+        *,
+        run_id: str,
+        per_series: list[MetricValue],
+        rng: np.random.Generator,
+        n_boot: int,
+        levels: tuple[float, ...],
+        metric_filter: set[str],
+    ) -> list[MetricValue]:
+        by_group: dict[tuple[str, Any, Any], dict[str, dict[str, MetricValue]]] = defaultdict(
+            lambda: defaultdict(dict)
+        )
+        for mv in per_series:
+            if mv.value is None or mv.record_id is None:
+                continue
+            if metric_filter and mv.metric_name not in metric_filter:
+                continue
+            sk_t = mv.metadata.get("stratum_key")
+            if not isinstance(sk_t, tuple):
+                continue
+            by_group[(mv.metric_name, sk_t, mv.metadata.get("nominal"))][mv.record_id][
+                mv.estimator_name
+            ] = mv
+
+        rows: list[MetricValue] = []
+        for (metric_name, sk_t, metric_nominal), by_record in by_group.items():
+            estimator_names = sorted(
+                {
+                    ename
+                    for estimator_map in by_record.values()
+                    for ename in estimator_map
+                }
+            )
+            for est_a, est_b in combinations(estimator_names, 2):
+                diffs: list[float] = []
+                stratum: dict[str, Any] | None = None
+                for estimator_map in by_record.values():
+                    mv_a = estimator_map.get(est_a)
+                    mv_b = estimator_map.get(est_b)
+                    if mv_a is None or mv_b is None or mv_a.value is None or mv_b.value is None:
+                        continue
+                    diffs.append(float(mv_a.value) - float(mv_b.value))
+                    stratum = dict(mv_a.stratum)
+                if not diffs:
+                    continue
+                values = np.asarray(diffs, dtype=float)
+                samples = []
+                for _ in range(n_boot):
+                    idx = rng.integers(0, values.size, size=values.size)
+                    samples.append(float(np.mean(values[idx])))
+                point = float(np.mean(values))
+                for level in levels:
+                    lo, hi = _percentile_interval(samples, level)
+                    metadata = {
+                        "uncertainty_type": "paired_bootstrap_difference",
+                        "aggregation": "paired_bootstrap_within_stratum",
+                        "stratum_key": sk_t,
+                        "estimator_a": est_a,
+                        "estimator_b": est_b,
+                        "n_bootstrap": n_boot,
+                        "n_pairs": int(values.size),
+                        "nominal": level,
+                        "ci_low": lo,
+                        "ci_high": hi,
+                    }
+                    if metric_nominal is not None:
+                        metadata["metric_nominal"] = metric_nominal
+                    rows.append(
+                        MetricValue(
+                            run_id=run_id,
+                            record_id=None,
+                            estimator_name=f"{est_a}__minus__{est_b}",
+                            metric_name=metric_name,
+                            value=point,
+                            stratum=stratum or {},
+                            metadata=metadata,
+                        )
+                    )
+        return rows
+
 
 class ObservationalEvaluator(GroundTruthEvaluator):
     """Observational metrics (no truth): runtime, CI width, instability, scale sensitivity proxy."""
@@ -603,8 +1123,42 @@ class ObservationalEvaluator(GroundTruthEvaluator):
                     ):
                         per_series.append(row)
 
+            sk = stratum_key(rec)
+            stratum_dict = dict(stratum_from_record(rec))
+            for ms in manifest.metric_specs:
+                if ms.name in DISAGREEMENT_METRICS or ms.name in SENSITIVITY_METRICS:
+                    validate_metric_admissibility(ms, manifest.mode, rec)
+            per_series.extend(
+                self._estimator_disagreement_rows(
+                    run_id=run_id,
+                    record=rec,
+                    metric_specs=manifest.metric_specs,
+                    estimator_specs=manifest.estimator_specs,
+                    idx=idx,
+                    stratum_dict=stratum_dict,
+                    sk=sk,
+                )
+            )
+            per_series.extend(
+                self._parameter_variant_sensitivity_rows(
+                    run_id=run_id,
+                    record=rec,
+                    metric_specs=manifest.metric_specs,
+                    estimator_specs=manifest.estimator_specs,
+                    idx=idx,
+                    stratum_dict=stratum_dict,
+                    sk=sk,
+                )
+            )
+
         aggregate = self._aggregate(run_id, per_series, manifest)
-        return MetricBundle(per_series=tuple(per_series), aggregate=tuple(aggregate), metadata={})
+        uncertainty = self._benchmark_uncertainty(run_id, per_series, aggregate, manifest)
+        return MetricBundle(
+            per_series=tuple(per_series),
+            aggregate=tuple(aggregate),
+            uncertainty=tuple(uncertainty),
+            metadata={},
+        )
 
     def _preprocessing_sensitivity_rows(
         self,

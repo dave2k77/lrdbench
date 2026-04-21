@@ -49,6 +49,62 @@ def _validate_execution_block(spec: Mapping[str, Any] | None) -> None:
             raise ManifestValidationError(f"execution.{key} must be a boolean")
 
 
+def _validate_uncertainty_block(spec: Mapping[str, Any] | None) -> None:
+    uq = dict(spec or {})
+    allowed = frozenset(
+        {
+            "enabled",
+            "n_bootstrap",
+            "ci_levels",
+            "seed",
+            "metrics",
+            "paired",
+            "paired_metrics",
+        }
+    )
+    bad = set(uq) - allowed
+    if bad:
+        raise ManifestValidationError(f"unknown uncertainty block keys: {sorted(bad)}")
+    if "enabled" in uq and not isinstance(uq["enabled"], bool):
+        raise ManifestValidationError("uncertainty.enabled must be a boolean")
+    if "n_bootstrap" in uq:
+        raw = uq["n_bootstrap"]
+        if isinstance(raw, bool):
+            raise ManifestValidationError("uncertainty.n_bootstrap must be an integer >= 1")
+        try:
+            n_boot = int(raw)
+        except (TypeError, ValueError) as exc:
+            raise ManifestValidationError(
+                "uncertainty.n_bootstrap must be an integer >= 1"
+            ) from exc
+        if n_boot < 1:
+            raise ManifestValidationError("uncertainty.n_bootstrap must be an integer >= 1")
+    if "seed" in uq:
+        raw_seed = uq["seed"]
+        if isinstance(raw_seed, bool):
+            raise ManifestValidationError("uncertainty.seed must be an integer")
+        try:
+            int(raw_seed)
+        except (TypeError, ValueError) as exc:
+            raise ManifestValidationError("uncertainty.seed must be an integer") from exc
+    if "ci_levels" in uq:
+        levels = uq["ci_levels"]
+        if not isinstance(levels, list) or not levels:
+            raise ManifestValidationError("uncertainty.ci_levels must be a non-empty list")
+        for level in levels:
+            if not (0.0 < float(level) < 1.0):
+                raise ManifestValidationError(
+                    f"uncertainty.ci_levels values must lie in (0,1), got {level!r}"
+                )
+    for key in ("metrics", "paired_metrics"):
+        if key in uq:
+            vals = uq[key]
+            if not isinstance(vals, list) or not all(isinstance(x, str) for x in vals):
+                raise ManifestValidationError(f"uncertainty.{key} must be a list of strings")
+    if "paired" in uq and not isinstance(uq["paired"], bool):
+        raise ManifestValidationError("uncertainty.paired must be a boolean")
+
+
 def validate_truth_compatibility(estimator_spec: EstimatorSpec, record: SeriesRecord) -> None:
     if record.truth is None:
         return
@@ -95,6 +151,7 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
             "leaderboards",
             "report",
             "execution",
+            "uncertainty",
             "seeds",
             "validation",
         }
@@ -152,6 +209,7 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
 
     # MV5b (Phase 5 execution)
     _validate_execution_block(manifest.execution_spec)
+    _validate_uncertainty_block(manifest.uncertainty_spec)
 
     # MV6
     metric_names = {x.name for x in manifest.metric_specs}
