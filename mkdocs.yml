@@ -55,6 +55,7 @@ nav:
       - Installation: installation.md
       - Research usage: research_usage.md
       - Benchmark protocol: benchmark_protocol.md
+      - Paper workflow: paper_workflow.md
       - Estimator contract: estimator_contract.md
   - Architecture: architecture.md
   - Reference:

@@ -1,0 +1,143 @@
+manifest_id: paper_stress_contamination_v1
+name: paper_stress_contamination
+description: Stress-test suite for estimator degradation under nonstationarity, impulsive contamination, and heavy-tailed noise.
+mode: stress_test
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.5, 0.7]
+        n: [512, 1024]
+        sigma: [1.0]
+      replicates: 3
+    - family: MRW
+      params:
+        H: [0.5, 0.7]
+        n: [512]
+        sigma: [1.0]
+        lambda2: [0.02, 0.08]
+      replicates: 3
+    - family: fOU
+      params:
+        H: [0.5, 0.7]
+        n: [512]
+        theta: [0.05, 0.2]
+        sigma: [1.0]
+        dt: [1.0]
+        burnin: [256]
+      replicates: 3
+contamination:
+  operators:
+    - name: level_shift
+      params:
+        shift: [0.25, 0.75, 1.5]
+    - name: polynomial_trend
+      params:
+        order: [1, 2]
+        strength: [0.25, 0.75]
+    - name: outliers
+      params:
+        rate: [0.01, 0.05]
+        amplitude: [4.0, 8.0]
+    - name: heavy_tail_noise
+      params:
+        df: [3.0, 5.0]
+        scale: [0.25, 0.75]
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [stationary_increments, finite_variance]
+    supports_ci: true
+    params:
+      n_bootstrap: 64
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: DFA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [scaling_range_stability]
+    supports_ci: false
+    params:
+      min_scale: 16
+      max_scale: 256
+      detrend_order: 1
+  - name: DMA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [scaling_range_stability]
+    supports_ci: false
+    params:
+      min_scale: 8
+      max_scale: 192
+  - name: Higuchi
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    assumptions: [self_affine_scaling]
+    supports_ci: false
+    params:
+      k_max: 64
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    assumptions: [dyadic_scaling]
+    supports_ci: false
+    params:
+      wavelet: db4
+      j_drop_low: 1
+      j_drop_high: 1
+metrics:
+  - bias
+  - mae
+  - rmse
+  - estimate_drift
+  - relative_degradation_ratio
+  - validity_rate
+  - validity_collapse
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - family_level_disagreement
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+  - name: coverage_collapse
+    levels: [0.95]
+leaderboards:
+  - name: stress_robustness
+    mode: stress_test
+    component_metrics: [mae, estimate_drift, validity_rate, runtime]
+    weights:
+      mae: 0.3
+      estimate_drift: 0.4
+      validity_rate: 0.2
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+uncertainty:
+  enabled: true
+  n_bootstrap: 300
+  ci_levels: [0.95]
+  seed: 20260422
+  metrics: [mae, estimate_drift, validity_rate]
+  paired: true
+  paired_metrics: [mae, estimate_drift]
+report:
+  formats: [html, csv, latex]
+  include_provenance: true
+  export_root: reports/paper
+  figure_set:
+    - degradation_curve
+    - disagreement_heatmap
+    - benchmark_uncertainty_intervals
+seeds:
+  global_seed: 20260422
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/paper_stress
+  cache_read: true
+  cache_write: true

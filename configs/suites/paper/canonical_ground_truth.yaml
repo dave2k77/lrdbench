@@ -1,0 +1,135 @@
+manifest_id: paper_canonical_ground_truth_v1
+name: paper_canonical_ground_truth
+description: Canonical truth-backed suite for Hurst-scaling estimators on stationary and structured synthetic LRD processes.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.35, 0.5, 0.65, 0.8]
+        n: [512, 1024]
+        sigma: [1.0]
+      replicates: 3
+    - family: fBm
+      params:
+        H: [0.35, 0.5, 0.65, 0.8]
+        n: [512, 1024]
+        sigma: [1.0]
+      replicates: 3
+    - family: MRW
+      params:
+        H: [0.5, 0.7]
+        n: [512, 1024]
+        sigma: [1.0]
+        lambda2: [0.02, 0.08]
+      replicates: 3
+    - family: fOU
+      params:
+        H: [0.5, 0.7]
+        n: [512, 1024]
+        theta: [0.05, 0.2]
+        sigma: [1.0]
+        dt: [1.0]
+        burnin: [256]
+      replicates: 3
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [stationary_increments, finite_variance]
+    supports_ci: true
+    params:
+      n_bootstrap: 96
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: DFA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [scaling_range_stability]
+    supports_ci: false
+    params:
+      min_scale: 16
+      max_scale: 256
+      detrend_order: 1
+  - name: DMA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [scaling_range_stability]
+    supports_ci: false
+    params:
+      min_scale: 8
+      max_scale: 192
+  - name: Higuchi
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    assumptions: [self_affine_scaling]
+    supports_ci: false
+    params:
+      k_max: 64
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    assumptions: [moment_scaling]
+    supports_ci: false
+    params:
+      q: 2.0
+      h_min: 1
+      n_scales: 16
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    assumptions: [dyadic_scaling]
+    supports_ci: false
+    params:
+      wavelet: db4
+      j_drop_low: 1
+      j_drop_high: 1
+metrics:
+  - bias
+  - mae
+  - rmse
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - family_level_disagreement
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+leaderboards:
+  - name: canonical_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime, cross_estimator_dispersion]
+    weights:
+      mae: 0.45
+      validity_rate: 0.2
+      runtime: 0.15
+      cross_estimator_dispersion: 0.2
+    ranking_rule: weighted_rank
+    tie_break_rule: mae
+uncertainty:
+  enabled: true
+  n_bootstrap: 300
+  ci_levels: [0.95]
+  seed: 20260421
+  metrics: [mae, rmse, validity_rate, runtime]
+  paired: true
+  paired_metrics: [mae]
+report:
+  formats: [html, csv, latex]
+  include_provenance: true
+  export_root: reports/paper
+  figure_set:
+    - disagreement_heatmap
+    - benchmark_uncertainty_intervals
+seeds:
+  global_seed: 20260421
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/paper_canonical
+  cache_read: true
+  cache_write: true

@@ -29,7 +29,7 @@ The site configuration is `mkdocs.yml` at the repository root. **Read the Docs**
 
 | Extra        | Purpose                                      |
 | ------------ | -------------------------------------------- |
-| `reports`    | Matplotlib / Jinja2 for richer reporting   |
+| `reports`    | Jinja2 / tabulate helpers for richer reporting |
 | `parquet`    | Parquet export via PyArrow                   |
 | `docs`       | MkDocs + Material + mkdocstrings             |
 | `test`       | pytest, coverage, Hypothesis                 |

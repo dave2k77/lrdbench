@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Paper workflow: added paper-oriented benchmark manifests plus a runner that collects run IDs,
+  LaTeX tables, and figures for publication drafting.
 - Report polish/completeness: estimator metadata, failures, environment snapshot, artefact index,
   raw artefact metadata exports, richer HTML sections, and publication-oriented LaTeX tables for
   disagreement, sensitivity, benchmark uncertainty, and failures.

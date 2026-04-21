@@ -100,6 +100,7 @@ include = [
   "/docs",
   "/configs",
   "/examples",
+  "/paper_support",
   "/.github",
   "/README.md",
   "/LICENSE",
