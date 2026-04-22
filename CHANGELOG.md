@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Documentation/handoff: added tracked clean-clone paper workflow documentation, fixed the MkDocs
+  nav entry for strict builds, and clarified that the frozen design PDF is local-only unless
+  explicitly restored.
 - Paper workflow (local only): publication-oriented benchmark manifests, optional
   `python -m paper_support.run_paper_suites`, staged LaTeX/figures, and `run_index.csv` are
   **not** tracked on the remote repository—see `.gitignore` and `docs/development_handoff.md`.

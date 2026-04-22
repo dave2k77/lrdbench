@@ -8,7 +8,7 @@ This book is built with [MkDocs](https://www.mkdocs.org/) and the [Material for 
 
 ## Design authority
 
-The frozen architecture, object contracts, and phased roadmap are in **`lrdbench-design-specifications.pdf`** in the repository; a short traceability note is in **`SPECIFICATION.md`**.
+The frozen architecture, object contracts, and phased roadmap are in **`lrdbench-design-specifications.pdf`** when that local design file is available; a short traceability note is in **`SPECIFICATION.md`**.
 
 ## Repository layout (quick)
 
