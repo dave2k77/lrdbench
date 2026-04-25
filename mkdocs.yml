@@ -62,6 +62,7 @@ nav:
       - Python API: reference/api.md
   - Read the Docs: readthedocs.md
   - Meta:
+      - Public release roadmap: public_release_roadmap.md
       - Development handoff: development_handoff.md
       - Contributing: contributing.md
       - Changelog: changelog.md

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Leaderboards: balanced-global diagnostic rows whose names are not declared estimator specs (for
+  example `__all_estimators__`) are no longer ranked as estimators.
 - Documentation/handoff: added tracked clean-clone paper workflow documentation, fixed the MkDocs
   nav entry for strict builds, and clarified that the frozen design PDF is local-only unless
   explicitly restored.

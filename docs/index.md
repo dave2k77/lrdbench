@@ -23,3 +23,4 @@ The frozen architecture, object contracts, and phased roadmap are in **`lrdbench
 - [Estimator contract](estimator_contract.md) — `BaseEstimator` and `EstimateResult`.
 - [Architecture](architecture.md) — how the orchestration pieces fit together.
 - [Python API](reference/api.md) — selected autodoc pages.
+- [Public release roadmap](public_release_roadmap.md) — phased alpha/beta/v1.0 plan.

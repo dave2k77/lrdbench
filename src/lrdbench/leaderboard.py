@@ -18,6 +18,7 @@ class WeightedRankLeaderboardBuilder(BaseLeaderboardBuilder):
             return ()
         rows_out: list[LeaderboardRow] = []
         run_id = manifest.manifest_id
+        eligible_estimators = {spec.name for spec in manifest.estimator_specs}
 
         agg_global = [m for m in metrics.aggregate if m.stratum.get("level") == "balanced_global"]
         for lb in manifest.leaderboard_specs:
@@ -26,6 +27,8 @@ class WeightedRankLeaderboardBuilder(BaseLeaderboardBuilder):
             acc: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
             for m in agg_global:
                 if m.metric_name not in lb.component_metrics or m.value is None:
+                    continue
+                if m.estimator_name not in eligible_estimators:
                     continue
                 acc[m.estimator_name][m.metric_name].append(float(m.value))
             estimators = sorted(acc)
