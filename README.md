@@ -4,6 +4,9 @@
 
 **Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs; configure your Read the Docs project slug if it differs).
 
+Current public release: `1.0.0`. No DOI is attached yet; cite the software using `CITATION.cff`
+and the GitHub release.
+
 `lrdbench` is a research-oriented benchmarking framework for studying the behaviour of long-range dependence (LRD) estimators across three distinct settings:
 
 - **ground-truth mode** for canonical synthetic time series with declared target truth;

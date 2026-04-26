@@ -1,7 +1,28 @@
 # Migration Notes
 
 This page records public-surface changes that matter when reproducing or comparing benchmark
-outputs across pre-1.0 releases.
+outputs across public releases.
+
+## 1.0.0
+
+Release `1.0.0` promotes the release-candidate public surfaces to the stable public research
+release.
+
+### Versioning
+
+- Python package version: `1.0.0`.
+- Planned Git tag: `v1.0.0`.
+- Public output contract version: `1.0.0`.
+
+### Public Output Contract
+
+The required report and raw result-store files are unchanged from `0.9.0-rc1`. The contract
+version was advanced to `1.0.0` to mark the stable public release.
+
+### Citation and Archival Status
+
+`v1.0.0` is citeable through `CITATION.cff` and the GitHub release. No DOI or archived benchmark
+result bundle is attached to this release; those can be added in a later archival release.
 
 ## 0.9.0rc1
 
@@ -52,4 +73,3 @@ When comparing outputs generated with `0.3.0-beta`:
 
 The CSV names and required columns are intended to remain compatible between `0.3.0-beta` and
 `0.9.0-rc1`.
-

@@ -24,9 +24,9 @@ hardening.
 
 Approximate status:
 
-- Core research framework: 80-90% complete for an alpha/beta research tool.
-- Open research usefulness: 70-80% complete.
-- Polished public v1.0 library: 55-65% complete.
+- Core research framework: complete for the first stable public research release.
+- Open research usefulness: complete for independent public benchmark use.
+- Polished public v1.0 library: released pending final tag/publish checks.
 - Local manuscript workflow: separate from public release readiness.
 
 ## Alpha 0.1: Public Research Alpha
@@ -212,10 +212,12 @@ Scope:
 
 Progress:
 
-- In progress: package and output-contract versions advanced for release-candidate checks.
-- In progress: API/schema/metric freeze review, migration notes, and citation guidance added to
-  the public docs.
-- In progress: stale alpha/beta roadmap status is being folded into phase progress notes.
+- Done: package and output-contract versions advanced for release-candidate checks.
+- Done: API/schema/metric freeze review, migration notes, and citation guidance added to the
+  public docs.
+- Done: all public-medium suites ran from an installed `0.9.0rc1` wheel and passed output-contract
+  validation.
+- Done: tag `v0.9.0-rc1` was pushed.
 
 Exit criteria:
 
@@ -240,6 +242,13 @@ Scope:
 - Citation file.
 - Clear governance and maintenance statement.
 - Optional archived benchmark result bundle or DOI.
+
+Progress:
+
+- Done: stable package version and output contract advanced to `1.0.0`.
+- Done: governance and maintenance statement added.
+- Done: citation guidance records that no DOI is attached to `v1.0.0`.
+- Done: release artefacts are built and tested locally before tagging.
 
 Exit criteria:
 

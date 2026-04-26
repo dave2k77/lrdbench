@@ -73,9 +73,12 @@ The core metric names exposed by `lrdbench list-metrics` are frozen for release-
 
 New metrics may be added after `0.9.0rc1`, but existing metric names should not be repurposed.
 
+## Promotion to v1.0.0
+
+The reviewed release-candidate surface was promoted to `v1.0.0` without planned schema, metric, or
+output-column churn. The stable public output contract version is `1.0.0`.
+
 ## Known Pre-1.0 Caveats
 
-The project remains pre-1.0 until the final public release. The known limitations page remains the
-authority for scientific and implementation caveats; this freeze review covers public interface
-stability rather than claims of estimator superiority.
-
+The known limitations page remains the authority for scientific and implementation caveats; this
+freeze review covers public interface stability rather than claims of estimator superiority.

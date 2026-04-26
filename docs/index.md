@@ -25,10 +25,11 @@ in [Design specification](design_specification.md). A short root-level traceabil
 - [Interpretation semantics](interpretation_semantics.md) — uncertainty, leaderboard, and failure rules.
 - [Release candidate freeze](release_candidate_freeze.md) — reviewed public APIs, schemas, columns, and metric names.
 - [Public small outputs](public_small_outputs.md) — expected artefacts for public-small suites.
-- [Migration notes](migration.md) — public-surface changes across pre-1.0 releases.
+- [Migration notes](migration.md) — public-surface changes across releases.
 - [Citation guidance](citation.md) — software citation and benchmark metadata expectations.
 - [Estimator contract](estimator_contract.md) — `BaseEstimator` and `EstimateResult`.
 - [Estimator status](estimator_status.md) — public interpretation status for bundled estimators.
 - [Architecture](architecture.md) — how the orchestration pieces fit together.
 - [Python API](reference/api.md) — selected autodoc pages.
 - [Public release roadmap](public_release_roadmap.md) — phased alpha/beta/v1.0 plan.
+- [Governance and maintenance](governance.md) — compatibility, review, and release policy.

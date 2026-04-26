@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.0.0
+
+- Release: promoted the public research framework from `v0.9.0-rc1` to stable `v1.0.0`.
+- Public contract: advanced the output contract to `1.0.0` without changing required files or
+  required columns from the release candidate.
+- Docs: added governance and maintenance policy, clarified DOI-free citation status, and updated
+  migration notes for the stable public release.
+
 - Release candidate: advanced package metadata to `0.9.0rc1` and public output contract to
   `0.9.0-rc1` for schema-freeze review.
 - Docs: added release-candidate freeze notes, migration notes, and citation guidance for

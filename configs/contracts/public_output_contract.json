@@ -1,5 +1,5 @@
 {
-  "contract_version": "0.9.0-rc1",
+  "contract_version": "1.0.0",
   "run_root": "<report.export_root>/<run_id>",
   "required_files": {
     "summary": [

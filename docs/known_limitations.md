@@ -1,7 +1,7 @@
 # Known Limitations
 
-This alpha release is designed for reproducible benchmarking experiments, not definitive estimator
-rankings.
+This public research release is designed for reproducible benchmarking experiments, not definitive
+estimator rankings.
 
 ## Estimators
 
