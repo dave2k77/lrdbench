@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.0.2
+
+- Packaging: republished as `1.0.2` after PyPI also rejected reuse of previously attempted
+  `1.0.1` distribution filenames.
+- Public contract: unchanged at `1.0.0`; no schema, metric, manifest, or output-column changes.
+
 ## 1.0.1
 
 - Packaging: republished the stable research release as `1.0.1` because PyPI does not allow

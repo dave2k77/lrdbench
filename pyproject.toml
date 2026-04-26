@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lrdbench"
-version = "1.0.1"
+version = "1.0.2"
 description = "A reproducible benchmark framework for evaluating long-range dependence estimators on canonical, contaminated, and observational time series."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -3,11 +3,18 @@
 This page records public-surface changes that matter when reproducing or comparing benchmark
 outputs across public releases.
 
+## 1.0.2
+
+Release `1.0.2` is a packaging-only republish after PyPI also rejected reuse of previously
+attempted `1.0.1` distribution filenames. The public output contract remains `1.0.0`; no schema,
+metric, manifest, or required-column changes were made.
+
 ## 1.0.1
 
-Release `1.0.1` is a packaging-only republish after PyPI rejected reuse of previously uploaded
-`1.0.0` distribution filenames. The public output contract remains `1.0.0`; no schema, metric,
-manifest, or required-column changes were made.
+Release `1.0.1` was a packaging-only republish after PyPI rejected reuse of previously uploaded
+`1.0.0` distribution filenames. Its filenames were also attempted on PyPI and should not be reused.
+The public output contract remains `1.0.0`; no schema, metric, manifest, or required-column
+changes were made.
 
 ## 1.0.0
 
