@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- CLI: added `lrdbench list-metrics` and `lrdbench list-estimators` discovery commands.
+- CLI: added `lrdbench list-suites` and public suite-name resolution for `run` and `validate`.
+- CLI: added `lrdbench validate-output <run_root>` to check generated reports against the public
+  output contract.
+- Public contract: added machine-readable output contract for required report/result-store files
+  and columns.
+- Docs: added output-contract and reproducibility guides for public benchmark beta users.
+- Docs: added public-medium reference output counts for contract-valid local runs.
+- Packaging: added CI packaging workflow and verified local sdist/wheel build plus installed
+  console-script and smoke-report contract checks.
+- Packaging: included tracked public suite manifests and output contract assets in built wheels.
 - Validation: added statistical generator checks for fGn/fBm scaling, ARFIMA memory behavior,
   MRW intermittency, and fOU mean reversion.
 - Validation: added statistical estimator checks for baseline Hurst-proxy and spectral

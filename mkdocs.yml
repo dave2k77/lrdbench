@@ -57,7 +57,10 @@ nav:
       - Design specification: design_specification.md
       - Benchmark protocol: benchmark_protocol.md
       - Interpretation semantics: interpretation_semantics.md
+      - Output contract: output_contract.md
+      - Reproducibility: reproducibility.md
       - Public small outputs: public_small_outputs.md
+      - Public medium outputs: public_medium_outputs.md
       - Failure mode taxonomy: failure_mode_taxonomy.md
       - Known limitations: known_limitations.md
       - Paper workflow: paper_workflow.md

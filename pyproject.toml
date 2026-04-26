@@ -93,6 +93,22 @@ lrdbench = "lrdbench.cli.main:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/lrdbench"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"configs/contracts" = "src/lrdbench/configs/contracts"
+"configs/suites/benchmark_rs_gph.yaml" = "src/lrdbench/configs/suites/benchmark_rs_gph.yaml"
+"configs/suites/data" = "src/lrdbench/configs/suites/data"
+"configs/suites/public_medium_canonical_ground_truth.yaml" = "src/lrdbench/configs/suites/public_medium_canonical_ground_truth.yaml"
+"configs/suites/public_medium_null_false_positive.yaml" = "src/lrdbench/configs/suites/public_medium_null_false_positive.yaml"
+"configs/suites/public_medium_sensitivity_disagreement.yaml" = "src/lrdbench/configs/suites/public_medium_sensitivity_disagreement.yaml"
+"configs/suites/public_medium_stress_contamination.yaml" = "src/lrdbench/configs/suites/public_medium_stress_contamination.yaml"
+"configs/suites/public_small_canonical_ground_truth.yaml" = "src/lrdbench/configs/suites/public_small_canonical_ground_truth.yaml"
+"configs/suites/public_small_null_false_positive.yaml" = "src/lrdbench/configs/suites/public_small_null_false_positive.yaml"
+"configs/suites/public_small_sensitivity_disagreement.yaml" = "src/lrdbench/configs/suites/public_small_sensitivity_disagreement.yaml"
+"configs/suites/public_small_stress_contamination.yaml" = "src/lrdbench/configs/suites/public_small_stress_contamination.yaml"
+"configs/suites/smoke_ground_truth.yaml" = "src/lrdbench/configs/suites/smoke_ground_truth.yaml"
+"configs/suites/smoke_observational.yaml" = "src/lrdbench/configs/suites/smoke_observational.yaml"
+"configs/suites/smoke_stress_test.yaml" = "src/lrdbench/configs/suites/smoke_stress_test.yaml"
+
 [tool.hatch.build.targets.sdist]
 include = [
   "/src",

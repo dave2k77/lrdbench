@@ -5,7 +5,7 @@ import json
 import os
 import platform
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from importlib import metadata
 from pathlib import Path
@@ -59,6 +59,48 @@ _SENSITIVITY_METRIC_NAMES = frozenset(
     }
 )
 
+_LEADERBOARD_COLUMNS = ("estimator_name", "rank", "score")
+_FAILURE_MAP_COLUMNS = ("estimator_name", "stratum_json")
+_DISAGREEMENT_COLUMNS = (
+    "scope",
+    "record_id",
+    "estimator_name",
+    "metric_name",
+    "value",
+    "stratum_json",
+    "metadata_json",
+)
+_SENSITIVITY_COLUMNS = _DISAGREEMENT_COLUMNS
+_BENCHMARK_UNCERTAINTY_COLUMNS = (
+    "estimator_name",
+    "metric_name",
+    "value",
+    "uncertainty_type",
+    "aggregation",
+    "nominal",
+    "ci_low",
+    "ci_high",
+    "stratum_json",
+    "metadata_json",
+)
+_UNCERTAINTY_CALIBRATION_COLUMNS = (
+    "estimator_name",
+    "metric_name",
+    "value",
+    "nominal",
+)
+_FAILURES_COLUMNS = (
+    "estimator_name",
+    "stratum_json",
+    "n_metric_rows",
+    "n_missing_values",
+    "n_missing_uncertainty",
+    "n_validity_observations",
+    "n_invalid_estimates",
+    "invalid_rate",
+    "missing_value_rate",
+)
+
 
 def _fmt_cell(value: Any) -> str:
     if value is None:
@@ -108,6 +150,28 @@ def _write_latex_table(
         lines.append(" & ".join(_tex_escape(_fmt_cell(cell)) for cell in row) + r" \\")
     lines.extend([r"\hline", r"\end{tabular}"])
     path.write_text("\n".join(lines), encoding="utf-8")
+
+
+def _write_csv_rows(path: Path, rows: Sequence[Mapping[str, Any]], columns: Sequence[str]) -> None:
+    pd.DataFrame(rows, columns=list(columns)).to_csv(path, index=False)
+
+
+def _columns_for_rows(rows: Sequence[Mapping[str, Any]], minimum: Sequence[str]) -> tuple[str, ...]:
+    columns = list(minimum)
+    for row in rows:
+        for key in row:
+            if key not in columns:
+                columns.append(key)
+    return tuple(columns)
+
+
+def _leaderboard_keys(leaderboards: Sequence[Any]) -> tuple[str, ...]:
+    keys: list[str] = []
+    for row in leaderboards:
+        for key in row.component_values:
+            if key not in keys:
+                keys.append(str(key))
+    return tuple(keys)
 
 
 def _load_plotting() -> tuple[Any, Any]:
@@ -316,10 +380,8 @@ class SimpleHtmlCsvReporter(BaseReporter):
             for r in leaderboards
         ]
         lb_path = tables / "leaderboard.csv"
-        if lb_rows:
-            pd.DataFrame(lb_rows).to_csv(lb_path, index=False)
-        else:
-            lb_path.write_text("", encoding="utf-8")
+        leaderboard_columns = (*_LEADERBOARD_COLUMNS, *(f"metric__{k}" for k in _leaderboard_keys(leaderboards)))
+        _write_csv_rows(lb_path, lb_rows, leaderboard_columns)
         _record_artifact(
             artefact_id=f"{run_id}_leaderboard_csv",
             artefact_type="leaderboard_export",
@@ -351,10 +413,7 @@ class SimpleHtmlCsvReporter(BaseReporter):
 
         failure_map_path = tables / "failure_map.csv"
         failure_rows = _failure_map_rows(metrics)
-        if failure_rows:
-            pd.DataFrame(failure_rows).to_csv(failure_map_path, index=False)
-        else:
-            failure_map_path.write_text("", encoding="utf-8")
+        _write_csv_rows(failure_map_path, failure_rows, _columns_for_rows(failure_rows, _FAILURE_MAP_COLUMNS))
         _record_artifact(
             artefact_id=f"{run_id}_failure_map_csv",
             artefact_type="metric_export",
@@ -376,10 +435,7 @@ class SimpleHtmlCsvReporter(BaseReporter):
             for m in (*metrics.per_series, *metrics.aggregate)
             if m.metric_name in _DISAGREEMENT_METRIC_NAMES
         ]
-        if disagreement_rows:
-            pd.DataFrame(disagreement_rows).to_csv(disagreement_path, index=False)
-        else:
-            disagreement_path.write_text("", encoding="utf-8")
+        _write_csv_rows(disagreement_path, disagreement_rows, _DISAGREEMENT_COLUMNS)
         _record_artifact(
             artefact_id=f"{run_id}_estimator_disagreement_csv",
             artefact_type="metric_export",
@@ -401,10 +457,7 @@ class SimpleHtmlCsvReporter(BaseReporter):
             for m in (*metrics.per_series, *metrics.aggregate)
             if m.metric_name in _SENSITIVITY_METRIC_NAMES
         ]
-        if sensitivity_rows:
-            pd.DataFrame(sensitivity_rows).to_csv(sensitivity_path, index=False)
-        else:
-            sensitivity_path.write_text("", encoding="utf-8")
+        _write_csv_rows(sensitivity_path, sensitivity_rows, _SENSITIVITY_COLUMNS)
         _record_artifact(
             artefact_id=f"{run_id}_scale_window_sensitivity_csv",
             artefact_type="metric_export",
@@ -414,7 +467,8 @@ class SimpleHtmlCsvReporter(BaseReporter):
 
         unc = [m for m in agg if m.metric_name in ("coverage", "ci_width", "coverage_error")]
         unc_path = tables / "uncertainty_calibration.csv"
-        pd.DataFrame(
+        _write_csv_rows(
+            unc_path,
             [
                 {
                     "estimator_name": m.estimator_name,
@@ -423,8 +477,9 @@ class SimpleHtmlCsvReporter(BaseReporter):
                     "nominal": m.metadata.get("nominal"),
                 }
                 for m in unc
-            ]
-        ).to_csv(unc_path, index=False)
+            ],
+            _UNCERTAINTY_CALIBRATION_COLUMNS,
+        )
         _record_artifact(
             artefact_id=f"{run_id}_uncertainty_csv",
             artefact_type="metric_export",
@@ -448,10 +503,11 @@ class SimpleHtmlCsvReporter(BaseReporter):
             }
             for m in metrics.uncertainty
         ]
-        if benchmark_uncertainty_rows:
-            pd.DataFrame(benchmark_uncertainty_rows).to_csv(benchmark_uncertainty_path, index=False)
-        else:
-            benchmark_uncertainty_path.write_text("", encoding="utf-8")
+        _write_csv_rows(
+            benchmark_uncertainty_path,
+            benchmark_uncertainty_rows,
+            _BENCHMARK_UNCERTAINTY_COLUMNS,
+        )
         _record_artifact(
             artefact_id=f"{run_id}_benchmark_uncertainty_csv",
             artefact_type="metric_export",
@@ -461,10 +517,11 @@ class SimpleHtmlCsvReporter(BaseReporter):
 
         failure_summary_rows = _failure_rows(metrics)
         failures_path = tables / "failures.csv"
-        if failure_summary_rows:
-            pd.DataFrame(failure_summary_rows).to_csv(failures_path, index=False)
-        else:
-            failures_path.write_text("", encoding="utf-8")
+        _write_csv_rows(
+            failures_path,
+            failure_summary_rows,
+            _columns_for_rows(failure_summary_rows, _FAILURES_COLUMNS),
+        )
         _record_artifact(
             artefact_id=f"{run_id}_failures_csv",
             artefact_type="failure_export",

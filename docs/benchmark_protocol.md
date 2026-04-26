@@ -21,6 +21,14 @@ lrdbench validate configs/suites/public_small_canonical_ground_truth.yaml
 lrdbench run configs/suites/public_small_canonical_ground_truth.yaml
 ```
 
+Installed packages also expose tracked suites by name:
+
+```bash
+lrdbench list-suites
+lrdbench validate public_small_canonical_ground_truth
+lrdbench run public_small_canonical_ground_truth
+```
+
 Available suites:
 
 - `configs/suites/public_small_canonical_ground_truth.yaml`: fGn ground-truth accuracy and
@@ -36,6 +44,8 @@ By default these suites write reports under `reports/public_small/<run_id>/`.
 
 Expected output shape and local reference run counts are recorded in
 [Public small outputs](public_small_outputs.md).
+The machine-readable report and result-store contract is recorded in
+[Output contract](output_contract.md).
 
 ## Public medium suites
 
@@ -56,6 +66,8 @@ Available suites:
   sensitivity grids for DFA, DMA, and WaveletOLS.
 
 By default these suites write reports under `reports/public_medium/<run_id>/`.
+Reference output row counts are recorded in
+[Public medium outputs](public_medium_outputs.md).
 
 ## Report completeness
 

@@ -131,6 +131,25 @@ Scope:
   - optionally `lrdbench list-estimators`.
 - Add packaging checks.
 
+Progress:
+
+- Done: canonical public-small and public-medium tracked suites are present.
+- Done: `lrdbench validate <manifest>` exists.
+- Done: machine-readable output contract is tracked in
+  `configs/contracts/public_output_contract.json`.
+- Done: `lrdbench validate-output <run_root>` checks generated reports against the public output
+  contract.
+- Done: `lrdbench list-metrics` and `lrdbench list-estimators` expose built-in discovery.
+- Done: `lrdbench list-suites` and suite-name resolution let installed users validate/run
+  packaged public suites.
+- Done: output-contract and reproducibility guides are included in the user guide.
+- Done: packaging workflow builds distributions, installs the wheel, runs a smoke report, and
+  checks the generated output contract.
+- Done: all tracked public-medium manifests validate cleanly.
+- Done: all tracked public-medium suites were run locally and passed `validate-output`; reference
+  row counts are documented.
+- Ready: tag `v0.3.0-beta` after committing and pushing the Beta 0.3 changes.
+
 Exit criteria:
 
 - External user can run medium suites and compare outputs.
