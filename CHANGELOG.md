@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.0.1
+
+- Packaging: republished the stable research release as `1.0.1` because PyPI does not allow
+  previously uploaded `1.0.0` distribution filenames to be reused, even after deletion.
+- Public contract: unchanged at `1.0.0`; no schema, metric, manifest, or output-column changes.
+
 - CI: updated GitHub-hosted workflow actions to Node 24-compatible major versions.
 - Release: configured the tag release workflow to publish built distributions to PyPI through
   Trusted Publishing using the `pypi` GitHub environment.

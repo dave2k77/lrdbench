@@ -3,6 +3,12 @@
 This page records public-surface changes that matter when reproducing or comparing benchmark
 outputs across public releases.
 
+## 1.0.1
+
+Release `1.0.1` is a packaging-only republish after PyPI rejected reuse of previously uploaded
+`1.0.0` distribution filenames. The public output contract remains `1.0.0`; no schema, metric,
+manifest, or required-column changes were made.
+
 ## 1.0.0
 
 Release `1.0.0` promotes the release-candidate public surfaces to the stable public research

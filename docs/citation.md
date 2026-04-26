@@ -10,11 +10,11 @@ manual reference lists, include:
 
 - software name: `lrdbench`;
 - author: Davian Chin;
-- version: `1.0.0`;
+- version: `1.0.1`;
 - repository: `https://github.com/dave2k77/lrdbench`;
 - license: MIT.
 
-No DOI is attached to `v1.0.0`. If a DOI or archived release bundle is added later, cite that
+No DOI is attached to `v1.0.1`. If a DOI or archived release bundle is added later, cite that
 archived artefact instead of a moving repository URL.
 
 ## Benchmark Metadata to Report
