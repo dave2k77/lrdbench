@@ -8,7 +8,9 @@ This book is built with [MkDocs](https://www.mkdocs.org/) and the [Material for 
 
 ## Design authority
 
-The frozen architecture, object contracts, and phased roadmap are in **`lrdbench-design-specifications.pdf`** when that local design file is available; a short traceability note is in **`SPECIFICATION.md`**.
+The tracked architecture, object contracts, manifest rules, and release-stability expectations are
+in [Design specification](design_specification.md). A short root-level traceability note remains in
+`SPECIFICATION.md`.
 
 ## Repository layout (quick)
 
@@ -20,7 +22,10 @@ The frozen architecture, object contracts, and phased roadmap are in **`lrdbench
 
 - [Installation](installation.md) — editable install, extras, local `mkdocs serve`.
 - [Benchmark protocol](benchmark_protocol.md) — manifest modes, execution block, outputs.
+- [Interpretation semantics](interpretation_semantics.md) — uncertainty, leaderboard, and failure rules.
+- [Public small outputs](public_small_outputs.md) — expected artefacts for public-small suites.
 - [Estimator contract](estimator_contract.md) — `BaseEstimator` and `EstimateResult`.
+- [Estimator status](estimator_status.md) — public interpretation status for bundled estimators.
 - [Architecture](architecture.md) — how the orchestration pieces fit together.
 - [Python API](reference/api.md) — selected autodoc pages.
 - [Public release roadmap](public_release_roadmap.md) — phased alpha/beta/v1.0 plan.

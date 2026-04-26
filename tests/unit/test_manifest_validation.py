@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from lrdbench.enums import BenchmarkMode
-from lrdbench.manifest import manifest_from_mapping
+from lrdbench.manifest import load_manifest, manifest_from_mapping
 from lrdbench.metrics_catalog import METRIC_SPECS
 from lrdbench.validation import ManifestValidationError, validate_metric_admissibility
 
@@ -88,3 +90,33 @@ def test_unknown_manifest_key_rejected() -> None:
     }
     with pytest.raises(ManifestValidationError):
         manifest_from_mapping(data)
+
+
+def test_public_small_manifests_load(repo_root: Path) -> None:
+    manifests = sorted((repo_root / "configs" / "suites").glob("public_small_*.yaml"))
+    assert {x.name for x in manifests} == {
+        "public_small_canonical_ground_truth.yaml",
+        "public_small_null_false_positive.yaml",
+        "public_small_sensitivity_disagreement.yaml",
+        "public_small_stress_contamination.yaml",
+    }
+    for path in manifests:
+        manifest = load_manifest(path)
+        assert manifest.manifest_id.startswith("public_small_")
+        assert manifest.estimator_specs
+        assert manifest.metric_specs
+
+
+def test_public_medium_manifests_load(repo_root: Path) -> None:
+    manifests = sorted((repo_root / "configs" / "suites").glob("public_medium_*.yaml"))
+    assert {x.name for x in manifests} == {
+        "public_medium_canonical_ground_truth.yaml",
+        "public_medium_null_false_positive.yaml",
+        "public_medium_sensitivity_disagreement.yaml",
+        "public_medium_stress_contamination.yaml",
+    }
+    for path in manifests:
+        manifest = load_manifest(path)
+        assert manifest.manifest_id.startswith("public_medium_")
+        assert manifest.estimator_specs
+        assert manifest.metric_specs

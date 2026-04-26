@@ -1,0 +1,84 @@
+manifest_id: public_small_null_false_positive_v1
+name: public_small_null_false_positive
+description: Tutorial-scale null suite for false-positive LRD checks at short-memory boundaries.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.5]
+        n: [512]
+        sigma: [1.0]
+      replicates: 5
+    - family: ARFIMA
+      params:
+        d: [0.0]
+        n: [512]
+        sigma: [1.0]
+      replicates: 5
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 32
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: GPH
+    family: spectral
+    target_estimand: long_memory_parameter
+    supports_ci: true
+    params:
+      n_bootstrap: 32
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: Periodogram
+    family: spectral
+    target_estimand: long_memory_parameter
+    supports_ci: false
+    params:
+      m_power: 0.5
+metrics:
+  - bias
+  - mae
+  - rmse
+  - false_positive_lrd_rate
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+leaderboards:
+  - name: null_specificity
+    mode: ground_truth
+    component_metrics: [false_positive_lrd_rate, validity_rate, runtime]
+    weights:
+      false_positive_lrd_rate: 0.6
+      validity_rate: 0.3
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+uncertainty:
+  enabled: true
+  n_bootstrap: 100
+  ci_levels: [0.95]
+  seed: 20260428
+  metrics: [false_positive_lrd_rate, validity_rate]
+report:
+  formats: [html, csv, latex]
+  export_root: reports/public_small
+  figure_set:
+    - false_positive_lrd
+    - disagreement_heatmap
+    - benchmark_uncertainty_intervals
+seeds:
+  global_seed: 20260428
+execution:
+  max_workers: 2

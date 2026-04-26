@@ -1,0 +1,94 @@
+manifest_id: public_medium_canonical_ground_truth_v1
+name: public_medium_canonical_ground_truth
+description: Medium canonical ground-truth suite for public-alpha estimator comparison.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.35, 0.5, 0.65, 0.8]
+        n: [512, 1024]
+        sigma: [1.0]
+      replicates: 3
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 64
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: DFA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      min_scale: 8
+      max_scale: 256
+      detrend_order: 1
+  - name: DMA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      min_scale: 8
+      max_scale: 256
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      n_scales: 18
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      wavelet: db2
+      j_drop_low: 1
+      j_drop_high: 1
+metrics:
+  - bias
+  - mae
+  - rmse
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+leaderboards:
+  - name: canonical_accuracy
+    mode: ground_truth
+    component_metrics: [mae, coverage_error, validity_rate, runtime]
+    weights:
+      mae: 0.45
+      coverage_error: 0.2
+      validity_rate: 0.25
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: mae
+uncertainty:
+  enabled: true
+  n_bootstrap: 200
+  ci_levels: [0.95]
+  seed: 20260430
+  metrics: [mae, validity_rate]
+  paired: true
+  paired_metrics: [mae]
+report:
+  formats: [html, csv, latex]
+  export_root: reports/public_medium
+  figure_set:
+    - disagreement_heatmap
+    - benchmark_uncertainty_intervals
+seeds:
+  global_seed: 20260430
+execution:
+  max_workers: 4

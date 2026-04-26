@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import platform
 import sys
 from collections.abc import Sequence
@@ -32,6 +33,7 @@ def _package_version(name: str) -> str | None:
         return metadata.version(name)
     except metadata.PackageNotFoundError:
         return None
+
 
 _STRESS_METRIC_NAMES = frozenset(
     {
@@ -70,9 +72,7 @@ def _html_table(headers: Sequence[str], rows: Sequence[Sequence[Any]], *, empty:
     head = "".join(f"<th>{html.escape(h)}</th>" for h in headers)
     if rows:
         body = "".join(
-            "<tr>"
-            + "".join(f"<td>{html.escape(_fmt_cell(cell))}</td>" for cell in row)
-            + "</tr>"
+            "<tr>" + "".join(f"<td>{html.escape(_fmt_cell(cell))}</td>" for cell in row) + "</tr>"
             for row in rows
         )
     else:
@@ -112,6 +112,10 @@ def _write_latex_table(
 
 def _load_plotting() -> tuple[Any, Any]:
     try:
+        if not os.environ.get("MPLCONFIGDIR"):
+            mpl_config_dir = Path(".lrdbench_cache") / "matplotlib"
+            mpl_config_dir.mkdir(parents=True, exist_ok=True)
+            os.environ["MPLCONFIGDIR"] = str(mpl_config_dir)
         import matplotlib
 
         matplotlib.use("Agg")
@@ -181,9 +185,7 @@ def _failure_rows(metrics: MetricBundle) -> list[dict[str, Any]]:
 
     for row in grouped.values():
         n_valid = int(row["n_validity_observations"])
-        row["invalid_rate"] = (
-            float(row["n_invalid_estimates"]) / n_valid if n_valid > 0 else None
-        )
+        row["invalid_rate"] = float(row["n_invalid_estimates"]) / n_valid if n_valid > 0 else None
         row["missing_value_rate"] = (
             float(row["n_missing_values"]) / int(row["n_metric_rows"])
             if int(row["n_metric_rows"]) > 0
@@ -447,9 +449,7 @@ class SimpleHtmlCsvReporter(BaseReporter):
             for m in metrics.uncertainty
         ]
         if benchmark_uncertainty_rows:
-            pd.DataFrame(benchmark_uncertainty_rows).to_csv(
-                benchmark_uncertainty_path, index=False
-            )
+            pd.DataFrame(benchmark_uncertainty_rows).to_csv(benchmark_uncertainty_path, index=False)
         else:
             benchmark_uncertainty_path.write_text("", encoding="utf-8")
         _record_artifact(
@@ -540,9 +540,7 @@ class SimpleHtmlCsvReporter(BaseReporter):
 
         if "disagreement_heatmap" in report_spec.figure_set:
             rows = [
-                r
-                for r in disagreement_rows
-                if r["scope"] == "aggregate" and r["value"] is not None
+                r for r in disagreement_rows if r["scope"] == "aggregate" and r["value"] is not None
             ]
             if rows:
                 plt, sns = _load_plotting()
@@ -578,9 +576,7 @@ class SimpleHtmlCsvReporter(BaseReporter):
 
         if "sensitivity_heatmap" in report_spec.figure_set:
             rows = [
-                r
-                for r in sensitivity_rows
-                if r["scope"] == "aggregate" and r["value"] is not None
+                r for r in sensitivity_rows if r["scope"] == "aggregate" and r["value"] is not None
             ]
             if rows:
                 plt, sns = _load_plotting()

@@ -1,0 +1,107 @@
+manifest_id: public_medium_stress_contamination_v1
+name: public_medium_stress_contamination
+description: Medium stress-test suite for controlled nonstationarity and contamination robustness.
+mode: stress_test
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.5, 0.7]
+        n: [512, 1024]
+        sigma: [1.0]
+      replicates: 3
+contamination:
+  operators:
+    - name: level_shift
+      params:
+        shift: [0.75]
+    - name: outliers
+      params:
+        rate: [0.01, 0.05]
+        amplitude: [4.0, 8.0]
+    - name: polynomial_trend
+      params:
+        order: [1, 2]
+        strength: [0.5, 1.0]
+    - name: heavy_tail_noise
+      params:
+        df: [3.0, 5.0]
+        scale: [0.5, 1.0]
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 48
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: DFA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      min_scale: 8
+      max_scale: 256
+      detrend_order: 1
+  - name: DMA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      min_scale: 8
+      max_scale: 256
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      wavelet: db2
+      j_drop_low: 1
+      j_drop_high: 1
+metrics:
+  - bias
+  - mae
+  - estimate_drift
+  - relative_degradation_ratio
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+  - name: coverage_collapse
+    levels: [0.95]
+leaderboards:
+  - name: stress_robustness
+    mode: stress_test
+    component_metrics: [mae, estimate_drift, validity_rate, runtime]
+    weights:
+      mae: 0.35
+      estimate_drift: 0.35
+      validity_rate: 0.2
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+uncertainty:
+  enabled: true
+  n_bootstrap: 200
+  ci_levels: [0.95]
+  seed: 20260501
+  metrics: [mae, estimate_drift, relative_degradation_ratio, validity_rate]
+report:
+  formats: [html, csv, latex]
+  export_root: reports/public_medium
+  figure_set:
+    - degradation_curve
+    - disagreement_heatmap
+    - benchmark_uncertainty_intervals
+seeds:
+  global_seed: 20260501
+execution:
+  max_workers: 4

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- CLI: added `lrdbench validate <manifest>` for manifest-only checks without running benchmarks.
+- Public suites: added tracked `public_small_*` benchmark manifests for canonical ground-truth,
+  stress contamination, null false-positive, and sensitivity/disagreement public-alpha checks.
+- Public suites: added first-pass tracked `public_medium_*` manifests for more serious local
+  benchmark campaigns.
+- Documentation: added tracked design specification and estimator status pages for public-alpha
+  interpretation.
+- Documentation: added explicit interpretation semantics for aggregation, uncertainty,
+  leaderboards, and failure outputs.
+- Documentation: recorded public-small expected output artefacts and local reference run counts.
+- Reporting: default plotting configuration now uses a writable local matplotlib cache when
+  `MPLCONFIGDIR` is unset, avoiding read-only home-directory warnings in sandboxed runs.
 - Leaderboards: balanced-global diagnostic rows whose names are not declared estimator specs (for
   example `__all_estimators__`) are no longer ranked as estimators.
 - Documentation/handoff: added tracked clean-clone paper workflow documentation, fixed the MkDocs

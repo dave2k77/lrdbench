@@ -201,15 +201,16 @@ Exit criteria:
 
 ## Immediate Next Sprint
 
-Start with Alpha 0.1 tasks:
+Alpha 0.1 progress:
 
-1. Create tracked `docs/design_specification.md` from the design/spec concepts already in the repo.
-2. Add `configs/suites/public_small_*.yaml`.
-3. Add `configs/suites/public_medium_*.yaml` skeleton or first pass.
-4. Add estimator status table to docs.
-5. Add uncertainty, leaderboard, and failure semantics pages or sections.
-6. Add `lrdbench validate <manifest>`.
-7. Run clean public small suites and record expected outputs in docs.
+- Done: create tracked `docs/design_specification.md` from the design/spec concepts already in the
+  repo.
+- Done: add `configs/suites/public_small_*.yaml`.
+- Done: add `configs/suites/public_medium_*.yaml` skeleton or first pass.
+- Done: add estimator status table to docs.
+- Done: add uncertainty, leaderboard, and failure semantics pages or sections.
+- Done: add `lrdbench validate <manifest>`.
+- Done: run clean public small suites and record expected outputs in docs.
 
 This moves the project from a strong internal research framework to a public alpha with a
 defensible research contract.

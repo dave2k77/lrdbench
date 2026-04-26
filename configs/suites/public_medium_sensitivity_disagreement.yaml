@@ -1,0 +1,107 @@
+manifest_id: public_medium_sensitivity_disagreement_v1
+name: public_medium_sensitivity_disagreement
+description: Medium sensitivity suite for scale/window variants and estimator disagreement.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.4, 0.6, 0.8]
+        n: [512, 1024]
+        sigma: [1.0]
+      replicates: 3
+estimators:
+  - name: DFA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    params:
+      detrend_order: 1
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_scales
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_scales
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: DMA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    variants:
+      - name: short_windows
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_windows
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_windows
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    variants:
+      - name: broad_band
+        params:
+          wavelet: db2
+          j_drop_low: 1
+          j_drop_high: 1
+      - name: upper_band
+        params:
+          wavelet: db2
+          j_drop_low: 2
+          j_drop_high: 1
+      - name: conservative_band
+        params:
+          wavelet: db4
+          j_drop_low: 1
+          j_drop_high: 2
+metrics:
+  - bias
+  - mae
+  - rmse
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - parameter_variant_sensitivity
+  - max_variant_drift
+leaderboards:
+  - name: sensitivity_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.6
+      validity_rate: 0.25
+      runtime: 0.15
+    ranking_rule: weighted_rank
+    tie_break_rule: mae
+uncertainty:
+  enabled: true
+  n_bootstrap: 200
+  ci_levels: [0.95]
+  seed: 20260503
+  metrics: [mae, parameter_variant_sensitivity, max_variant_drift]
+report:
+  formats: [html, csv, latex]
+  export_root: reports/public_medium
+  figure_set:
+    - disagreement_heatmap
+    - sensitivity_heatmap
+    - benchmark_uncertainty_intervals
+seeds:
+  global_seed: 20260503
+execution:
+  max_workers: 4

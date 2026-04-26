@@ -8,6 +8,55 @@
 
 Example suite manifests: `configs/suites/smoke_*.yaml`.
 
+For interpretation rules covering aggregation, uncertainty, leaderboards, and failures, see
+[Interpretation semantics](interpretation_semantics.md).
+
+## Public small suites
+
+The tracked `public_small_*` manifests are the first public-alpha benchmark set. They are larger
+than CI smoke tests but intended to remain laptop-runnable from a clean clone:
+
+```bash
+lrdbench validate configs/suites/public_small_canonical_ground_truth.yaml
+lrdbench run configs/suites/public_small_canonical_ground_truth.yaml
+```
+
+Available suites:
+
+- `configs/suites/public_small_canonical_ground_truth.yaml`: fGn ground-truth accuracy and
+  disagreement for RS, DFA, and DMA.
+- `configs/suites/public_small_stress_contamination.yaml`: controlled level-shift, outlier, and
+  polynomial-trend stress testing on fGn.
+- `configs/suites/public_small_null_false_positive.yaml`: short-memory boundary checks using fGn
+  `H=0.5` and ARFIMA `d=0.0`.
+- `configs/suites/public_small_sensitivity_disagreement.yaml`: scale/window parameter variants
+  for DFA, DMA, and WaveletOLS.
+
+By default these suites write reports under `reports/public_small/<run_id>/`.
+
+Expected output shape and local reference run counts are recorded in
+[Public small outputs](public_small_outputs.md).
+
+## Public medium suites
+
+The tracked `public_medium_*` manifests are first-pass public-alpha suites for more serious local
+benchmark campaigns. They use broader grids, more replicates, more estimators, or richer
+contamination designs than the public-small suites. They are intended for laptop or workstation
+runs, not CI smoke checks.
+
+Available suites:
+
+- `configs/suites/public_medium_canonical_ground_truth.yaml`: fGn canonical accuracy,
+  disagreement, and paired benchmark uncertainty for RS, DFA, DMA, GHE, and WaveletOLS.
+- `configs/suites/public_medium_stress_contamination.yaml`: level-shift, outlier,
+  polynomial-trend, and heavy-tail-noise stress testing on fGn.
+- `configs/suites/public_medium_null_false_positive.yaml`: larger short-memory boundary checks
+  using fGn `H=0.5` and ARFIMA `d=0.0`.
+- `configs/suites/public_medium_sensitivity_disagreement.yaml`: three-variant scale/window
+  sensitivity grids for DFA, DMA, and WaveletOLS.
+
+By default these suites write reports under `reports/public_medium/<run_id>/`.
+
 ## Report completeness
 
 The CSV/HTML reporter emits audit-oriented tables in addition to metric summaries:
