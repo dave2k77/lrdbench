@@ -2,7 +2,7 @@
 
 **A reproducible benchmark framework for evaluating long-range dependence estimators on canonical, contaminated, and observational time series.**
 
-**Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs; configure your Read the Docs project slug if it differs).
+**Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs and Read the Docs).
 
 Current public release: `1.0.0`. No DOI is attached yet; cite the software using `CITATION.cff`
 and the GitHub release.

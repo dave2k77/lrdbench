@@ -1,9 +1,15 @@
-# Hosting on Read the Docs
+# Read the Docs
 
-1. Sign in at [readthedocs.org](https://readthedocs.org/) and **Import a project** from your Git host.
-2. Point the default branch at the repository that contains this `mkdocs.yml` and `.readthedocs.yaml`.
-3. Read the Docs will detect **MkDocs** from `.readthedocs.yaml` and run `pip install .[docs]` then `mkdocs build`.
-4. Under **Admin → Domains**, note the default subdomain (for example `lrdbench.readthedocs.io`). Set that URL in `mkdocs.yml` (`site_url`) and in `pyproject.toml` under `[project.urls]` → `Documentation` if you rename the project slug.
+The public documentation is hosted at [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/).
+
+Read the Docs builds the MkDocs site from `.readthedocs.yaml`, installs the package with the
+`docs` extra, and uses `mkdocs.yml` as the site configuration.
+
+If the project slug changes, update:
+
+- `site_url` in `mkdocs.yml`;
+- `Documentation` under `[project.urls]` in `pyproject.toml`;
+- README and docs links that point to `lrdbench.readthedocs.io`.
 
 Local check before pushing:
 

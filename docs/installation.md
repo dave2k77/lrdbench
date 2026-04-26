@@ -2,7 +2,7 @@
 
 ## Library and CLI
 
-From the repository root (or after publishing to PyPI):
+From the repository root or PyPI:
 
 ```bash
 pip install -e .
@@ -23,7 +23,7 @@ pip install -e ".[docs]"
 mkdocs serve
 ```
 
-The site configuration is `mkdocs.yml` at the repository root. **Read the Docs** builds the same site using `.readthedocs.yaml` (see the [Read the Docs project](https://readthedocs.org/) once you import this repository).
+The site configuration is `mkdocs.yml` at the repository root. **Read the Docs** builds the same site using `.readthedocs.yaml`; the hosted site is [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/).
 
 ## Optional extras
 

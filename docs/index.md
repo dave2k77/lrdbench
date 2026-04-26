@@ -4,7 +4,7 @@ Welcome to the **lrdbench** documentation: a reproducible benchmark framework fo
 
 ## Hosted site
 
-This book is built with [MkDocs](https://www.mkdocs.org/) and the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. The canonical hosted copy is intended to live on **[Read the Docs](https://readthedocs.org/)** (see [Read the Docs setup](readthedocs.md)).
+This book is built with [MkDocs](https://www.mkdocs.org/) and the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. The canonical hosted copy is **[lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/)**.
 
 ## Design authority
 
