@@ -1,12 +1,27 @@
 name: release
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
 
 jobs:
-  placeholder:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Note
-        run: echo "Wire PyPI trusted publishing or twine upload when ready for releases."
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build twine
+      - name: Build distributions
+        run: python -m build
+      - name: Check distributions
+        run: python -m twine check dist/*
+      - name: Upload release artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lrdbench-dist
+          path: dist/*

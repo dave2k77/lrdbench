@@ -62,13 +62,14 @@ For public comparisons, report at least:
 - generated `manifest/environment.json`;
 - generated `artefacts/artefact_index.csv`.
 
-The project is still pre-1.0, so output columns and schema details may change between alpha/beta
-releases. Changes that affect public outputs should be reflected in the changelog and output
-contract.
+The project is in release-candidate review. No known output-column or schema churn is planned
+before `v1.0.0`; any change that affects public outputs must be reflected in the changelog,
+migration notes, and output contract.
 
 ## Packaging Check
 
-Before tagging a public beta, build and install the package from local artefacts:
+Before tagging a release candidate or stable public release, build and install the package from
+local artefacts:
 
 ```bash
 python -m build

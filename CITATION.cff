@@ -10,7 +10,7 @@ authors:
 repository-code: "https://github.com/dave2k77/lrdbench"
 url: "https://github.com/dave2k77/lrdbench"
 license: "MIT"
-version: "0.1.0"
+version: "0.9.0rc1"
 abstract: >-
   lrdbench is a reproducible benchmark framework for evaluating long-range
   dependence estimators on canonical synthetic, contaminated synthetic, and
@@ -31,5 +31,5 @@ preferred-citation:
     - family-names: "Chin"
       given-names: "Davian"
   title: "lrdbench"
-  version: "0.1.0"
+  version: "0.9.0rc1"
   url: "https://github.com/dave2k77/lrdbench"

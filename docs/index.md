@@ -23,7 +23,10 @@ in [Design specification](design_specification.md). A short root-level traceabil
 - [Installation](installation.md) — editable install, extras, local `mkdocs serve`.
 - [Benchmark protocol](benchmark_protocol.md) — manifest modes, execution block, outputs.
 - [Interpretation semantics](interpretation_semantics.md) — uncertainty, leaderboard, and failure rules.
+- [Release candidate freeze](release_candidate_freeze.md) — reviewed public APIs, schemas, columns, and metric names.
 - [Public small outputs](public_small_outputs.md) — expected artefacts for public-small suites.
+- [Migration notes](migration.md) — public-surface changes across pre-1.0 releases.
+- [Citation guidance](citation.md) — software citation and benchmark metadata expectations.
 - [Estimator contract](estimator_contract.md) — `BaseEstimator` and `EstimateResult`.
 - [Estimator status](estimator_status.md) — public interpretation status for bundled estimators.
 - [Architecture](architecture.md) — how the orchestration pieces fit together.

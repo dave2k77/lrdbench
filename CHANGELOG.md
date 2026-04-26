@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Release candidate: advanced package metadata to `0.9.0rc1` and public output contract to
+  `0.9.0-rc1` for schema-freeze review.
+- Docs: added release-candidate freeze notes, migration notes, and citation guidance for
+  independent public use.
+- Release: replaced placeholder release workflow with a build/check/upload-artifact workflow for
+  tagged release-candidate artefacts.
 - Docs: started external contributor beta with estimator onboarding guide, expanded estimator
   contract, contributor checklist, and issue templates.
 - Docs: added third-party estimator workflow and leaderboard submission policy.

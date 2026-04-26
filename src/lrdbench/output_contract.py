@@ -4,7 +4,7 @@ import csv
 from pathlib import Path
 from typing import Any
 
-PUBLIC_OUTPUT_CONTRACT_VERSION = "0.3.0-beta"
+PUBLIC_OUTPUT_CONTRACT_VERSION = "0.9.0-rc1"
 
 PUBLIC_OUTPUT_CONTRACT: dict[str, Any] = {
     "contract_version": PUBLIC_OUTPUT_CONTRACT_VERSION,

@@ -59,6 +59,9 @@ nav:
       - Interpretation semantics: interpretation_semantics.md
       - Output contract: output_contract.md
       - Reproducibility: reproducibility.md
+      - Release candidate freeze: release_candidate_freeze.md
+      - Migration notes: migration.md
+      - Citation guidance: citation.md
       - Public small outputs: public_small_outputs.md
       - Public medium outputs: public_medium_outputs.md
       - Failure mode taxonomy: failure_mode_taxonomy.md

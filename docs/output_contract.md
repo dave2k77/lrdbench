@@ -4,7 +4,7 @@ The public benchmark output contract is tracked in
 `configs/contracts/public_output_contract.json`. The same contract is exposed from
 `lrdbench.output_contract.PUBLIC_OUTPUT_CONTRACT` for tests and downstream tooling.
 
-The current contract version is `0.3.0-beta`.
+The current contract version is `0.9.0-rc1`.
 
 ## Run Root
 

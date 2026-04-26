@@ -148,7 +148,7 @@ Progress:
 - Done: all tracked public-medium manifests validate cleanly.
 - Done: all tracked public-medium suites were run locally and passed `validate-output`; reference
   row counts are documented.
-- Ready: tag `v0.3.0-beta` after committing and pushing the Beta 0.3 changes.
+- Done: Beta 0.3 changes were committed and pushed.
 
 Exit criteria:
 
@@ -184,7 +184,7 @@ Progress:
 - Done: added a programmatic third-party estimator workflow example with report and leaderboard
   output validation.
 - Done: added leaderboard submission policy.
-- Ready: tag `v0.4.0-beta` after committing and pushing the Beta 0.4 changes.
+- Done: Beta 0.4 changes were committed and pushed.
 
 Exit criteria:
 
@@ -209,6 +209,13 @@ Scope:
 - Publish docs.
 - Build source and wheel locally.
 - Test install in a clean environment.
+
+Progress:
+
+- In progress: package and output-contract versions advanced for release-candidate checks.
+- In progress: API/schema/metric freeze review, migration notes, and citation guidance added to
+  the public docs.
+- In progress: stale alpha/beta roadmap status is being folded into phase progress notes.
 
 Exit criteria:
 
@@ -241,19 +248,3 @@ Exit criteria:
 - Known limitations are explicit.
 - Release artefacts are built and tested.
 - Tag `v1.0.0`.
-
-## Immediate Next Sprint
-
-Alpha 0.1 progress:
-
-- Done: create tracked `docs/design_specification.md` from the design/spec concepts already in the
-  repo.
-- Done: add `configs/suites/public_small_*.yaml`.
-- Done: add `configs/suites/public_medium_*.yaml` skeleton or first pass.
-- Done: add estimator status table to docs.
-- Done: add uncertainty, leaderboard, and failure semantics pages or sections.
-- Done: add `lrdbench validate <manifest>`.
-- Done: run clean public small suites and record expected outputs in docs.
-
-This moves the project from a strong internal research framework to a public alpha with a
-defensible research contract.
