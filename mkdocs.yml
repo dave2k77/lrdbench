@@ -58,6 +58,8 @@ nav:
       - Benchmark protocol: benchmark_protocol.md
       - Interpretation semantics: interpretation_semantics.md
       - Public small outputs: public_small_outputs.md
+      - Failure mode taxonomy: failure_mode_taxonomy.md
+      - Known limitations: known_limitations.md
       - Paper workflow: paper_workflow.md
       - Estimator contract: estimator_contract.md
       - Estimator status: estimator_status.md

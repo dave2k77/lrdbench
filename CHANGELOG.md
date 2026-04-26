@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Validation: added statistical generator checks for fGn/fBm scaling, ARFIMA memory behavior,
+  MRW intermittency, and fOU mean reversion.
+- Validation: added statistical estimator checks for baseline Hurst-proxy and spectral
+  long-memory estimators on known fGn/ARFIMA regimes.
+- Test coverage: added behavior checks for contamination operators and broader wavelet estimator
+  validity/failure paths.
+- Test coverage: added observational-source loader checks for inline and CSV-backed series.
+- Docs: added public failure-mode taxonomy and known-limitations pages, and expanded estimator
+  status metadata with assumptions, expected regimes, and failure risks.
 - CLI: added `lrdbench validate <manifest>` for manifest-only checks without running benchmarks.
 - Public suites: added tracked `public_small_*` benchmark manifests for canonical ground-truth,
   stress contamination, null false-positive, and sensitivity/disagreement public-alpha checks.

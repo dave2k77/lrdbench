@@ -108,3 +108,55 @@ def test_arfima_d_estimators_finite() -> None:
         assert out.valid, (est_name, out.failure_reason)
         assert out.point is not None
         assert -0.49 < float(out.point) < 0.49
+
+
+def test_wavelet_estimators_return_bounded_points_on_fgn() -> None:
+    rng = np.random.default_rng(17)
+    x = simulate_fgn(2048, 0.7, rng, sigma=1.0)
+    rec = _record(x)
+    reg = build_default_estimator_registry()
+    params_by_name = {
+        "WaveletAbryVeitch": {"n_bootstrap": 0, "wavelet": "db2", "j_drop_low": 1, "j_drop_high": 1},
+        "WaveletBardet": {"n_bootstrap": 0, "wavelet": "db2", "j_drop_low": 1, "j_drop_high": 1},
+        "WaveletOLS": {"n_bootstrap": 0, "wavelet": "db2", "j_drop_low": 1, "j_drop_high": 1},
+        "WaveletJensen": {
+            "n_bootstrap": 0,
+            "wavelet": "db2",
+            "fine_band": (2, 4),
+            "coarse_band": (4, 6),
+        },
+        "WaveletWhittle": {"n_bootstrap": 0, "wavelet": "db2", "j_drop_low": 1, "j_drop_high": 1},
+    }
+    for est_name, params in params_by_name.items():
+        spec = EstimatorSpec(
+            name=est_name,
+            family="wavelet",
+            target_estimand="hurst_scaling_proxy",
+            assumptions=(),
+            supports_ci=False,
+            supports_diagnostics=True,
+            parameter_schema=params,
+        )
+        out = reg.get(est_name)(spec).fit(rec)
+        assert out.valid, (est_name, out.failure_reason)
+        assert out.point is not None
+        assert 0.0 < float(out.point) < 1.0
+
+
+def test_wavelet_estimators_report_invalid_for_short_signal() -> None:
+    rec = _record(np.arange(32, dtype=float))
+    reg = build_default_estimator_registry()
+    for est_name in ("WaveletAbryVeitch", "WaveletBardet", "WaveletOLS", "WaveletWhittle"):
+        spec = EstimatorSpec(
+            name=est_name,
+            family="wavelet",
+            target_estimand="hurst_scaling_proxy",
+            assumptions=(),
+            supports_ci=False,
+            supports_diagnostics=True,
+            parameter_schema={"n_bootstrap": 0, "wavelet": "db2"},
+        )
+        out = reg.get(est_name)(spec).fit(rec)
+        assert not out.valid
+        assert out.point is None
+        assert out.failure_reason is not None

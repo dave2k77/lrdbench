@@ -84,6 +84,18 @@ Scope:
 - Add failure-mode taxonomy docs and tests.
 - Add a public "known limitations" page.
 
+Progress:
+
+- Done: statistical generator validation tests cover fGn/fBm scaling ordering, ARFIMA memory
+  behavior, MRW intermittency, and fOU mean reversion.
+- Done: statistical estimator validation tests cover baseline Hurst-proxy estimators on fGn and
+  baseline spectral long-memory estimators on ARFIMA.
+- Done: focused unit coverage now covers contamination operators, wavelet valid/invalid paths, and
+  observational source loading.
+- Done: estimator status docs list each estimator target, assumptions, expected regime, and known
+  failure risks.
+- Done: public failure-mode taxonomy and known-limitations pages are included in the user guide.
+
 Exit criteria:
 
 - Coverage is meaningfully improved in weak modules.

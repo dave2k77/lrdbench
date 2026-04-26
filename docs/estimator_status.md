@@ -13,22 +13,22 @@ Status meanings:
 - **reference-grade**: validated enough to serve as an implementation reference. No estimator has
   this status yet.
 
-| Estimator | Family | Target estimand | Status | Notes |
-| --- | --- | --- | --- | --- |
-| `RS` | temporal | `hurst_scaling_proxy` | baseline | Rescaled-range Hurst proxy with optional block-bootstrap intervals. Useful as a simple classical baseline. |
-| `DFA` | temporal | `hurst_scaling_proxy` | baseline | Detrended fluctuation analysis scaling exponent. Sensitive to scale range and detrending order. |
-| `DMA` | temporal | `hurst_scaling_proxy` | baseline | Detrended moving-average fluctuation scaling. Sensitive to window range. |
-| `GPH` | spectral | `long_memory_parameter` | baseline | Geweke-Porter-Hudak-style low-frequency regression for ARFIMA-style memory parameter `d`. |
-| `Periodogram` | spectral | `long_memory_parameter` | approximate | Log-periodogram regression variant. Bandwidth choices materially affect results. |
-| `WhittleMLE` | spectral | `long_memory_parameter` | approximate | Gaussian Whittle fit to ARFIMA(0,d,0) spectral shape. Use within its model assumptions. |
-| `ModifiedLocalWhittle` | spectral | `long_memory_parameter` | approximate | Local Whittle-style low-frequency estimator. Needs more validation across finite samples and regimes. |
-| `Higuchi` | geometric | `hurst_scaling_proxy` | approximate | Graph-dimension-derived Hurst proxy. Useful as a geometry-based comparator, not direct LRD evidence. |
-| `GHE` | geometric | `hurst_scaling_proxy` | approximate | Multiscale increment-variance Hurst proxy. Sensitive to lag grid and short-sample behavior. |
-| `WaveletOLS` | wavelet | `hurst_scaling_proxy` | approximate | OLS log-scale regression on wavelet detail variances. Scale-band selection is important. |
-| `WaveletAbryVeitch` | wavelet | `hurst_scaling_proxy` | experimental | Abry-Veitch-style log-scale regression approximation. Needs stronger validation before public claims. |
-| `WaveletBardet` | wavelet | `hurst_scaling_proxy` | experimental | Weighted log-scale regression approximation. Current implementation is exploratory. |
-| `WaveletJensen` | wavelet | `hurst_scaling_proxy` | experimental | Two-band wavelet slope extrapolation. Current implementation is exploratory. |
-| `WaveletWhittle` | wavelet | `hurst_scaling_proxy` | experimental | Wavelet-domain Whittle-type fit to detail variances. Current implementation is exploratory. |
+| Estimator | Family | Target estimand | Status | Assumptions | Expected regime | Known failure risks |
+| --- | --- | --- | --- | --- | --- | --- |
+| `RS` | temporal | `hurst_scaling_proxy` | baseline | Self-similar scaling over selected block sizes. | Clean fGn/fBm-style synthetic checks and simple public smoke suites. | Short signals, nonstationary trends, and contamination can bias the slope; bootstrap intervals are approximate. |
+| `DFA` | temporal | `hurst_scaling_proxy` | baseline | Power-law fluctuation scaling after polynomial detrending. | fGn/fBm-style signals with a defensible scale window. | Scale-window and detrending-order choices can dominate finite-sample results. |
+| `DMA` | temporal | `hurst_scaling_proxy` | baseline | Moving-average fluctuation scaling over selected windows. | fGn/fBm-style signals where window range avoids edge effects. | Window choices, short records, and deterministic trends can distort estimates. |
+| `GPH` | spectral | `long_memory_parameter` | baseline | Low-frequency log-periodogram regression for ARFIMA-style memory. | ARFIMA(0,d,0)-like synthetic regimes with moderate sample sizes. | Bandwidth sensitivity, short-memory leakage, and low-frequency contamination. |
+| `Periodogram` | spectral | `long_memory_parameter` | approximate | Log-periodogram slope approximates long-memory parameter. | ARFIMA-style long-memory comparisons. | Bandwidth choices materially affect results; periodogram noise is high. |
+| `WhittleMLE` | spectral | `long_memory_parameter` | approximate | Gaussian ARFIMA(0,d,0) spectral likelihood approximation. | Clean ARFIMA-style records near the fitted model family. | Model misspecification, numerical bounds, and short samples. |
+| `ModifiedLocalWhittle` | spectral | `long_memory_parameter` | approximate | Local low-frequency Whittle objective captures fractional memory. | ARFIMA-style long-memory regimes with adequate low-frequency support. | Bandwidth sensitivity and finite-sample instability. |
+| `Higuchi` | geometric | `hurst_scaling_proxy` | approximate | Graph dimension maps to a Hurst-style proxy. | Geometry-based comparator on sufficiently long records. | It is indirect LRD evidence and can fail under short or highly noisy signals. |
+| `GHE` | geometric | `hurst_scaling_proxy` | approximate | Increment moments scale across selected lags. | Multiscale increment-variance comparisons. | Lag-grid sensitivity and short-sample instability. |
+| `WaveletOLS` | wavelet | `hurst_scaling_proxy` | approximate | Wavelet detail variances scale linearly across selected levels. | fGn/fBm-style records with adequate wavelet levels. | Scale-band selection, boundary effects, and short signals. |
+| `WaveletAbryVeitch` | wavelet | `hurst_scaling_proxy` | experimental | Abry-Veitch-style wavelet log-scale regression approximation. | Exploratory wavelet comparison on long enough records. | Needs stronger validation; sensitive to wavelet family and usable levels. |
+| `WaveletBardet` | wavelet | `hurst_scaling_proxy` | experimental | Weighted wavelet log-scale regression approximation. | Exploratory wavelet comparison on long enough records. | Weighting and level selection can drive results; short signals are invalid. |
+| `WaveletJensen` | wavelet | `hurst_scaling_proxy` | experimental | Two-band wavelet slope extrapolation. | Exploratory comparison where fine and coarse bands are both populated. | Band definitions can be fragile; short or narrow-band records fail. |
+| `WaveletWhittle` | wavelet | `hurst_scaling_proxy` | experimental | Wavelet-domain Whittle-type fit to detail variances. | Exploratory wavelet comparison on long enough records. | Numerical fit and level support remain experimental. |
 
 ## Interpretation Rules
 
