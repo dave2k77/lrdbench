@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- CI: updated GitHub-hosted workflow actions to Node 24-compatible major versions.
 - Release: configured the tag release workflow to publish built distributions to PyPI through
   Trusted Publishing using the `pypi` GitHub environment.
 - Docs: updated Read the Docs references now that the hosted documentation project exists.
