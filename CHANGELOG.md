@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Docs: started external contributor beta with estimator onboarding guide, expanded estimator
+  contract, contributor checklist, and issue templates.
+- Docs: added third-party estimator workflow and leaderboard submission policy.
+- Examples: added a minimal custom estimator, a programmatic custom-estimator benchmark, and test
+  utilities for estimator-author smoke tests.
 - CLI: added `lrdbench list-metrics` and `lrdbench list-estimators` discovery commands.
 - CLI: added `lrdbench list-suites` and public suite-name resolution for `run` and `validate`.
 - CLI: added `lrdbench validate-output <run_root>` to check generated reports against the public

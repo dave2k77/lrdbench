@@ -174,6 +174,18 @@ Scope:
 - Add issue templates for estimator validation and benchmark submissions.
 - Add leaderboard submission policy: what counts and what does not.
 
+Progress:
+
+- Done: expanded estimator contract docs and added an "Adding estimators" guide.
+- Done: added importable test helpers in `lrdbench.testing` for estimator-author smoke tests.
+- Done: added packaged `lrdbench.examples.custom_estimator` with valid and invalid path tests.
+- Done: added contributor checklist and issue templates for estimator validation and benchmark
+  submissions.
+- Done: added a programmatic third-party estimator workflow example with report and leaderboard
+  output validation.
+- Done: added leaderboard submission policy.
+- Ready: tag `v0.4.0-beta` after committing and pushing the Beta 0.4 changes.
+
 Exit criteria:
 
 - A researcher can add an estimator without reading internals.

@@ -41,3 +41,4 @@ jobs:
           lrdbench run smoke_ground_truth | tee run.out
           run_dir=$(grep '^result_store=' run.out | cut -d= -f2-)
           lrdbench validate-output "$run_dir"
+          python -c "from lrdbench.testing import estimator_spec; from lrdbench.examples.custom_estimator import build_variance_ratio_estimator; build_variance_ratio_estimator(estimator_spec(name='VarianceRatio'))"

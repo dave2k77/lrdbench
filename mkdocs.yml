@@ -64,6 +64,8 @@ nav:
       - Failure mode taxonomy: failure_mode_taxonomy.md
       - Known limitations: known_limitations.md
       - Paper workflow: paper_workflow.md
+      - Adding estimators: adding_estimators.md
+      - Third-party estimator workflow: third_party_estimators.md
       - Estimator contract: estimator_contract.md
       - Estimator status: estimator_status.md
   - Architecture: architecture.md
@@ -73,5 +75,7 @@ nav:
   - Meta:
       - Public release roadmap: public_release_roadmap.md
       - Development handoff: development_handoff.md
+      - Contributor checklist: contributor_checklist.md
+      - Leaderboard submission policy: leaderboard_submission_policy.md
       - Contributing: contributing.md
       - Changelog: changelog.md
