@@ -4,14 +4,12 @@
 
 ## 1.0.2
 
-- Packaging: republished as `1.0.2` after PyPI also rejected reuse of previously attempted
-  `1.0.1` distribution filenames.
+- Packaging: first PyPI-published stable package release.
 - Public contract: unchanged at `1.0.0`; no schema, metric, manifest, or output-column changes.
 
 ## 1.0.1
 
-- Packaging: republished the stable research release as `1.0.1` because PyPI does not allow
-  previously uploaded `1.0.0` distribution filenames to be reused, even after deletion.
+- Packaging: internal packaging-only release candidate for PyPI publication.
 - Public contract: unchanged at `1.0.0`; no schema, metric, manifest, or output-column changes.
 
 - CI: updated GitHub-hosted workflow actions to Node 24-compatible major versions.
