@@ -67,6 +67,7 @@ nav:
       - Interpretation semantics: interpretation_semantics.md
       - Output contract: output_contract.md
       - Reproducibility: reproducibility.md
+      - Research notebooks: research_notebooks.md
       - Release candidate freeze: release_candidate_freeze.md
       - Migration notes: migration.md
       - Citation guidance: citation.md

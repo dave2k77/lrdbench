@@ -69,6 +69,11 @@ docs = [
   "mkdocstrings[python]>=0.24"
 ]
 
+notebooks = [
+  "jupyterlab>=4.0",
+  "ipykernel>=6.0"
+]
+
 test = [
   "pytest>=8.0",
   "pytest-cov>=4.1",
@@ -84,7 +89,7 @@ dev = [
 ]
 
 all = [
-  "lrdbench[reports,parquet,docs,test,dev]"
+  "lrdbench[reports,parquet,docs,notebooks,test,dev]"
 ]
 
 [project.scripts]
@@ -114,6 +119,7 @@ include = [
   "/src",
   "/tests",
   "/docs",
+  "/notebooks",
   "/configs",
   "/examples",
   "/.github",
