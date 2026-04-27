@@ -139,3 +139,23 @@ See [`RESEARCH_USAGE.md`](RESEARCH_USAGE.md) for the full policy.
 
 ```bash
 pip install lrdbench
+```
+
+### First run
+
+After installing with reporting support, run the smallest packaged benchmark:
+
+```bash
+pip install "lrdbench[reports]"
+lrdbench run smoke_ground_truth
+```
+
+From a repository checkout, the same quickstart is available as:
+
+```bash
+pip install -e ".[reports]"
+python examples/quickstart_pure.py
+```
+
+The command prints the run identifier, result store, HTML report path, and output validation
+command. See the [quickstart tutorial](docs/tutorials/quickstart.md) for the full walkthrough.

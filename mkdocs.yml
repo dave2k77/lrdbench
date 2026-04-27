@@ -51,6 +51,14 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Tutorials:
+      - Quickstart: tutorials/quickstart.md
+      - Ground-truth benchmark: tutorials/ground_truth_benchmark.md
+      - Stress testing: tutorials/stress_testing.md
+      - Observational data: tutorials/observational_data.md
+      - Custom estimator: tutorials/custom_estimator.md
+      - Reading outputs: tutorials/reading_outputs.md
+      - Reproducibility checklist: tutorials/reproducibility_checklist.md
   - User guide:
       - Installation: installation.md
       - Research usage: research_usage.md

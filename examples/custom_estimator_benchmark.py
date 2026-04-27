@@ -66,7 +66,15 @@ def run_custom_estimator_example(export_root: str = "reports/custom_estimator") 
     )
 
 
-if __name__ == "__main__":
+def main() -> None:
     output = run_custom_estimator_example()
     print(f"run_id={output.run_id}")
     print(f"result_store={output.result_store_path}")
+    if output.report_bundle and output.report_bundle.html_report_path:
+        print(f"html_report={output.report_bundle.html_report_path}")
+    if output.result_store_path:
+        print(f"validate_output=lrdbench validate-output {output.result_store_path}")
+
+
+if __name__ == "__main__":
+    main()
