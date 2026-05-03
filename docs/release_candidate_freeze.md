@@ -7,7 +7,7 @@ additive extensions that do not break existing manifests or result consumers.
 ## Package and Contract Versions
 
 - Python package version: `0.9.0rc1`.
-- Planned Git tag: `v0.9.0-rc1`.
+- Git tag: `v0.9.0-rc1`.
 - Public output contract version: `0.9.0-rc1`.
 
 ## Stable Public Entry Points

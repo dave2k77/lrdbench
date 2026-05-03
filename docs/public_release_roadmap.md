@@ -26,7 +26,7 @@ Approximate status:
 
 - Core research framework: complete for the first stable public research release.
 - Open research usefulness: complete for independent public benchmark use.
-- Polished public v1.0 library: released pending final tag/publish checks.
+- Polished public v1.0 library: released; `1.0.2` is the first PyPI-published stable package.
 - Local manuscript workflow: separate from public release readiness.
 
 ## Alpha 0.1: Public Research Alpha
@@ -249,6 +249,8 @@ Progress:
 - Done: governance and maintenance statement added.
 - Done: citation guidance records that no DOI is attached to `v1.0.0`.
 - Done: release artefacts are built and tested locally before tagging.
+- Done: package `1.0.2` was published as the first stable PyPI release with the unchanged
+  `1.0.0` public output contract.
 
 Exit criteria:
 
@@ -256,4 +258,4 @@ Exit criteria:
 - Public docs are coherent.
 - Known limitations are explicit.
 - Release artefacts are built and tested.
-- Tag `v1.0.0`.
+- Tag `v1.0.0`; publish stable package artefacts without changing the `1.0.0` public contract.

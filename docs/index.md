@@ -25,7 +25,7 @@ in [Design specification](design_specification.md). A short root-level traceabil
 - [Installation](installation.md) — editable install, extras, local `mkdocs serve`.
 - [Benchmark protocol](benchmark_protocol.md) — manifest modes, execution block, outputs.
 - [Interpretation semantics](interpretation_semantics.md) — uncertainty, leaderboard, and failure rules.
-- [Release candidate freeze](release_candidate_freeze.md) — reviewed public APIs, schemas, columns, and metric names.
+- [Release candidate freeze](release_candidate_freeze.md) — historical pre-1.0 review of public APIs, schemas, columns, and metric names.
 - [Public small outputs](public_small_outputs.md) — expected artefacts for public-small suites.
 - [Migration notes](migration.md) — public-surface changes across releases.
 - [Citation guidance](citation.md) — software citation and benchmark metadata expectations.

@@ -1,7 +1,7 @@
 # Interpretation Semantics
 
 This page defines how to read uncertainty, leaderboard, and failure outputs. It is part of the
-public-alpha research contract.
+stable public research contract.
 
 ## Metric Scopes
 

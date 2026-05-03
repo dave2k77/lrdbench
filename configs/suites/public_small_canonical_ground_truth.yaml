@@ -1,6 +1,6 @@
 manifest_id: public_small_canonical_ground_truth_v1
 name: public_small_canonical_ground_truth
-description: Tutorial-scale canonical ground-truth suite for clean-clone public alpha checks.
+description: Tutorial-scale canonical ground-truth suite for clean-clone public checks.
 mode: ground_truth
 source:
   type: generator_grid

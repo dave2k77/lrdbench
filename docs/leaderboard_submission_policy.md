@@ -21,7 +21,7 @@ A leaderboard submission must include:
 Use tracked public suites for comparable public submissions:
 
 - `public_small_*` for quick checks;
-- `public_medium_*` for public beta comparisons.
+- `public_medium_*` for comparable public benchmark submissions.
 
 Custom manifests are welcome for discussion, but they should be labelled as custom and should not be
 mixed with canonical public-suite leaderboards.

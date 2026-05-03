@@ -13,8 +13,8 @@ For interpretation rules covering aggregation, uncertainty, leaderboards, and fa
 
 ## Public small suites
 
-The tracked `public_small_*` manifests are the first public-alpha benchmark set. They are larger
-than CI smoke tests but intended to remain laptop-runnable from a clean clone:
+The tracked `public_small_*` manifests are the stable tutorial-scale public benchmark set. They are
+larger than CI smoke tests but intended to remain laptop-runnable from a clean clone:
 
 ```bash
 lrdbench validate configs/suites/public_small_canonical_ground_truth.yaml
@@ -49,7 +49,7 @@ The machine-readable report and result-store contract is recorded in
 
 ## Public medium suites
 
-The tracked `public_medium_*` manifests are first-pass public-alpha suites for more serious local
+The tracked `public_medium_*` manifests are stable public suites for more serious local
 benchmark campaigns. They use broader grids, more replicates, more estimators, or richer
 contamination designs than the public-small suites. They are intended for laptop or workstation
 runs, not CI smoke checks.

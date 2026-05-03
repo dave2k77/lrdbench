@@ -48,7 +48,7 @@ The central schema objects live in `lrdbench.schema`.
   artefact metadata.
 
 These objects are intentionally simple dataclasses. Their fields form the current public schema
-surface until a release-candidate schema freeze says otherwise.
+surface governed by the stable public output contract.
 
 ## Benchmark Loop
 
@@ -149,6 +149,9 @@ produced them.
 
 ## Release Stability
 
-The project is currently alpha-stage. Manifest fields, metric names, output columns, and report
-artefacts are documented public surfaces, but they are not frozen for v1.0 yet. Breaking changes
-must be reflected in the changelog and release notes.
+The project has a stable public research release. Package `1.0.2` is the first PyPI-published
+stable package release, and the public output contract remains `1.0.0`.
+
+Manifest fields, metric names, output columns, and report artefacts documented here and in the
+output contract are stable public surfaces. Breaking changes require an explicit compatibility
+plan, migration notes, changelog entries, and release notes.

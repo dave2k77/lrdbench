@@ -1,6 +1,6 @@
 manifest_id: public_medium_canonical_ground_truth_v1
 name: public_medium_canonical_ground_truth
-description: Medium canonical ground-truth suite for public-alpha estimator comparison.
+description: Medium canonical ground-truth suite for public estimator comparison.
 mode: ground_truth
 source:
   type: generator_grid

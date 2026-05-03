@@ -21,7 +21,7 @@ release.
 ### Versioning
 
 - Python package version: `1.0.0`.
-- Planned Git tag: `v1.0.0`.
+- Git tag: `v1.0.0`.
 - Public output contract version: `1.0.0`.
 
 ### Public Output Contract
@@ -42,7 +42,7 @@ Release candidate `0.9.0rc1` freezes the public result export contract for final
 ### Versioning
 
 - Python package version: `0.9.0rc1`.
-- Planned Git tag: `v0.9.0-rc1`.
+- Git tag: `v0.9.0-rc1`.
 - Public output contract version: `0.9.0-rc1`.
 
 ### Public Output Contract
