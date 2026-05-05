@@ -29,6 +29,10 @@ Status meanings:
 | `WaveletBardet` | wavelet | `hurst_scaling_proxy` | experimental | Weighted wavelet log-scale regression approximation. | Exploratory wavelet comparison on long enough records. | Weighting and level selection can drive results; short signals are invalid. |
 | `WaveletJensen` | wavelet | `hurst_scaling_proxy` | experimental | Two-band wavelet slope extrapolation. | Exploratory comparison where fine and coarse bands are both populated. | Band definitions can be fragile; short or narrow-band records fail. |
 | `WaveletWhittle` | wavelet | `hurst_scaling_proxy` | experimental | Wavelet-domain Whittle-type fit to detail variances. | Exploratory wavelet comparison on long enough records. | Numerical fit and level support remain experimental. |
+| `MLRandomForest` | data-driven | `hurst_scaling_proxy` | experimental | Supervised synthetic training distribution declared in `ml_training`. | Contaminated synthetic Hurst-proxy comparisons where train/eval provenance is explicit. | Distribution shift, training-grid leakage, and optional dependency availability. |
+| `MLSVR` | data-driven | `hurst_scaling_proxy` | experimental | Supervised synthetic training distribution declared in `ml_training`. | Feature-based nonlinear baseline against classical estimators. | Feature design and hyperparameters can dominate results; no estimator-level CI. |
+| `MLCNN` | data-driven | `hurst_scaling_proxy` | experimental | Supervised synthetic training distribution declared in `ml_training`; requires `lrdbench[nn]`. | Sequence baseline for exploratory neural comparisons. | Small training grids can overfit; distribution shift and stochastic training affect results. |
+| `MLLSTM` | data-driven | `hurst_scaling_proxy` | experimental | Supervised synthetic training distribution declared in `ml_training`; requires `lrdbench[nn]`. | Sequential neural baseline for exploratory comparisons. | Slow training, overfitting, and weak extrapolation outside the manifest training grid. |
 
 ## Interpretation Rules
 
@@ -40,3 +44,6 @@ rankings and should always be reported with the underlying metrics.
 
 For publication-facing analysis, prefer reporting estimator families, target estimands, parameter
 settings, and failure/missing-uncertainty rates alongside any accuracy or robustness summaries.
+
+Data-driven estimators are run-local supervised baselines. Interpret them relative to the
+manifest-declared `ml_training` distribution, not as distribution-free LRD estimators.

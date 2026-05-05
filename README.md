@@ -18,6 +18,7 @@ The framework is designed to support:
 - rigorous comparison of classical and new LRD estimators;
 - uncertainty-aware benchmarking, including empirical interval coverage where applicable;
 - robustness analysis under heavy tails, nonstationarity, artefacts, level shifts, outliers, polynomial trends, and low-frequency contamination;
+- experimental data-driven baselines, including Random Forest, SVR, CNN, and LSTM estimators;
 - transparent failure analysis and validity-rate reporting;
 - manifest-driven, provenance-complete, reproducible benchmark execution.
 
@@ -108,6 +109,7 @@ See [`RESEARCH_USAGE.md`](RESEARCH_USAGE.md) for the full policy.
 - pluggable estimator interface
 - manifest-driven benchmark runs
 - explicit estimator metadata and estimand declarations
+- run-local supervised training for built-in ML/NN baseline estimators
 - registry-based component enrolment
 
 ---
@@ -159,3 +161,24 @@ python examples/quickstart_pure.py
 
 The command prints the run identifier, result store, HTML report path, and output validation
 command. See the [quickstart tutorial](docs/tutorials/quickstart.md) for the full walkthrough.
+
+### Data-driven smoke benchmark
+
+The RF/SVR data-driven smoke suite uses optional scikit-learn dependencies:
+
+```bash
+pip install "lrdbench[ml,reports]"
+lrdbench run smoke_data_driven
+```
+
+From a repository checkout:
+
+```bash
+pip install -e ".[ml,reports]"
+lrdbench run configs/suites/smoke_data_driven.yaml
+python examples/data_driven_baseline_benchmark.py
+```
+
+Data-driven estimators are trained from the manifest-declared `ml_training` block and should be
+interpreted relative to that synthetic training distribution. See
+[`docs/data_driven_estimators.md`](docs/data_driven_estimators.md).

@@ -4,6 +4,7 @@ import numpy as np
 
 from lrdbench.defaults import build_default_estimator_registry
 from lrdbench.enums import SourceType
+from lrdbench.estimators.data_driven import feature_vector, fixed_length_sequence
 from lrdbench.generators._signal import simulate_arfima_zero_d_zero, simulate_fgn
 from lrdbench.schema import EstimatorSpec, SeriesRecord
 
@@ -36,8 +37,51 @@ def test_default_registry_lists_new_estimators() -> None:
         "WaveletOLS",
         "WaveletJensen",
         "WaveletWhittle",
+        "MLRandomForest",
+        "MLSVR",
+        "MLCNN",
+        "MLLSTM",
     ):
         assert name in names
+
+
+def test_data_driven_estimators_report_missing_optional_dependency() -> None:
+    reg = build_default_estimator_registry()
+    rec = _record(np.sin(np.linspace(0.0, 8.0, 128)))
+    for est_name, package in (
+        ("MLRandomForest", "scikit-learn"),
+        ("MLSVR", "scikit-learn"),
+        ("MLCNN", "torch"),
+        ("MLLSTM", "torch"),
+    ):
+        spec = EstimatorSpec(
+            name=est_name,
+            family="data_driven",
+            target_estimand="hurst_scaling_proxy",
+            assumptions=(),
+            supports_ci=False,
+            supports_diagnostics=True,
+            parameter_schema={"model_path": "/tmp/missing-model"},
+        )
+        out = reg.get(est_name)(spec).fit(rec)
+        if out.valid:
+            continue
+        assert out.point is None
+        assert out.failure_reason is not None
+        assert (
+            out.failure_reason.startswith(f"missing_optional_dependency:{package}")
+            or out.failure_reason.startswith("exception:")
+        )
+
+
+def test_data_driven_preprocessing_is_fixed_shape_and_finite() -> None:
+    x = np.sin(np.linspace(0.0, 12.0, 127))
+    feats = feature_vector(x, max_lag=8)
+    seq = fixed_length_sequence(x, length=64)
+    assert feats.shape == (37,)
+    assert seq.shape == (64,)
+    assert np.all(np.isfinite(feats))
+    assert np.all(np.isfinite(seq))
 
 
 def test_fgn_hurst_estimators_near_truth() -> None:

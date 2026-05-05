@@ -173,6 +173,7 @@ A benchmark result should be considered reproducible only if the following are a
 - software version or commit hash;
 - seed policy;
 - estimator configuration;
+- for data-driven estimators, the `ml_training` block and model artefact hashes;
 - metric and leaderboard configuration;
 - exported result store or equivalent machine-readable artefacts.
 

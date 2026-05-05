@@ -98,6 +98,7 @@ def manifest_from_mapping(data: Mapping[str, Any]) -> BenchmarkManifest:
         report_spec=report_spec,
         execution_spec=dict(data.get("execution") or {}),
         uncertainty_spec=dict(data.get("uncertainty") or {}),
+        ml_training_spec=dict(data.get("ml_training") or {}),
         seed_spec=dict(data.get("seeds") or {}),
         raw_yaml=dict(data),
     )

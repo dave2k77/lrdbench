@@ -5,6 +5,10 @@ through the programmatic runner by passing a custom `EstimatorRegistry`.
 
 The repository includes a complete example in `examples/custom_estimator_benchmark.py`.
 
+Built-in data-driven baselines are not third-party estimators. Use the packaged registry names
+`MLRandomForest`, `MLSVR`, `MLCNN`, and `MLLSTM` with a manifest `ml_training` block instead. See
+[Data-driven estimators](data_driven_estimators.md).
+
 ## Run The Example
 
 From a source checkout:

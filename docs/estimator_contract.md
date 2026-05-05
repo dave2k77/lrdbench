@@ -90,6 +90,16 @@ runner = BenchmarkRunner(estimators=registry)
 The public CLI currently exposes built-in estimators. Third-party CLI/plugin discovery is planned
 for the external contributor beta.
 
+## Data-Driven Built-ins
+
+`MLRandomForest`, `MLSVR`, `MLCNN`, and `MLLSTM` are built-in estimators and use the same
+`BaseEstimator.fit(record) -> EstimateResult` contract at evaluation time. When `ml_training` is
+enabled in a manifest, the runner trains the requested models before the normal fit loop and records
+the trained model paths in estimator metadata.
+
+Use `supports_ci: false` for these baselines in the current implementation. Their diagnostics
+include model path and training-summary metadata. See [Data-driven estimators](data_driven_estimators.md).
+
 ## Test Utilities
 
 `lrdbench.testing` provides small helpers for estimator authors:

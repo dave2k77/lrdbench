@@ -41,6 +41,75 @@ def test_ground_truth_manifest_loads() -> None:
     assert mf.mode is BenchmarkMode.GROUND_TRUTH
 
 
+def test_data_driven_manifest_requires_training_or_model_path() -> None:
+    data = {
+        "manifest_id": "ml1",
+        "name": "ml",
+        "mode": "ground_truth",
+        "source": {
+            "type": "generator_grid",
+            "generators": [
+                {"family": "fGn", "params": {"H": [0.5], "n": [64]}, "replicates": 1},
+            ],
+        },
+        "estimators": [
+            {
+                "name": "MLRandomForest",
+                "family": "data_driven",
+                "target_estimand": "hurst_scaling_proxy",
+                "params": {},
+            },
+        ],
+        "metrics": ["mae", "runtime"],
+    }
+    with pytest.raises(ManifestValidationError, match="ml_training"):
+        manifest_from_mapping(data)
+
+
+def test_data_driven_manifest_loads_with_training_block() -> None:
+    data = {
+        "manifest_id": "ml2",
+        "name": "ml",
+        "mode": "ground_truth",
+        "source": {
+            "type": "generator_grid",
+            "generators": [
+                {"family": "fGn", "params": {"H": [0.5], "n": [64]}, "replicates": 1},
+            ],
+        },
+        "ml_training": {
+            "enabled": True,
+            "target_estimand": "hurst_scaling_proxy",
+            "source": {
+                "type": "generator_grid",
+                "generators": [
+                    {
+                        "family": "fGn",
+                        "params": {"H": [0.4, 0.7], "n": [64]},
+                        "replicates": 1,
+                    },
+                ],
+            },
+        },
+        "estimators": [
+            {
+                "name": "MLRandomForest",
+                "family": "data_driven",
+                "target_estimand": "hurst_scaling_proxy",
+                "params": {"n_estimators": 10},
+            },
+        ],
+        "metrics": ["mae", "runtime"],
+    }
+    mf = manifest_from_mapping(data)
+    assert mf.ml_training_spec["enabled"] is True
+
+
+def test_smoke_data_driven_manifest_loads(repo_root: Path) -> None:
+    manifest = load_manifest(repo_root / "configs" / "suites" / "smoke_data_driven.yaml")
+    assert manifest.manifest_id == "smoke_data_driven_v1"
+
+
 def test_stress_requires_contamination() -> None:
     data = {
         "manifest_id": "t2",

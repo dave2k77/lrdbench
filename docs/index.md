@@ -24,6 +24,8 @@ in [Design specification](design_specification.md). A short root-level traceabil
 - [Tutorials](tutorials/ground_truth_benchmark.md) — ground-truth, stress-test, observational, and custom-estimator workflows.
 - [Installation](installation.md) — editable install, extras, local `mkdocs serve`.
 - [Benchmark protocol](benchmark_protocol.md) — manifest modes, execution block, outputs.
+- [Data-driven estimators](data_driven_estimators.md) — RF/SVR/CNN/LSTM baselines and
+  manifest-level training.
 - [Interpretation semantics](interpretation_semantics.md) — uncertainty, leaderboard, and failure rules.
 - [Release candidate freeze](release_candidate_freeze.md) — historical pre-1.0 review of public APIs, schemas, columns, and metric names.
 - [Public small outputs](public_small_outputs.md) — expected artefacts for public-small suites.

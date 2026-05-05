@@ -1,0 +1,90 @@
+manifest_id: smoke_data_driven_v1
+name: smoke_data_driven
+description: Tiny data-driven baseline smoke benchmark with run-local synthetic training.
+mode: stress_test
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.45, 0.75]
+        n: [128]
+        sigma: [1.0]
+      replicates: 1
+contamination:
+  operators:
+    - name: level_shift
+      params:
+        shift: [0.2]
+ml_training:
+  enabled: true
+  target_estimand: hurst_scaling_proxy
+  validation_fraction: 0.25
+  source:
+    type: generator_grid
+    generators:
+      - family: fGn
+        params:
+          H: [0.35, 0.5, 0.65, 0.8]
+          n: [128]
+          sigma: [1.0]
+        replicates: 2
+  contamination:
+    include_clean: true
+    operators:
+      - name: level_shift
+        params:
+          shift: [0.2]
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_bootstrap: 0
+  - name: MLRandomForest
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_estimators: 20
+      random_state: 7
+      max_lag: 8
+  - name: MLSVR
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      C: 5.0
+      epsilon: 0.05
+      max_lag: 8
+metrics:
+  - mae
+  - bias
+  - estimate_drift
+  - validity_rate
+  - runtime
+leaderboards:
+  - name: data_driven_smoke
+    mode: stress_test
+    component_metrics: [mae, estimate_drift, validity_rate, runtime]
+    weights:
+      mae: 0.4
+      estimate_drift: 0.3
+      validity_rate: 0.2
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports
+execution:
+  max_workers: 1
+seeds:
+  global_seed: 7

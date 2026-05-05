@@ -31,8 +31,21 @@ The site configuration is `mkdocs.yml` at the repository root. **Read the Docs**
 | ------------ | -------------------------------------------- |
 | `reports`    | Jinja2 / tabulate helpers for richer reporting |
 | `parquet`    | Parquet export via PyArrow                   |
+| `ml`         | scikit-learn baselines: `MLRandomForest`, `MLSVR` |
+| `nn`         | PyTorch baselines: `MLCNN`, `MLLSTM`         |
+| `data-driven` | All ML and NN baseline dependencies        |
 | `docs`       | MkDocs + Material + mkdocstrings             |
 | `test`       | pytest, coverage, Hypothesis                 |
 | `dev`        | Ruff, mypy, build, twine, pre-commit         |
 
 Example: `pip install -e ".[docs,test]"`.
+
+Data-driven smoke benchmarks need the feature-based ML extra and reporting support:
+
+```bash
+pip install -e ".[ml,reports]"
+lrdbench run configs/suites/smoke_data_driven.yaml
+```
+
+The neural-network extra may install a large PyTorch distribution depending on your platform. Use
+`ml` for the packaged RF/SVR smoke suite, and install `nn` only when running CNN/LSTM benchmarks.

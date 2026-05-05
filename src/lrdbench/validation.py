@@ -17,6 +17,9 @@ class ManifestValidationError(ValueError):
     pass
 
 
+_DATA_DRIVEN_ESTIMATOR_NAMES = frozenset({"MLRandomForest", "MLSVR", "MLCNN", "MLLSTM"})
+
+
 def _validate_execution_block(spec: Mapping[str, Any] | None) -> None:
     ex = dict(spec or {})
     allowed = frozenset({"max_workers", "estimate_cache_dir", "cache_read", "cache_write"})
@@ -105,6 +108,102 @@ def _validate_uncertainty_block(spec: Mapping[str, Any] | None) -> None:
         raise ManifestValidationError("uncertainty.paired must be a boolean")
 
 
+def _estimator_base_name(estimator: EstimatorSpec) -> str:
+    params = dict(estimator.parameter_schema)
+    return str(params.get("_base_estimator_name", estimator.name)).split("::", 1)[0]
+
+
+def _validate_ml_training_block(
+    spec: Mapping[str, Any] | None,
+    *,
+    estimators: tuple[EstimatorSpec, ...],
+) -> None:
+    ml_estimators = tuple(
+        e for e in estimators if _estimator_base_name(e) in _DATA_DRIVEN_ESTIMATOR_NAMES
+    )
+    ml = dict(spec or {})
+    if not ml_estimators:
+        if ml:
+            allowed = frozenset(
+                {
+                    "enabled",
+                    "target_estimand",
+                    "source",
+                    "contamination",
+                    "validation_fraction",
+                }
+            )
+            bad = set(ml) - allowed
+            if bad:
+                raise ManifestValidationError(f"unknown ml_training block keys: {sorted(bad)}")
+        return
+
+    model_paths_present = all(
+        bool(
+            dict(e.parameter_schema).get("_trained_model_path")
+            or dict(e.parameter_schema).get("model_path")
+        )
+        for e in ml_estimators
+    )
+    if model_paths_present and not ml:
+        return
+    if not ml:
+        raise ManifestValidationError(
+            "data-driven estimators require ml_training.enabled=true or explicit params.model_path"
+        )
+
+    allowed = frozenset(
+        {
+            "enabled",
+            "target_estimand",
+            "source",
+            "contamination",
+            "validation_fraction",
+        }
+    )
+    bad = set(ml) - allowed
+    if bad:
+        raise ManifestValidationError(f"unknown ml_training block keys: {sorted(bad)}")
+    if "enabled" in ml and not isinstance(ml["enabled"], bool):
+        raise ManifestValidationError("ml_training.enabled must be a boolean")
+    if not bool(ml.get("enabled", False)) and not model_paths_present:
+        raise ManifestValidationError(
+            "data-driven estimators require ml_training.enabled=true or explicit params.model_path"
+        )
+    target = str(ml.get("target_estimand", "hurst_scaling_proxy"))
+    if target != "hurst_scaling_proxy":
+        raise ManifestValidationError("ml_training.target_estimand must be hurst_scaling_proxy")
+    source = ml.get("source")
+    if not isinstance(source, Mapping):
+        raise ManifestValidationError("ml_training.source must be a mapping")
+    if source.get("type") != "generator_grid":
+        raise ManifestValidationError("ml_training.source.type must be generator_grid")
+    generators = source.get("generators")
+    if not isinstance(generators, list) or not generators:
+        raise ManifestValidationError("ml_training.source.generators must be a non-empty list")
+    contamination = ml.get("contamination")
+    if contamination is not None:
+        if not isinstance(contamination, Mapping):
+            raise ManifestValidationError("ml_training.contamination must be a mapping")
+        allowed_contam = frozenset({"include_clean", "operators"})
+        bad_contam = set(contamination) - allowed_contam
+        if bad_contam:
+            raise ManifestValidationError(
+                f"unknown ml_training.contamination keys: {sorted(bad_contam)}"
+            )
+        if "include_clean" in contamination and not isinstance(
+            contamination["include_clean"], bool
+        ):
+            raise ManifestValidationError("ml_training.contamination.include_clean must be boolean")
+        ops = contamination.get("operators", [])
+        if ops is not None and not isinstance(ops, list):
+            raise ManifestValidationError("ml_training.contamination.operators must be a list")
+    if "validation_fraction" in ml:
+        vf = float(ml["validation_fraction"])
+        if not (0.0 <= vf < 1.0):
+            raise ManifestValidationError("ml_training.validation_fraction must be in [0,1)")
+
+
 def validate_truth_compatibility(estimator_spec: EstimatorSpec, record: SeriesRecord) -> None:
     if record.truth is None:
         return
@@ -152,6 +251,7 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
             "report",
             "execution",
             "uncertainty",
+            "ml_training",
             "seeds",
             "validation",
         }
@@ -210,6 +310,10 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
     # MV5b (Phase 5 execution)
     _validate_execution_block(manifest.execution_spec)
     _validate_uncertainty_block(manifest.uncertainty_spec)
+    _validate_ml_training_block(
+        manifest.ml_training_spec,
+        estimators=manifest.estimator_specs,
+    )
 
     # MV6
     metric_names = {x.name for x in manifest.metric_specs}

@@ -1,0 +1,265 @@
+# Benchmark-experiment template: classical estimators plus data-driven ML/NN baselines.
+#
+# Dependency guidance:
+# - RF/SVR only: install lrdbench[ml,reports].
+# - CNN/LSTM: install lrdbench[nn,reports] or lrdbench[data-driven,reports].
+#   On some Linux platforms the default PyTorch wheel may pull CUDA packages; use a CPU-only
+#   PyTorch install if that is preferable for the experiment environment.
+#
+# To run RF/SVR only, remove or comment out the MLCNN and MLLSTM estimator entries.
+
+manifest_id: benchmark_experiment_data_driven_stress_v1
+name: benchmark_experiment_data_driven_stress
+description: Controlled contamination benchmark including classical and data-driven LRD baselines.
+mode: stress_test
+
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.5, 0.6, 0.7, 0.8]
+        n: [512, 1024, 2048]
+        sigma: [1.0]
+      replicates: 10
+
+contamination:
+  operators:
+    - name: level_shift
+      params:
+        shift: [0.25, 0.5, 0.75]
+    - name: outliers
+      params:
+        rate: [0.01, 0.05]
+        amplitude: [4.0, 8.0]
+    - name: polynomial_trend
+      params:
+        order: [1, 2]
+        strength: [0.25, 0.5, 1.0]
+    - name: heavy_tail_noise
+      params:
+        df: [3.0, 5.0]
+        scale: [0.5, 1.0]
+
+# Training data is generated independently from the benchmark evaluation records. Include
+# contaminations here only when the scientific question is whether supervised models learn
+# robustness to declared artefacts.
+ml_training:
+  enabled: true
+  target_estimand: hurst_scaling_proxy
+  validation_fraction: 0.2
+  source:
+    type: generator_grid
+    generators:
+      - family: fGn
+        params:
+          H: [0.35, 0.45, 0.55, 0.65, 0.75, 0.85]
+          n: [512, 1024, 2048]
+          sigma: [1.0]
+        replicates: 20
+  contamination:
+    include_clean: true
+    operators:
+      - name: level_shift
+        params:
+          shift: [0.25, 0.5, 0.75]
+      - name: outliers
+        params:
+          rate: [0.01, 0.05]
+          amplitude: [4.0, 8.0]
+      - name: polynomial_trend
+        params:
+          order: [1, 2]
+          strength: [0.25, 0.5, 1.0]
+      - name: heavy_tail_noise
+        params:
+          df: [3.0, 5.0]
+          scale: [0.5, 1.0]
+
+estimators:
+  - name: RS
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [self_similar_scaling, finite_variance]
+    supports_ci: true
+    supports_diagnostics: true
+    params:
+      n_bootstrap: 48
+      bootstrap_block_len: 64
+      ci_levels: [0.95]
+
+  - name: DFA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [power_law_fluctuation_scaling]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+      detrend_order: 1
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 64
+      - name: medium_scales
+        params:
+          min_scale: 16
+          max_scale: 256
+      - name: long_scales
+        params:
+          min_scale: 64
+          max_scale: 512
+
+  - name: DMA
+    family: time_domain
+    target_estimand: hurst_scaling_proxy
+    assumptions: [moving_average_fluctuation_scaling]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    assumptions: [increment_moment_scaling]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      max_lag: 64
+      q: 2.0
+
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    assumptions: [wavelet_detail_variance_scaling]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      wavelet: db2
+      j_drop_low: 1
+      j_drop_high: 1
+
+  - name: MLRandomForest
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_estimators: 300
+      min_samples_leaf: 2
+      random_state: 20260501
+      max_lag: 16
+
+  - name: MLSVR
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      C: 10.0
+      epsilon: 0.03
+      kernel: rbf
+      gamma: scale
+      max_lag: 16
+
+  - name: MLCNN
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      sequence_length: 512
+      epochs: 20
+      batch_size: 32
+      learning_rate: 0.001
+      random_state: 20260501
+
+  - name: MLLSTM
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      sequence_length: 512
+      epochs: 20
+      batch_size: 32
+      learning_rate: 0.001
+      random_state: 20260501
+
+metrics:
+  - bias
+  - mae
+  - rmse
+  - estimate_drift
+  - relative_degradation_ratio
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - family_level_disagreement
+  - parameter_variant_sensitivity
+  - max_variant_drift
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+  - name: coverage_collapse
+    levels: [0.95]
+
+leaderboards:
+  - name: stress_robustness_with_data_driven
+    mode: stress_test
+    component_metrics: [mae, estimate_drift, validity_rate, runtime]
+    weights:
+      mae: 0.35
+      estimate_drift: 0.35
+      validity_rate: 0.2
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+
+uncertainty:
+  enabled: true
+  n_bootstrap: 1000
+  ci_levels: [0.95]
+  seed: 20260501
+  metrics:
+    - mae
+    - estimate_drift
+    - relative_degradation_ratio
+    - validity_rate
+    - pairwise_estimator_disagreement
+    - max_variant_drift
+  paired: true
+  paired_metrics:
+    - mae
+    - estimate_drift
+    - relative_degradation_ratio
+
+report:
+  formats: [html, csv, latex]
+  export_root: reports/benchmark_experiment/data_driven_stress
+  figure_set:
+    - degradation_curve
+    - disagreement_heatmap
+    - sensitivity_heatmap
+    - benchmark_uncertainty_intervals
+
+seeds:
+  global_seed: 20260501
+
+execution:
+  max_workers: 8
+  estimate_cache_dir: reports/cache/benchmark_experiment_data_driven_stress
+  cache_read: true
+  cache_write: true

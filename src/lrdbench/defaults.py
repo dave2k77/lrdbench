@@ -6,6 +6,12 @@ from lrdbench.contaminations import (
     OutliersContamination,
     PolynomialTrendContamination,
 )
+from lrdbench.estimators.data_driven import (
+    MLCNNEstimator,
+    MLLSTMEstimator,
+    MLRandomForestEstimator,
+    MLSVREstimator,
+)
 from lrdbench.estimators.geometric import GHEEstimator, HiguchiEstimator
 from lrdbench.estimators.spectral import (
     GPHEstimator,
@@ -95,6 +101,18 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     def w_whittle_builder(spec: EstimatorSpec) -> BaseEstimator:
         return WaveletWhittleEstimator(spec)
 
+    def ml_rf_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return MLRandomForestEstimator(spec)
+
+    def ml_svr_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return MLSVREstimator(spec)
+
+    def ml_cnn_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return MLCNNEstimator(spec)
+
+    def ml_lstm_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return MLLSTMEstimator(spec)
+
     reg.register("RS", rs_builder)
     reg.register("GPH", gph_builder)
     reg.register("DFA", dfa_builder)
@@ -109,4 +127,8 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     reg.register("WaveletOLS", w_ols_builder)
     reg.register("WaveletJensen", w_jensen_builder)
     reg.register("WaveletWhittle", w_whittle_builder)
+    reg.register("MLRandomForest", ml_rf_builder)
+    reg.register("MLSVR", ml_svr_builder)
+    reg.register("MLCNN", ml_cnn_builder)
+    reg.register("MLLSTM", ml_lstm_builder)
     return reg

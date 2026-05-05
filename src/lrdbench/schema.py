@@ -203,6 +203,7 @@ class BenchmarkManifest:
     report_spec: ReportSpec | None = None
     execution_spec: Mapping[str, Any] = field(default_factory=dict)
     uncertainty_spec: Mapping[str, Any] = field(default_factory=dict)
+    ml_training_spec: Mapping[str, Any] = field(default_factory=dict)
     seed_spec: Mapping[str, Any] = field(default_factory=dict)
     raw_yaml: Mapping[str, Any] | None = None
 

@@ -19,11 +19,18 @@ from lrdbench.execution import collect_fit_jobs, run_fit_jobs
 from lrdbench.interfaces import BaseEvaluator
 from lrdbench.leaderboard import WeightedRankLeaderboardBuilder
 from lrdbench.manifest import load_manifest, manifest_from_mapping
+from lrdbench.ml_training import prepare_data_driven_estimators
 from lrdbench.observational_sources import load_observational_records
 from lrdbench.registries import ContaminationRegistry, EstimatorRegistry, GeneratorRegistry
 from lrdbench.reporter import SimpleHtmlCsvReporter
 from lrdbench.result_store import CsvResultStore
-from lrdbench.schema import BenchmarkManifest, BenchmarkRunOutput, ReportSpec, SeriesRecord
+from lrdbench.schema import (
+    ArtefactRecord,
+    BenchmarkManifest,
+    BenchmarkRunOutput,
+    ReportSpec,
+    SeriesRecord,
+)
 
 
 def _stable_seed(global_seed: int, *parts: object) -> int:
@@ -39,6 +46,35 @@ def _record_id(manifest_id: str, family: str, params: dict[str, Any], rep: int) 
 def _contam_record_id(manifest_id: str, clean_id: str, op_name: str, op_params: dict[str, Any]) -> str:
     key = f"{manifest_id}|{clean_id}|{op_name}|{sorted(op_params.items())}"
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
+
+
+def _file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _ml_model_artefacts(run_id: str, export_root: Path) -> tuple[ArtefactRecord, ...]:
+    model_dir = export_root / run_id / "ml_models"
+    if not model_dir.is_dir():
+        return ()
+    out: list[ArtefactRecord] = []
+    for path in sorted(model_dir.iterdir()):
+        if not path.is_file():
+            continue
+        out.append(
+            ArtefactRecord(
+                artefact_id=f"{run_id}_ml_model_{path.stem}",
+                run_id=run_id,
+                artefact_type="ml_model" if path.suffix != ".json" else "ml_training_summary",
+                format=path.suffix.lstrip(".") or "binary",
+                path=str(path.as_posix()),
+                hash=_file_sha256(path),
+            )
+        )
+    return tuple(out)
 
 
 def _expand_generator_grid(source: dict[str, Any]) -> list[tuple[str, dict[str, Any], int]]:
@@ -135,6 +171,23 @@ class BenchmarkRunner:
             )
             evaluator = ObservationalEvaluator(self.estimators)
 
+        report_spec = manifest.report_spec or ReportSpec(
+            formats=("html", "csv"),
+            leaderboards=tuple(manifest.leaderboard_specs),
+        )
+        if not report_spec.leaderboards and manifest.leaderboard_specs:
+            report_spec = replace(report_spec, leaderboards=tuple(manifest.leaderboard_specs))
+        export_root = Path(report_spec.export_root)
+
+        manifest = prepare_data_driven_estimators(
+            manifest,
+            generators=self.generators,
+            contaminations=self.contaminations,
+            run_id=run_id,
+            artefact_root=export_root,
+            global_seed=global_seed,
+        )
+
         estimates = run_fit_jobs(
             collect_fit_jobs(records, manifest.estimator_specs),
             estimators=self.estimators,
@@ -145,13 +198,6 @@ class BenchmarkRunner:
         metrics = evaluator.evaluate(manifest, records, estimates)
         boards = self._leaderboard.build(manifest, metrics)
 
-        report_spec = manifest.report_spec or ReportSpec(
-            formats=("html", "csv"),
-            leaderboards=tuple(manifest.leaderboard_specs),
-        )
-        if not report_spec.leaderboards and manifest.leaderboard_specs:
-            report_spec = replace(report_spec, leaderboards=tuple(manifest.leaderboard_specs))
-        export_root = Path(report_spec.export_root)
         store_root = export_root / run_id
         store = CsvResultStore(store_root)
         store.write_run_metadata(manifest, run_id)
@@ -167,6 +213,9 @@ class BenchmarkRunner:
             report_spec=report_spec,
             run_id=run_id,
         )
+        model_artefacts = _ml_model_artefacts(run_id, export_root)
+        if model_artefacts:
+            bundle = replace(bundle, artefacts=tuple(bundle.artefacts) + model_artefacts)
 
         store.write_artefacts(bundle.artefacts)
         store_path = store.finalise()

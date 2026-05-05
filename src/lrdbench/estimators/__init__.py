@@ -1,3 +1,9 @@
+from lrdbench.estimators.data_driven import (
+    MLCNNEstimator,
+    MLLSTMEstimator,
+    MLRandomForestEstimator,
+    MLSVREstimator,
+)
 from lrdbench.estimators.geometric import GHEEstimator, HiguchiEstimator
 from lrdbench.estimators.spectral import (
     GPHEstimator,
@@ -20,6 +26,10 @@ __all__ = [
     "GHEEstimator",
     "GPHEstimator",
     "HiguchiEstimator",
+    "MLCNNEstimator",
+    "MLLSTMEstimator",
+    "MLRandomForestEstimator",
+    "MLSVREstimator",
     "ModifiedLocalWhittleEstimator",
     "PeriodogramRegressionEstimator",
     "RSEstimator",

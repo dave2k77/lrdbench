@@ -76,6 +76,7 @@ nav:
       - Failure mode taxonomy: failure_mode_taxonomy.md
       - Known limitations: known_limitations.md
       - Paper workflow: paper_workflow.md
+      - Data-driven estimators: data_driven_estimators.md
       - Adding estimators: adding_estimators.md
       - Third-party estimator workflow: third_party_estimators.md
       - Estimator contract: estimator_contract.md

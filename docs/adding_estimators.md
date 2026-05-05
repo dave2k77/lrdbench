@@ -3,6 +3,10 @@
 This guide shows the shortest path for adding and testing an estimator outside the built-in
 registry.
 
+For built-in supervised baselines such as `MLRandomForest`, `MLSVR`, `MLCNN`, and `MLLSTM`, see
+[Data-driven estimators](data_driven_estimators.md). Those estimators are already registered and use
+the manifest-level `ml_training` protocol instead of custom registry enrolment.
+
 ## 1. Implement `BaseEstimator`
 
 Create a class that stores its `EstimatorSpec` and returns `EstimateResult` from `fit`.

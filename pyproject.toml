@@ -63,6 +63,21 @@ parquet = [
   "pyarrow>=14.0"
 ]
 
+ml = [
+  "scikit-learn>=1.4",
+  "joblib>=1.3"
+]
+
+nn = [
+  "torch>=2.2"
+]
+
+data-driven = [
+  "scikit-learn>=1.4",
+  "joblib>=1.3",
+  "torch>=2.2"
+]
+
 docs = [
   "mkdocs>=1.5",
   "mkdocs-material>=9.5",
@@ -113,6 +128,7 @@ packages = ["src/lrdbench"]
 "configs/suites/smoke_ground_truth.yaml" = "src/lrdbench/configs/suites/smoke_ground_truth.yaml"
 "configs/suites/smoke_observational.yaml" = "src/lrdbench/configs/suites/smoke_observational.yaml"
 "configs/suites/smoke_stress_test.yaml" = "src/lrdbench/configs/suites/smoke_stress_test.yaml"
+"configs/suites/smoke_data_driven.yaml" = "src/lrdbench/configs/suites/smoke_data_driven.yaml"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -210,7 +226,10 @@ module = [
   "pandas",
   "pandas.*",
   "pywt",
-  "pywt.*"
+  "pywt.*",
+  "sklearn.*",
+  "torch",
+  "torch.*"
 ]
 ignore_missing_imports = true
 

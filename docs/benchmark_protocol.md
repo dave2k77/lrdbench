@@ -1,12 +1,30 @@
 # Benchmark protocol
 
-1. **Manifest** (YAML): declares `mode`, `source`, optional `contamination`, `estimators`, `metrics`, `leaderboards`, `report`, and `seeds`.
+1. **Manifest** (YAML): declares `mode`, `source`, optional `contamination`, optional
+   `ml_training`, `estimators`, `metrics`, `leaderboards`, `report`, and `seeds`.
 2. **Records**: synthetic grid (`generator_grid`), stress pairs (clean + contaminated), or observational series (`csv_series_index` / `inline_table`).
-3. **Estimation**: each `(record, estimator_spec)` yields an `EstimateResult`.
-4. **Evaluation**: mode-appropriate metrics (`MetricBundle`) and optional leaderboards.
-5. **Outputs**: CSV result store under `reports/<run_id>/` plus HTML/CSV summaries from the reporter.
+3. **Optional data-driven training**: built-in ML/NN estimators train from `ml_training` and write
+   run-local model artefacts before benchmark estimation.
+4. **Estimation**: each `(record, estimator_spec)` yields an `EstimateResult`.
+5. **Evaluation**: mode-appropriate metrics (`MetricBundle`) and optional leaderboards.
+6. **Outputs**: CSV result store under `reports/<run_id>/` plus HTML/CSV summaries from the reporter.
 
 Example suite manifests: `configs/suites/smoke_*.yaml`.
+
+## Data-driven baseline suites
+
+`configs/suites/smoke_data_driven.yaml` is the tutorial-scale suite for run-local supervised
+baselines. It trains `MLRandomForest` and `MLSVR` from a manifest-declared fGn training grid, then
+benchmarks them alongside `RS` in stress-test mode:
+
+```bash
+pip install -e ".[ml,reports]"
+lrdbench validate configs/suites/smoke_data_driven.yaml
+lrdbench run configs/suites/smoke_data_driven.yaml
+```
+
+The trained models and training summary are exported under `reports/<run_id>/ml_models/` and
+indexed in `raw/artefacts.csv`. For details, see [Data-driven estimators](data_driven_estimators.md).
 
 For interpretation rules covering aggregation, uncertainty, leaderboards, and failures, see
 [Interpretation semantics](interpretation_semantics.md).

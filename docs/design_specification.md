@@ -35,7 +35,7 @@ valid only relative to the declared source, estimand, metrics, and aggregation r
 The central schema objects live in `lrdbench.schema`.
 
 - `BenchmarkManifest`: parsed YAML contract for mode, source, estimators, metrics, leaderboards,
-  reporting, execution, uncertainty, and seeds.
+  reporting, execution, uncertainty, optional data-driven training, and seeds.
 - `SeriesRecord`: materialised time series plus truth, annotations, contamination/preprocessing
   history, and provenance.
 - `EstimatorSpec`: manifest-level estimator enrollment metadata and parameter schema.
@@ -89,10 +89,16 @@ Optional blocks:
 - `report`: requested formats, figures, table exports, and export root.
 - `execution`: parallelism and optional estimate-cache behavior.
 - `uncertainty`: benchmark-level bootstrap intervals and paired estimator differences.
+- `ml_training`: run-local supervised training protocol for built-in data-driven estimators.
 - `seeds`: reproducibility policy.
 - `validation`: parser behavior such as unknown-key rejection.
 
 Unknown top-level keys are rejected by default.
+
+`ml_training` is additive and is required for built-in data-driven estimators unless an estimator
+entry provides an explicit `params.model_path`. The initial built-in data-driven target is
+`hurst_scaling_proxy`; trained model artefacts are written under the run report directory and are
+listed in the artefact index.
 
 ## Mode Rules
 

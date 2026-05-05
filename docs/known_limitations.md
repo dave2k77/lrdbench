@@ -11,6 +11,10 @@ estimator rankings.
   protocol decision.
 - Scale-window, bandwidth, wavelet-band, and bootstrap settings can materially change results.
 - Experimental wavelet estimators are included for comparison, but should not anchor public claims.
+- Data-driven estimators are supervised baselines whose validity depends on the declared training
+  distribution; they are not distribution-free LRD estimators.
+- CNN/LSTM baselines require optional PyTorch dependencies and are not part of the lightweight
+  RF/SVR smoke suite.
 
 ## Synthetic Data
 

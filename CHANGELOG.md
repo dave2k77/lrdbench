@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Estimators: added experimental data-driven baselines `MLRandomForest`, `MLSVR`, `MLCNN`, and
+  `MLLSTM` targeting `hurst_scaling_proxy`.
+- Manifests: added optional `ml_training` for run-local supervised training before benchmark
+  estimation.
+- Suites/examples: added `smoke_data_driven.yaml` and
+  `examples/data_driven_baseline_benchmark.py` for RF/SVR stress-test comparison.
+- Docs: added data-driven estimator installation, manifest, interpretation, and artefact guidance.
+
 ## 1.0.2
 
 - Packaging: first PyPI-published stable package release.
