@@ -25,6 +25,7 @@ def test_default_registry_lists_new_estimators() -> None:
     reg = build_default_estimator_registry()
     names = set(reg.list())
     for name in (
+        "AbsoluteMoment",
         "DFA",
         "DMA",
         "Higuchi",
@@ -41,6 +42,8 @@ def test_default_registry_lists_new_estimators() -> None:
         "MLSVR",
         "MLCNN",
         "MLLSTM",
+        "Variance",
+        "VarianceResidual",
     ):
         assert name in names
 
@@ -68,10 +71,9 @@ def test_data_driven_estimators_report_missing_optional_dependency() -> None:
             continue
         assert out.point is None
         assert out.failure_reason is not None
-        assert (
-            out.failure_reason.startswith(f"missing_optional_dependency:{package}")
-            or out.failure_reason.startswith("exception:")
-        )
+        assert out.failure_reason.startswith(
+            f"missing_optional_dependency:{package}"
+        ) or out.failure_reason.startswith("exception:")
 
 
 def test_data_driven_preprocessing_is_fixed_shape_and_finite() -> None:
@@ -109,6 +111,59 @@ def test_fgn_hurst_estimators_near_truth() -> None:
         assert out.valid, (est_name, out.failure_reason)
         assert out.point is not None
         assert abs(float(out.point) - h_true) < 0.45
+
+
+def test_aggregation_hurst_estimators_fit_valid_on_fgn() -> None:
+    rng = np.random.default_rng(43)
+    x = simulate_fgn(4096, 0.7, rng, sigma=1.0)
+    rec = _record(x)
+    reg = build_default_estimator_registry()
+    for est_name, params in (
+        ("AbsoluteMoment", {"n_bootstrap": 12, "bootstrap_block_len": 64, "max_scale": 256}),
+        ("Variance", {"n_bootstrap": 12, "bootstrap_block_len": 64, "max_scale": 256}),
+        (
+            "VarianceResidual",
+            {
+                "n_bootstrap": 12,
+                "bootstrap_block_len": 64,
+                "min_scale": 8,
+                "max_scale": 256,
+                "detrend_order": 1,
+            },
+        ),
+    ):
+        spec = EstimatorSpec(
+            name=est_name,
+            family="temporal",
+            target_estimand="hurst_scaling_proxy",
+            assumptions=(),
+            supports_ci=True,
+            supports_diagnostics=True,
+            parameter_schema=params,
+        )
+        out = reg.get(est_name)(spec).fit(rec)
+        assert out.valid, (est_name, out.failure_reason)
+        assert out.point is not None
+        assert 0.0 < float(out.point) < 1.0
+
+
+def test_aggregation_hurst_estimators_report_invalid_for_short_signal() -> None:
+    rec = _record(np.arange(32, dtype=float))
+    reg = build_default_estimator_registry()
+    for est_name in ("AbsoluteMoment", "Variance", "VarianceResidual"):
+        spec = EstimatorSpec(
+            name=est_name,
+            family="temporal",
+            target_estimand="hurst_scaling_proxy",
+            assumptions=(),
+            supports_ci=False,
+            supports_diagnostics=True,
+            parameter_schema={"n_bootstrap": 0},
+        )
+        out = reg.get(est_name)(spec).fit(rec)
+        assert not out.valid
+        assert out.point is None
+        assert out.failure_reason is not None
 
 
 def test_higuchi_and_ghe_fit_valid() -> None:
@@ -160,7 +215,12 @@ def test_wavelet_estimators_return_bounded_points_on_fgn() -> None:
     rec = _record(x)
     reg = build_default_estimator_registry()
     params_by_name = {
-        "WaveletAbryVeitch": {"n_bootstrap": 0, "wavelet": "db2", "j_drop_low": 1, "j_drop_high": 1},
+        "WaveletAbryVeitch": {
+            "n_bootstrap": 0,
+            "wavelet": "db2",
+            "j_drop_low": 1,
+            "j_drop_high": 1,
+        },
         "WaveletBardet": {"n_bootstrap": 0, "wavelet": "db2", "j_drop_low": 1, "j_drop_high": 1},
         "WaveletOLS": {"n_bootstrap": 0, "wavelet": "db2", "j_drop_low": 1, "j_drop_high": 1},
         "WaveletJensen": {

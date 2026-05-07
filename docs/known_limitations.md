@@ -10,6 +10,8 @@ estimator rankings.
   model assumptions; they should not be merged into a single public ranking without an explicit
   protocol decision.
 - Scale-window, bandwidth, wavelet-band, and bootstrap settings can materially change results.
+- Aggregation-based estimators (`AbsoluteMoment`, `Variance`, and `VarianceResidual`) are
+  especially sensitive to block-size support, centring, finite-sample effects, and contamination.
 - Experimental wavelet estimators are included for comparison, but should not anchor public claims.
 - Data-driven estimators are supervised baselines whose validity depends on the declared training
   distribution; they are not distribution-free LRD estimators.

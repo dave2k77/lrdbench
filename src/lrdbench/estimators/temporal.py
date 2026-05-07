@@ -42,9 +42,7 @@ class RSEstimator(BaseEstimator):
         n_boot = int(params.get("n_bootstrap", 200))
         block_len = int(params.get("bootstrap_block_len", 0)) or max(4, record.values.size // 10)
         levels_raw = params.get("ci_levels")
-        ci_levels = (
-            tuple(float(x) for x in levels_raw) if levels_raw is not None else (0.95,)
-        )
+        ci_levels = tuple(float(x) for x in levels_raw) if levels_raw is not None else (0.95,)
         seed = 0
         if record.provenance is not None and record.provenance.seed is not None:
             seed = int(record.provenance.seed)
@@ -297,4 +295,260 @@ class DMAEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_dma",
             seed_offset=17,
+        )
+
+
+def _aggregation_scales(
+    n: int,
+    *,
+    min_scale: int,
+    max_scale: int | None,
+    scale_ratio: float = 1.5,
+) -> list[int]:
+    if n < 64:
+        return []
+    min_scale = max(2, int(min_scale))
+    if max_scale is None:
+        max_scale = max(min_scale + 2, n // 4)
+    max_scale = min(int(max_scale), n // 2)
+    if max_scale <= min_scale:
+        return []
+    scales: list[int] = []
+    s = min_scale
+    while s <= max_scale:
+        scales.append(int(s))
+        s = int(max(s + 1, round(s * max(1.01, float(scale_ratio)))))
+    return scales
+
+
+def _block_means(x: np.ndarray, block_size: int) -> np.ndarray:
+    n_blocks = x.size // block_size
+    if n_blocks < 2:
+        return np.empty(0, dtype=float)
+    trimmed = x[: n_blocks * block_size]
+    return np.mean(trimmed.reshape(n_blocks, block_size), axis=1)
+
+
+def _ols_slope(xs: list[float], ys: list[float]) -> float | None:
+    if len(xs) < 3 or len(ys) < 3:
+        return None
+    x_arr = np.asarray(xs, dtype=float)
+    y_arr = np.asarray(ys, dtype=float)
+    xm = float(np.mean(x_arr))
+    ym = float(np.mean(y_arr))
+    denom = float(np.sum((x_arr - xm) ** 2))
+    if denom < 1e-20:
+        return None
+    slope = float(np.sum((x_arr - xm) * (y_arr - ym)) / denom)
+    if not np.isfinite(slope):
+        return None
+    return slope
+
+
+def _absolute_moment_hurst(
+    x: np.ndarray,
+    *,
+    min_scale: int = 2,
+    max_scale: int | None = None,
+    scale_ratio: float = 1.5,
+) -> float | None:
+    """Aggregated absolute first moment slope mapped to a Hurst proxy."""
+    x = np.asarray(x, dtype=float)
+    x = x - np.mean(x)
+    log_m: list[float] = []
+    log_moment: list[float] = []
+    for m in _aggregation_scales(
+        x.size, min_scale=min_scale, max_scale=max_scale, scale_ratio=scale_ratio
+    ):
+        agg = _block_means(x, m)
+        if agg.size < 2:
+            continue
+        moment = float(np.mean(np.abs(agg - np.mean(agg))))
+        if moment <= 0.0 or not np.isfinite(moment):
+            continue
+        log_m.append(np.log(float(m)))
+        log_moment.append(np.log(moment))
+    slope = _ols_slope(log_m, log_moment)
+    if slope is None:
+        return None
+    return float(np.clip(slope + 1.0, 1e-4, 1.0 - 1e-4))
+
+
+def _variance_aggregation_hurst(
+    x: np.ndarray,
+    *,
+    min_scale: int = 2,
+    max_scale: int | None = None,
+    scale_ratio: float = 1.5,
+) -> float | None:
+    """Aggregated-series variance slope mapped to a Hurst proxy."""
+    x = np.asarray(x, dtype=float)
+    x = x - np.mean(x)
+    log_m: list[float] = []
+    log_var: list[float] = []
+    for m in _aggregation_scales(
+        x.size, min_scale=min_scale, max_scale=max_scale, scale_ratio=scale_ratio
+    ):
+        agg = _block_means(x, m)
+        if agg.size < 2:
+            continue
+        var = float(np.var(agg, ddof=1))
+        if var <= 0.0 or not np.isfinite(var):
+            continue
+        log_m.append(np.log(float(m)))
+        log_var.append(np.log(var))
+    slope = _ols_slope(log_m, log_var)
+    if slope is None:
+        return None
+    return float(np.clip(0.5 * slope + 1.0, 1e-4, 1.0 - 1e-4))
+
+
+def _variance_residual_hurst(
+    x: np.ndarray,
+    *,
+    min_scale: int = 8,
+    max_scale: int | None = None,
+    scale_ratio: float = 1.5,
+    detrend_order: int = 1,
+) -> float | None:
+    """Mean block residual variance slope mapped to a Hurst proxy."""
+    x = np.asarray(x, dtype=float)
+    n = x.size
+    if n < 64:
+        return None
+    y = np.cumsum(x - np.mean(x))
+    order = max(0, int(detrend_order))
+    log_m: list[float] = []
+    log_var: list[float] = []
+    for m in _aggregation_scales(
+        n, min_scale=min_scale, max_scale=max_scale, scale_ratio=scale_ratio
+    ):
+        if m < order + 2:
+            continue
+        n_blocks = n // m
+        if n_blocks < 2:
+            continue
+        t = np.arange(m, dtype=float)
+        design = np.vander(t, order + 1, increasing=True)
+        block_vars: list[float] = []
+        for idx in range(n_blocks):
+            seg = y[idx * m : (idx + 1) * m]
+            if order == 0:
+                fit = np.full_like(seg, float(np.mean(seg)))
+            else:
+                coef, _, _, _ = np.linalg.lstsq(design, seg, rcond=None)
+                fit = design @ coef
+            resid = seg - fit
+            if resid.size > 1:
+                block_vars.append(float(np.var(resid, ddof=1)))
+        if not block_vars:
+            continue
+        avg_var = float(np.mean(block_vars))
+        if avg_var <= 0.0 or not np.isfinite(avg_var):
+            continue
+        log_m.append(np.log(float(m)))
+        log_var.append(np.log(avg_var))
+    slope = _ols_slope(log_m, log_var)
+    if slope is None:
+        return None
+    return float(np.clip(0.5 * slope, 1e-4, 1.0 - 1e-4))
+
+
+class AbsoluteMomentEstimator(BaseEstimator):
+    """Absolute first moment of aggregated series as a Hurst proxy."""
+
+    VERSION = "0.1.0"
+
+    def __init__(self, spec: EstimatorSpec) -> None:
+        self._spec = spec
+
+    @property
+    def spec(self) -> EstimatorSpec:
+        return self._spec
+
+    def fit(self, record: SeriesRecord) -> EstimateResult:
+        params = dict(self._spec.parameter_schema)
+
+        def stat(z: np.ndarray) -> float | None:
+            return _absolute_moment_hurst(
+                z,
+                min_scale=int(params.get("min_scale", 2)),
+                max_scale=int(params["max_scale"]) if params.get("max_scale") is not None else None,
+                scale_ratio=float(params.get("scale_ratio", 1.5)),
+            )
+
+        return fit_with_block_bootstrap(
+            record,
+            self._spec,
+            statistic=stat,
+            estimator_version=self.VERSION,
+            failure_reason="insufficient_signal_for_absolute_moment",
+            seed_offset=29,
+        )
+
+
+class VarianceEstimator(BaseEstimator):
+    """Variance of aggregated series as a Hurst proxy."""
+
+    VERSION = "0.1.0"
+
+    def __init__(self, spec: EstimatorSpec) -> None:
+        self._spec = spec
+
+    @property
+    def spec(self) -> EstimatorSpec:
+        return self._spec
+
+    def fit(self, record: SeriesRecord) -> EstimateResult:
+        params = dict(self._spec.parameter_schema)
+
+        def stat(z: np.ndarray) -> float | None:
+            return _variance_aggregation_hurst(
+                z,
+                min_scale=int(params.get("min_scale", 2)),
+                max_scale=int(params["max_scale"]) if params.get("max_scale") is not None else None,
+                scale_ratio=float(params.get("scale_ratio", 1.5)),
+            )
+
+        return fit_with_block_bootstrap(
+            record,
+            self._spec,
+            statistic=stat,
+            estimator_version=self.VERSION,
+            failure_reason="insufficient_signal_for_variance",
+            seed_offset=31,
+        )
+
+
+class VarianceResidualEstimator(BaseEstimator):
+    """Variance of block residuals as a Hurst proxy."""
+
+    VERSION = "0.1.0"
+
+    def __init__(self, spec: EstimatorSpec) -> None:
+        self._spec = spec
+
+    @property
+    def spec(self) -> EstimatorSpec:
+        return self._spec
+
+    def fit(self, record: SeriesRecord) -> EstimateResult:
+        params = dict(self._spec.parameter_schema)
+
+        def stat(z: np.ndarray) -> float | None:
+            return _variance_residual_hurst(
+                z,
+                min_scale=int(params.get("min_scale", 8)),
+                max_scale=int(params["max_scale"]) if params.get("max_scale") is not None else None,
+                scale_ratio=float(params.get("scale_ratio", 1.5)),
+                detrend_order=int(params.get("detrend_order", 1)),
+            )
+
+        return fit_with_block_bootstrap(
+            record,
+            self._spec,
+            statistic=stat,
+            estimator_version=self.VERSION,
+            failure_reason="insufficient_signal_for_variance_residual",
+            seed_offset=37,
         )

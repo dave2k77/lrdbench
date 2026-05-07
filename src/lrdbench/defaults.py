@@ -19,7 +19,14 @@ from lrdbench.estimators.spectral import (
     PeriodogramRegressionEstimator,
     WhittleMLEEstimator,
 )
-from lrdbench.estimators.temporal import DFAEstimator, DMAEstimator, RSEstimator
+from lrdbench.estimators.temporal import (
+    AbsoluteMomentEstimator,
+    DFAEstimator,
+    DMAEstimator,
+    RSEstimator,
+    VarianceEstimator,
+    VarianceResidualEstimator,
+)
 from lrdbench.estimators.wavelet import (
     WaveletAbryVeitchEstimator,
     WaveletBardetEstimator,
@@ -71,6 +78,15 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     def dma_builder(spec: EstimatorSpec) -> BaseEstimator:
         return DMAEstimator(spec)
 
+    def absolute_moment_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return AbsoluteMomentEstimator(spec)
+
+    def variance_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return VarianceEstimator(spec)
+
+    def variance_residual_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return VarianceResidualEstimator(spec)
+
     def higuchi_builder(spec: EstimatorSpec) -> BaseEstimator:
         return HiguchiEstimator(spec)
 
@@ -117,6 +133,9 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     reg.register("GPH", gph_builder)
     reg.register("DFA", dfa_builder)
     reg.register("DMA", dma_builder)
+    reg.register("AbsoluteMoment", absolute_moment_builder)
+    reg.register("Variance", variance_builder)
+    reg.register("VarianceResidual", variance_residual_builder)
     reg.register("Higuchi", higuchi_builder)
     reg.register("GHE", ghe_builder)
     reg.register("Periodogram", periodogram_builder)

@@ -23,6 +23,12 @@ Generated with [mkdocstrings](https://mkdocstrings.github.io/) from package docs
         - spec
         - fit
 
+## Bundled temporal estimators
+
+::: lrdbench.estimators.temporal.AbsoluteMomentEstimator
+::: lrdbench.estimators.temporal.VarianceEstimator
+::: lrdbench.estimators.temporal.VarianceResidualEstimator
+
 ## Generator interface
 
 ::: lrdbench.interfaces.BaseGenerator

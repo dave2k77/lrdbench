@@ -16,6 +16,7 @@ and the GitHub release.
 The framework is designed to support:
 
 - rigorous comparison of classical and new LRD estimators;
+- bundled temporal, spectral, geometric, wavelet, aggregation, and data-driven estimator families;
 - uncertainty-aware benchmarking, including empirical interval coverage where applicable;
 - robustness analysis under heavy tails, nonstationarity, artefacts, level shifts, outliers, polynomial trends, and low-frequency contamination;
 - experimental data-driven baselines, including Random Forest, SVR, CNN, and LSTM estimators;
@@ -111,6 +112,18 @@ See [`RESEARCH_USAGE.md`](RESEARCH_USAGE.md) for the full policy.
 - explicit estimator metadata and estimand declarations
 - run-local supervised training for built-in ML/NN baseline estimators
 - registry-based component enrolment
+
+### Bundled estimators
+- temporal Hurst-proxy methods: `RS`, `DFA`, `DMA`, `AbsoluteMoment`, `Variance`,
+  `VarianceResidual`
+- spectral long-memory methods: `GPH`, `Periodogram`, `WhittleMLE`,
+  `ModifiedLocalWhittle`
+- geometric and wavelet Hurst-proxy comparators
+- experimental data-driven baselines: `MLRandomForest`, `MLSVR`, `MLCNN`, `MLLSTM`
+
+See [`docs/bundled_estimators.md`](docs/bundled_estimators.md) and
+[`docs/estimator_status.md`](docs/estimator_status.md) for names, targets, and interpretation
+status.
 
 ---
 

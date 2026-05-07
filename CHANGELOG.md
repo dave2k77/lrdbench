@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Estimators: added aggregation-based temporal Hurst-proxy estimators `AbsoluteMoment`,
+  `Variance`, and `VarianceResidual`.
+- Docs: added bundled-estimator documentation covering registry names, targets, parameters, and
+  aggregation-method interpretation notes.
 - Estimators: added experimental data-driven baselines `MLRandomForest`, `MLSVR`, `MLCNN`, and
   `MLLSTM` targeting `hurst_scaling_proxy`.
 - Manifests: added optional `ml_training` for run-local supervised training before benchmark

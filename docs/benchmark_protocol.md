@@ -11,6 +11,11 @@
 
 Example suite manifests: `configs/suites/smoke_*.yaml`.
 
+Bundled estimator names and target estimands are documented in
+[Bundled estimators](bundled_estimators.md). The default registry includes temporal aggregation
+methods (`AbsoluteMoment`, `Variance`, and `VarianceResidual`) alongside `RS`, `DFA`, `DMA`,
+spectral, geometric, wavelet, and data-driven estimators.
+
 ## Data-driven baseline suites
 
 `configs/suites/smoke_data_driven.yaml` is the tutorial-scale suite for run-local supervised

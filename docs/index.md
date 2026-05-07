@@ -24,6 +24,7 @@ in [Design specification](design_specification.md). A short root-level traceabil
 - [Tutorials](tutorials/ground_truth_benchmark.md) — ground-truth, stress-test, observational, and custom-estimator workflows.
 - [Installation](installation.md) — editable install, extras, local `mkdocs serve`.
 - [Benchmark protocol](benchmark_protocol.md) — manifest modes, execution block, outputs.
+- [Bundled estimators](bundled_estimators.md) — registry names, families, and key parameters.
 - [Data-driven estimators](data_driven_estimators.md) — RF/SVR/CNN/LSTM baselines and
   manifest-level training.
 - [Interpretation semantics](interpretation_semantics.md) — uncertainty, leaderboard, and failure rules.
