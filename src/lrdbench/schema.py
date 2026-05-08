@@ -43,6 +43,17 @@ class ProvenanceRecord:
 
 
 @dataclass(frozen=True)
+class PluginProvenanceRecord:
+    plugin_name: str
+    module_name_or_path: str
+    entry_point_name: str
+    version: str | None = None
+    status: str = "ok"
+    failure_reason: str | None = None
+    source_hash: str | None = None
+
+
+@dataclass(frozen=True)
 class SeriesRecord:
     record_id: str
     values: np.ndarray
@@ -217,3 +228,4 @@ class BenchmarkRunOutput:
     leaderboards: tuple[LeaderboardRow, ...]
     report_bundle: ReportBundle | None
     result_store_path: str | None = None
+    plugin_provenance: tuple[PluginProvenanceRecord, ...] = ()

@@ -28,7 +28,7 @@ def test_custom_estimator_example_smoke_fit() -> None:
         max_value=1.0,
     )
 
-    assert result.estimator_version == "0.1.0"
+    assert result.estimator_version == "1.0.2"
     assert result.diagnostics["example_only"] is True
 
 

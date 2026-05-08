@@ -10,7 +10,13 @@ import pandas as pd
 import yaml
 
 from lrdbench.interfaces import BaseResultStore
-from lrdbench.schema import BenchmarkManifest, EstimateResult, MetricBundle, SeriesRecord
+from lrdbench.schema import (
+    BenchmarkManifest,
+    EstimateResult,
+    MetricBundle,
+    PluginProvenanceRecord,
+    SeriesRecord,
+)
 
 
 class CsvResultStore(BaseResultStore):
@@ -27,6 +33,7 @@ class CsvResultStore(BaseResultStore):
         self._metrics_rows: list[dict[str, Any]] = []
         self._leader_rows: list[dict[str, Any]] = []
         self._artefact_rows: list[dict[str, Any]] = []
+        self._plugin_rows: list[dict[str, Any]] = []
 
     def write_run_metadata(self, manifest: BenchmarkManifest, run_id: str) -> None:
         meta = {
@@ -144,6 +151,20 @@ class CsvResultStore(BaseResultStore):
                 }
             )
 
+    def write_plugin_provenance(self, rows: Sequence[PluginProvenanceRecord]) -> None:
+        for p in rows:
+            self._plugin_rows.append(
+                {
+                    "plugin_name": p.plugin_name,
+                    "module_name_or_path": p.module_name_or_path,
+                    "entry_point_name": p.entry_point_name,
+                    "version": p.version,
+                    "status": p.status,
+                    "failure_reason": p.failure_reason,
+                    "source_hash": p.source_hash,
+                }
+            )
+
     def finalise(self) -> str:
         if self._records_rows:
             pd.DataFrame(self._records_rows).to_csv(self.raw / "records.csv", index=False)
@@ -155,4 +176,8 @@ class CsvResultStore(BaseResultStore):
             pd.DataFrame(self._leader_rows).to_csv(self.raw / "leaderboards.csv", index=False)
         if self._artefact_rows:
             pd.DataFrame(self._artefact_rows).to_csv(self.raw / "artefacts.csv", index=False)
+        if self._plugin_rows:
+            pd.DataFrame(self._plugin_rows).to_csv(
+                self.raw / "plugin_provenance.csv", index=False
+            )
         return str(self.root.resolve())

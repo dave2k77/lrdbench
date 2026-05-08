@@ -28,6 +28,7 @@ from lrdbench.schema import (
     ArtefactRecord,
     BenchmarkManifest,
     BenchmarkRunOutput,
+    PluginProvenanceRecord,
     ReportSpec,
     SeriesRecord,
 )
@@ -126,10 +127,32 @@ class BenchmarkRunner:
         generators: GeneratorRegistry | None = None,
         estimators: EstimatorRegistry | None = None,
         contaminations: ContaminationRegistry | None = None,
+        discover_plugins: bool = True,
     ) -> None:
         self.generators = generators or build_default_generator_registry()
-        self.estimators = estimators or build_default_estimator_registry()
         self.contaminations = contaminations or build_default_contamination_registry()
+        self._plugin_provenance: list[PluginProvenanceRecord] = []
+        if estimators is not None:
+            self.estimators = estimators
+        elif discover_plugins:
+            from lrdbench.plugin_loader import build_estimator_registry_with_plugins
+
+            reg, results = build_estimator_registry_with_plugins()
+            self.estimators = reg
+            self._plugin_provenance = [
+                PluginProvenanceRecord(
+                    plugin_name=r.plugin_name,
+                    module_name_or_path=r.module_name_or_path,
+                    entry_point_name=r.entry_point_name,
+                    version=r.version,
+                    status=r.status,
+                    failure_reason=r.failure_reason,
+                    source_hash=r.source_hash,
+                )
+                for r in results
+            ]
+        else:
+            self.estimators = build_default_estimator_registry()
         self._gt_evaluator = GroundTruthEvaluator()
         self._leaderboard = WeightedRankLeaderboardBuilder()
         self._reporter = SimpleHtmlCsvReporter()
@@ -217,6 +240,7 @@ class BenchmarkRunner:
         if model_artefacts:
             bundle = replace(bundle, artefacts=tuple(bundle.artefacts) + model_artefacts)
 
+        store.write_plugin_provenance(self._plugin_provenance)
         store.write_artefacts(bundle.artefacts)
         store_path = store.finalise()
         bundle = replace(bundle, result_store_path=store_path)
@@ -229,6 +253,7 @@ class BenchmarkRunner:
             leaderboards=boards,
             report_bundle=bundle,
             result_store_path=store_path,
+            plugin_provenance=tuple(self._plugin_provenance),
         )
 
     def _generate_records_ground_truth(
@@ -299,12 +324,16 @@ class BenchmarkRunner:
         return records
 
 
-def run_manifest_path(path: str | Path) -> BenchmarkRunOutput:
+def run_manifest_path(path: str | Path, *, discover_plugins: bool = True) -> BenchmarkRunOutput:
     p = Path(path)
     manifest = load_manifest(p)
-    return BenchmarkRunner().run(manifest, manifest_path=p)
+    return BenchmarkRunner(discover_plugins=discover_plugins).run(manifest, manifest_path=p)
 
 
-def run_manifest_mapping(data: dict[str, Any], *, base_dir: Path | None = None) -> BenchmarkRunOutput:
+def run_manifest_mapping(
+    data: dict[str, Any], *, base_dir: Path | None = None, discover_plugins: bool = True
+) -> BenchmarkRunOutput:
     manifest = manifest_from_mapping(data)
-    return BenchmarkRunner().run(manifest, base_dir=base_dir or Path.cwd())
+    return BenchmarkRunner(discover_plugins=discover_plugins).run(
+        manifest, base_dir=base_dir or Path.cwd()
+    )

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Plugin discovery: added automatic third-party estimator loading via `LRD_BENCH_ESTIMATOR_PLUGIN`
+  (import-style) and `LRD_BENCH_ESTIMATOR_PLUGIN_PATH` (file-path) environment variables.
+- CLI: added `--no-plugins` flag to `lrdbench run` and `lrdbench list-estimators` to skip automatic
+  plugin discovery.
+- CLI: added `lrdbench list-plugins` command to inspect discovered third-party plugins.
+- Core: added `lrdbench.plugin_loader` module with safe, failure-transparent plugin loading.
+- Core: `BenchmarkRunOutput` now carries `plugin_provenance` to track loaded plugins, versions,
+  source hashes, and load failures.
+- Docs: updated estimator contract and third-party estimator workflow for plugin discovery.
 - Estimators: added aggregation-based temporal Hurst-proxy estimators `AbsoluteMoment`,
   `Variance`, and `VarianceResidual`.
 - Docs: added bundled-estimator documentation covering registry names, targets, parameters, and

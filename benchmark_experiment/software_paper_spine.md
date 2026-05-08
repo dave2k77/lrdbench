@@ -228,6 +228,7 @@ Figures:
 
 - architecture diagram;
 - manifest-to-report workflow;
+- extensibility workflow diagram;
 - example HTML report screenshot;
 - example stress-test degradation plot.
 

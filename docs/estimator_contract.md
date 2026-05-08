@@ -28,6 +28,49 @@ Each enrolled estimator must declare:
 - `parameter_schema`: manifest parameters passed to the implementation.
 - `version`: optional implementation version.
 
+## Plugin Discovery
+
+Third-party estimators can be loaded automatically via two environment variables:
+
+- `LRD_BENCH_ESTIMATOR_PLUGIN` — colon-separated list of importable module names that define
+  `ENTRY_POINTS: dict[str, Callable[[EstimatorSpec], BaseEstimator]]`.
+- `LRD_BENCH_ESTIMATOR_PLUGIN_PATH` — colon-separated list of absolute or relative `.py` file paths
+  that define the same `ENTRY_POINTS` dict.
+
+All import failures are captured as structured warnings (no crashes), and built-in estimators
+always take precedence if a plugin name collides with a built-in registry entry. To disable plugin
+discovery, pass `--no-plugins` to `lrdbench run` / `lrdbench list-estimators`, or set
+`discover_plugins=False` when constructing `BenchmarkRunner` programmatically.
+
+Example plugin module (`my_estimator_plugin.py`):
+
+```python
+from lrdbench.interfaces import BaseEstimator
+from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
+
+__version__ = "2.1.0"
+
+def _build_my_estimator(spec: EstimatorSpec) -> BaseEstimator:
+    class MyEstimator(BaseEstimator):
+        @property
+        def spec(self) -> EstimatorSpec:
+            return spec
+
+        def fit(self, record: SeriesRecord) -> EstimateResult:
+            return EstimateResult(
+                record_id=record.record_id,
+                estimator_name=spec.name,
+                point=0.7,
+                valid=True,
+                estimator_version="2.1.0",
+            )
+    return MyEstimator()
+
+ENTRY_POINTS = {
+    "MyEstimator": _build_my_estimator,
+}
+```
+
 ## Fit Results
 
 `fit(record)` should return `EstimateResult` with:
@@ -87,8 +130,9 @@ from lrdbench.runner import BenchmarkRunner
 runner = BenchmarkRunner(estimators=registry)
 ```
 
-The public CLI currently exposes built-in estimators. Third-party CLI/plugin discovery is planned
-for the external contributor beta.
+Plugin discovery is now supported via environment variables (see Plugin Discovery above). To disable it,
+use `--no-plugins` on the CLI or `discover_plugins=False` in `BenchmarkRunner`. Built-in estimators
+always take precedence over plugins when names collide.
 
 ## Data-Driven Built-ins
 

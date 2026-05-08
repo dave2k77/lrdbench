@@ -464,13 +464,8 @@ Public research release roadmap documented on 2026-04-25:
 - Tracked roadmap: `docs/public_release_roadmap.md`.
 - MkDocs nav entry: Meta → Public release roadmap.
 - Roadmap separates local manuscript infrastructure from public library readiness.
-- Immediate next sprint targets Alpha 0.1:
-  - tracked design specification;
-  - public small/medium benchmark suites;
-  - estimator status table;
-  - uncertainty/leaderboard/failure semantics docs;
-  - `lrdbench validate <manifest>`;
-  - clean-clone public-small-suite verification.
+- All alpha, beta, and release-candidate phases have been completed. The stable v1.0.2 package is
+  now published on PyPI with the unchanged 1.0.0 public output contract.
 
 ## Research Direction
 

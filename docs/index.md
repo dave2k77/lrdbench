@@ -21,7 +21,8 @@ in [Design specification](design_specification.md). A short root-level traceabil
 ## Where to go next
 
 - [Quickstart tutorial](tutorials/quickstart.md) — run the first benchmark and validate the output.
-- [Tutorials](tutorials/ground_truth_benchmark.md) — ground-truth, stress-test, observational, and custom-estimator workflows.
+- [Tutorials](tutorials/ground_truth_benchmark.md) — ground-truth, stress-test,
+  [observational](tutorials/observational_data.md), and custom-estimator workflows.
 - [Installation](installation.md) — editable install, extras, local `mkdocs serve`.
 - [Benchmark protocol](benchmark_protocol.md) — manifest modes, execution block, outputs.
 - [Bundled estimators](bundled_estimators.md) — registry names, families, and key parameters.

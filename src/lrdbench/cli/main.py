@@ -14,6 +14,7 @@ def main(argv: list[str] | None = None) -> int:
 
     run_p = sub.add_parser("run", help="Run a benchmark from a YAML manifest")
     run_p.add_argument("manifest", type=Path, help="Path to benchmark_manifest.yaml")
+    run_p.add_argument("--no-plugins", action="store_true", help="Skip automatic third-party estimator plugin discovery")
 
     validate_p = sub.add_parser("validate", help="Validate a YAML benchmark manifest")
     validate_p.add_argument("manifest", type=Path, help="Path to benchmark_manifest.yaml")
@@ -21,8 +22,12 @@ def main(argv: list[str] | None = None) -> int:
     metrics_p = sub.add_parser("list-metrics", help="List built-in metric catalog entries")
     metrics_p.add_argument("--format", choices=("text", "json"), default="text")
 
-    estimators_p = sub.add_parser("list-estimators", help="List built-in estimator registry entries")
+    estimators_p = sub.add_parser("list-estimators", help="List estimator registry entries (built-in + plugins)")
     estimators_p.add_argument("--format", choices=("text", "json"), default="text")
+    estimators_p.add_argument("--no-plugins", action="store_true", help="Show only built-in estimators")
+
+    plugins_p = sub.add_parser("list-plugins", help="List discovered third-party estimator plugins")
+    plugins_p.add_argument("--format", choices=("text", "json"), default="text")
 
     suites_p = sub.add_parser("list-suites", help="List packaged public suite manifests")
     suites_p.add_argument("--format", choices=("text", "json"), default="text")
@@ -37,11 +42,16 @@ def main(argv: list[str] | None = None) -> int:
         from lrdbench.runner import run_manifest_path
 
         with resolve_manifest_argument(args.manifest) as manifest_path:
-            out = run_manifest_path(manifest_path)
+            out = run_manifest_path(manifest_path, discover_plugins=not args.no_plugins)
         print(f"run_id={out.run_id}")
         print(f"result_store={out.result_store_path}")
         if out.report_bundle and out.report_bundle.html_report_path:
             print(f"html_report={out.report_bundle.html_report_path}")
+        if out.plugin_provenance:
+            print(f"plugins_discovered={len(out.plugin_provenance)}")
+            failed = [p for p in out.plugin_provenance if p.status != "ok"]
+            if failed:
+                print(f"plugins_failed={len(failed)} (see result store)", file=sys.stderr)
         return 0
 
     if args.command == "validate":
@@ -94,12 +104,43 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "list-estimators":
         from lrdbench.defaults import build_default_estimator_registry
 
-        rows = [{"name": name} for name in build_default_estimator_registry().list()]
+        if args.no_plugins:
+            rows = [{"name": name} for name in build_default_estimator_registry().list()]
+        else:
+            from lrdbench.plugin_loader import build_estimator_registry_with_plugins
+
+            reg, _ = build_estimator_registry_with_plugins()
+            rows = [{"name": name} for name in reg.list()]
         if args.format == "json":
             print(json.dumps(rows, indent=2, sort_keys=True))
         else:
             for row in rows:
                 print(row["name"])
+        return 0
+
+    if args.command == "list-plugins":
+        from lrdbench.plugin_loader import discover_plugins_from_env
+
+        results = discover_plugins_from_env()
+        rows = [
+            {
+                "plugin_name": r.plugin_name,
+                "module_or_path": r.module_name_or_path,
+                "entry_point": r.entry_point_name,
+                "version": r.version,
+                "status": r.status,
+                "failure_reason": r.failure_reason,
+                "source_hash": r.source_hash,
+            }
+            for r in results
+        ]
+        if args.format == "json":
+            print(json.dumps(rows, indent=2, sort_keys=True))
+        else:
+            for r in rows:
+                status_mark = "OK" if r["status"] == "ok" else r["status"]
+                ver = r["version"] or "?"
+                print(f"{r['plugin_name']}\t{status_mark}\t{ver}\t{r['module_or_path']}")
         return 0
 
     if args.command == "list-suites":

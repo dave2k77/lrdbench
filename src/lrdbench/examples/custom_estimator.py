@@ -11,7 +11,7 @@ from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
 class VarianceRatioEstimator(BaseEstimator):
     """Minimal external estimator example for contributor documentation."""
 
-    VERSION = "0.1.0"
+    VERSION = "1.0.2"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
