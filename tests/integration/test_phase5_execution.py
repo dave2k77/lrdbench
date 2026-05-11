@@ -23,7 +23,7 @@ def test_manifest_rejects_unknown_execution_key() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 8},
             },
@@ -55,7 +55,7 @@ def test_parallel_max_workers_matches_serial(tmp_path: Path, monkeypatch: pytest
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 16, "bootstrap_block_len": 8, "ci_levels": [0.95]},
             },
@@ -93,7 +93,7 @@ def test_estimate_disk_cache_second_run(tmp_path: Path, monkeypatch: pytest.Monk
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 12, "bootstrap_block_len": 8, "ci_levels": [0.95]},
             },

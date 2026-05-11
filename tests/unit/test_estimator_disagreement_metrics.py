@@ -46,8 +46,8 @@ def _estimator(name: str, family: str) -> EstimatorSpec:
 
 def test_estimator_disagreement_metrics_preserve_record_pairing_and_family_summaries() -> None:
     estimators = (
-        _estimator("A", "time_domain"),
-        _estimator("B", "time_domain"),
+        _estimator("A", "temporal"),
+        _estimator("B", "temporal"),
         _estimator("C", "spectral"),
     )
     metrics = metric_specs_from_manifest_entries(
@@ -96,11 +96,11 @@ def test_estimator_disagreement_metrics_preserve_record_pairing_and_family_summa
         for m in bundle.per_series
         if m.metric_name == "family_level_disagreement"
     }
-    assert family["family:time_domain"].value == pytest.approx(0.2)
-    assert family["family:spectral__vs__time_domain"].value == pytest.approx(0.5)
-    assert family["family:time_domain"].metadata["comparison_scope"] == "within_family"
+    assert family["family:temporal"].value == pytest.approx(0.2)
+    assert family["family:spectral__vs__temporal"].value == pytest.approx(0.5)
+    assert family["family:temporal"].metadata["comparison_scope"] == "within_family"
     assert (
-        family["family:spectral__vs__time_domain"].metadata["comparison_scope"]
+        family["family:spectral__vs__temporal"].metadata["comparison_scope"]
         == "between_family"
     )
 

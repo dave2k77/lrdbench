@@ -11,6 +11,9 @@
 
 Example suite manifests: `configs/suites/smoke_*.yaml`.
 
+A machine-readable JSON Schema for the manifest format is available at
+[`configs/contracts/manifest_schema.json`](../configs/contracts/manifest_schema.json).
+
 Bundled estimator names and target estimands are documented in
 [Bundled estimators](bundled_estimators.md). The default registry includes temporal aggregation
 methods (`AbsoluteMoment`, `Variance`, and `VarianceResidual`) alongside `RS`, `DFA`, `DMA`,
@@ -147,7 +150,7 @@ window, or tuning choices:
 ```yaml
 estimators:
   - name: DFA
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     params:
       n_bootstrap: 0
@@ -193,6 +196,32 @@ balanced-global rows. Paired intervals preserve record-level estimator pairing a
 differences as `EstimatorA__minus__EstimatorB`. The reporter exports rows to
 `tables/benchmark_uncertainty.csv`, and the raw result store records them with
 `scope=uncertainty`.
+
+## Bootstrap methodology
+
+Estimator-level confidence intervals use the **circular block bootstrap** (CBB) with a fixed
+block length. The default block length for each estimator is:
+
+```text
+max(4, n // 10)
+```
+
+where `n` is the record length. This is a pragmatic compromise, not a data-adaptive choice.
+It respects local dependence structure (essential for LRD series) while remaining reproducible
+from the manifest alone.
+
+You can override the block length per estimator:
+
+```yaml
+estimators:
+  - name: DFA
+    params:
+      n_bootstrap: 200
+      bootstrap_block_len: 32
+```
+
+There is currently no automatic block-length selection (e.g. Politis–White). If you need a
+data-adaptive length, compute it externally and set `bootstrap_block_len` explicitly.
 
 ## Execution (Phase 5)
 

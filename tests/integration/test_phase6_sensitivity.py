@@ -18,7 +18,7 @@ def test_estimator_variants_run_through_default_registry(tmp_path) -> None:
             "estimators": [
                 {
                     "name": "DFA",
-                    "family": "time_domain",
+                    "family": "temporal",
                     "target_estimand": "hurst_scaling_proxy",
                     "params": {"n_bootstrap": 0},
                     "variants": [

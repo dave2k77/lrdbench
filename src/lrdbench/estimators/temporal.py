@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 
 import numpy as np
+from scipy.special import gammaln
 
 from lrdbench.bootstrap import bootstrap_statistic_distribution, symmetric_percentile_cis
 from lrdbench.estimators._fit_utils import fit_with_block_bootstrap
@@ -10,7 +11,29 @@ from lrdbench.interfaces import BaseEstimator
 from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
 
 
-def _rs_hurst_proxy(x: np.ndarray) -> float | None:
+def _anis_lloyd_expected_rs(n: int) -> float:
+    """Expected R/S for Gaussian white noise of length n (Anis & Lloyd 1976).
+
+    Uses the exact formula expressed via log-gamma for numerical stability:
+    E[R/S] = Gamma((n-1)/2) / (sqrt(pi) * Gamma(n/2)) * sum_{i=1}^{n-1} sqrt((n-i)/i)
+    """
+    if n < 2:
+        return 1.0
+    i = np.arange(1, n, dtype=float)
+    s = float(np.sum(np.sqrt((n - i) / i)))
+    log_ratio = float(gammaln((n - 1) / 2.0) - gammaln(n / 2.0) - 0.5 * np.log(np.pi))
+    return float(np.exp(log_ratio) * s)
+
+
+def _rs_hurst_proxy(x: np.ndarray, *, use_correction: bool = False) -> float | None:
+    """Rescaled-range Hurst proxy.
+
+    Args:
+        x: Input time series.
+        use_correction: If ``True``, apply the Anis-Lloyd finite-sample correction
+            for Gaussian white noise. This reduces the well-known upward bias near
+            ``H = 0.5`` and for small sample sizes.
+    """
     x = np.asarray(x, dtype=float)
     if x.size < 16:
         return None
@@ -21,11 +44,28 @@ def _rs_hurst_proxy(x: np.ndarray) -> float | None:
     if s < 1e-12 or r < 1e-12:
         return None
     n = x.size
-    return float(np.log(r / s) / np.log(n))
+    rs = r / s
+    if use_correction:
+        expected = _anis_lloyd_expected_rs(n)
+        if expected > 0:
+            rs = rs / expected
+        # The correction removes the white-noise baseline; add 0.5 back
+        return float(np.log(rs) / np.log(n) + 0.5)
+    return float(np.log(rs) / np.log(n))
 
 
 class RSEstimator(BaseEstimator):
-    """Rescaled-range Hurst proxy with optional block-bootstrap CIs (Phase 2)."""
+    """Rescaled-range Hurst proxy with optional block-bootstrap CIs.
+
+    Parameters read from ``params``:
+
+    - ``n_bootstrap`` (int, default 200) – number of bootstrap replicates.
+    - ``bootstrap_block_len`` (int, default ``max(4, n//10)``) – block length.
+    - ``ci_levels`` (list, default ``[0.95]``) – nominal coverage levels.
+    - ``use_anis_lloyd_correction`` (bool, default ``False``) – if ``True``,
+      apply the Anis-Lloyd finite-sample correction. This reduces systematic
+      bias near ``H = 0.5`` but assumes approximately Gaussian increments.
+    """
 
     VERSION = "0.2.0"
 
@@ -49,7 +89,8 @@ class RSEstimator(BaseEstimator):
         rng = np.random.default_rng(seed & (2**32 - 1))
 
         try:
-            h = _rs_hurst_proxy(record.values)
+            use_corr = bool(params.get("use_anis_lloyd_correction", False))
+            h = _rs_hurst_proxy(record.values, use_correction=use_corr)
             dt = time.perf_counter() - t0
             if h is None:
                 return EstimateResult(
@@ -62,10 +103,13 @@ class RSEstimator(BaseEstimator):
                     estimator_version=self.VERSION,
                 )
 
+            def _rs_stat(z: np.ndarray) -> float | None:
+                return _rs_hurst_proxy(z, use_correction=use_corr)
+
             samples = bootstrap_statistic_distribution(
                 record.values,
                 rng,
-                _rs_hurst_proxy,
+                _rs_stat,
                 n_boot=n_boot,
                 block_len=block_len,
             )

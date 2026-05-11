@@ -69,8 +69,52 @@ def _ghe_hurst(
 ) -> float | None:
     """Geometric Hurst proxy: multiscale log–log slope of squared-increment variance vs lag.
 
-    Uses geometrically spaced integer lags; for clear scaling, H ≈ slope/2; flat slope → 0.5.
+    Uses geometrically spaced integer lags; for clear scaling, H ≈ slope/2.
+
+    Args:
+        n_scales: Number of geometrically spaced lags to evaluate.
+        h_min: Minimum lag (in samples).
+        flat_slope_tol: Pragmatic guard that returns ``0.5`` when the absolute
+            log-log slope is smaller than this threshold. This avoids numerical
+            instability when the variance scaling is nearly flat, but the default
+            ``0.08`` is empiric and not derived from theory. Set to ``0.0`` to
+            disable the guard entirely.
     """
+    x = np.asarray(x, dtype=float)
+    n = int(x.size)
+    if n < 128:
+        return None
+    x = x - np.mean(x)
+    h_max = max(h_min + 2, n // 8)
+    hs = np.unique(
+        np.round(np.geomspace(float(h_min), float(h_max), num=max(6, int(n_scales)))).astype(int)
+    )
+    log_h: list[float] = []
+    log_v: list[float] = []
+    for h in hs:
+        if h < 1 or h >= n // 2:
+            continue
+        dlt = x[h:] - x[:-h]
+        v = float(np.var(dlt, ddof=0))
+        v = max(v, 1e-30)
+        log_h.append(float(np.log(float(h))))
+        log_v.append(float(np.log(v)))
+    if len(log_h) < 4:
+        return None
+    xh = np.asarray(log_h, dtype=float)
+    yv = np.asarray(log_v, dtype=float)
+    xm = float(np.mean(xh))
+    ym = float(np.mean(yv))
+    denom = float(np.sum((xh - xm) ** 2))
+    if denom < 1e-20:
+        return None
+    slope = float(np.sum((xh - xm) * (yv - ym)) / denom)
+    if not np.isfinite(slope):
+        return None
+    if abs(slope) < float(flat_slope_tol):
+        return 0.5
+    h_est = 0.5 * slope
+    return float(np.clip(h_est, 1e-4, 1.0 - 1e-4))
     x = np.asarray(x, dtype=float)
     n = int(x.size)
     if n < 128:
@@ -138,7 +182,17 @@ class HiguchiEstimator(BaseEstimator):
 
 
 class GHEEstimator(BaseEstimator):
-    """Geometric Hurst estimator: multiscale variance scaling of lagged increments."""
+    """Geometric Hurst estimator: multiscale variance scaling of lagged increments.
+
+    Parameters read from ``params``:
+
+    - ``n_scales`` (int, default 16) – number of geometric lags.
+    - ``h_min`` (int, default 1) – minimum lag in samples.
+    - ``flat_slope_tol`` (float, default 0.08) – pragmatic threshold below which
+      the log-log slope is treated as flat and the estimate is clamped to ``0.5``.
+      This is an empiric finite-sample guard, not a theoretically derived bound;
+      set to ``0.0`` to disable it.
+    """
 
     VERSION = "0.1.0"
 

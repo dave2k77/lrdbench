@@ -23,7 +23,7 @@ def test_coverage_error_requires_coverage_metric() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 20},
             },
@@ -51,7 +51,7 @@ def test_nominal_level_must_be_in_unit_interval() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 20},
             },
@@ -82,7 +82,7 @@ def test_phase2_bootstrap_coverage_in_pipeline(
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 60, "bootstrap_block_len": 16, "ci_levels": [0.95]},
             },

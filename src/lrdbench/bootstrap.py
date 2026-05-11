@@ -6,7 +6,20 @@ import numpy as np
 
 
 def circular_block_resample(x: np.ndarray, rng: np.random.Generator, block_len: int) -> np.ndarray:
-    """Circular block bootstrap of the same length as x."""
+    """Circular block bootstrap resample of the same length as ``x``.
+
+    The series is treated as circular (wrap-around at the boundaries) to
+    avoid edge artefacts. Blocks are concatenated until the desired length
+    is reached, then truncated.
+
+    Args:
+        x: 1-D input array.
+        rng: NumPy random generator instance.
+        block_len: Block length in samples. Clamped to ``[1, len(x)]``.
+
+    Returns:
+        A resampled array of the same shape as ``x``.
+    """
     n = int(x.size)
     if n == 0:
         return x
@@ -27,7 +40,23 @@ def bootstrap_statistic_distribution(
     n_boot: int,
     block_len: int,
 ) -> np.ndarray:
-    """Return vector of bootstrap replicates (finite values only)."""
+    """Compute a bootstrap distribution for ``statistic`` using circular block resampling.
+
+    Only finite replicate values are retained; ``None`` or non-finite results
+    are silently dropped. This is important for estimators that may fail on
+    short resampled blocks.
+
+    Args:
+        x: 1-D input array (the original time series).
+        rng: NumPy random generator instance.
+        statistic: Function that takes a 1-D array and returns a scalar or ``None``.
+        n_boot: Number of bootstrap replicates.
+        block_len: Block length in samples. A common pragmatic default is
+            ``max(4, n // 10)``.
+
+    Returns:
+        1-D array of finite bootstrap replicates.
+    """
     reps: list[float] = []
     for _ in range(max(1, n_boot)):
         xb = circular_block_resample(x, rng, block_len)
@@ -40,7 +69,22 @@ def bootstrap_statistic_distribution(
 def symmetric_percentile_cis(
     samples: np.ndarray, alphas: tuple[float, ...]
 ) -> tuple[tuple[float, float, float], ...]:
-    """For each nominal alpha, CI = [q_{(1-alpha)/2}, q_{1-(1-alpha)/2}]."""
+    """Symmetric percentile confidence intervals from bootstrap samples.
+
+    For each nominal level ``alpha`` the interval is
+    ``[q_{(1-alpha)/2}, q_{1-(1-alpha)/2}]`` where ``q`` denotes the sample
+    quantile of the bootstrap distribution.
+
+    Args:
+        samples: 1-D array of bootstrap replicates (e.g. from
+            :func:`bootstrap_statistic_distribution`).
+        alphas: Nominal coverage levels (e.g. ``(0.95, 0.99)``). Invalid
+            values outside ``(0, 1)`` are skipped.
+
+    Returns:
+        Tuple of ``(alpha, lower, upper)`` for each valid, deduplicated alpha.
+        Empty if ``samples`` has no elements.
+    """
     if samples.size == 0:
         return ()
     out: list[tuple[float, float, float]] = []

@@ -51,7 +51,7 @@ def data_driven_manifest(export_root: str = "reports/data_driven_example") -> di
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "supports_ci": False,
                 "supports_diagnostics": True,

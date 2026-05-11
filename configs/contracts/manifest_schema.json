@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dave2k77/lrdbench/manifest_schema.json",
+  "title": "lrdbench Benchmark Manifest",
+  "description": "Machine-readable schema for lrdbench benchmark manifests.",
+  "type": "object",
+  "required": ["manifest_id", "name", "mode", "source", "estimators", "metrics"],
+  "properties": {
+    "manifest_id": {
+      "type": "string",
+      "description": "Unique identifier for this manifest."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable benchmark name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional long-form description."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["ground_truth", "stress_test", "observational"],
+      "description": "Benchmark mode."
+    },
+    "source": {
+      "type": "object",
+      "description": "Data source specification.",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["generator_grid", "csv_series_index", "inline_table"]
+        },
+        "generators": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["family", "params"],
+            "properties": {
+              "family": { "type": "string" },
+              "params": { "type": "object" },
+              "replicates": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        "series": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["record_id"],
+            "properties": {
+              "record_id": { "type": "string" },
+              "path": { "type": "string" },
+              "value_column": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "contamination": {
+      "type": "object",
+      "description": "Required in stress_test mode.",
+      "required": ["operators"],
+      "properties": {
+        "operators": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "params"],
+            "properties": {
+              "name": { "type": "string" },
+              "params": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    "preprocessing": {
+      "type": "object"
+    },
+    "estimators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "family", "target_estimand"],
+        "properties": {
+          "name": { "type": "string" },
+          "family": { "type": "string" },
+          "target_estimand": { "type": "string" },
+          "assumptions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "supports_ci": { "type": "boolean" },
+          "supports_diagnostics": { "type": "boolean" },
+          "params": { "type": "object" },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "properties": {
+                "name": { "type": "string" },
+                "params": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "levels": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "leaderboards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["mode", "component_metrics", "weights"],
+        "properties": {
+          "name": { "type": "string" },
+          "mode": { "type": "string" },
+          "component_metrics": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "weights": { "type": "object" },
+          "ranking_rule": { "type": "string" },
+          "tie_break_rule": { "type": "string" }
+        }
+      }
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "formats": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "export_root": { "type": "string" },
+        "figure_set": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "table_set": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "include_raw_exports": { "type": "boolean" },
+        "include_provenance": { "type": "boolean" },
+        "include_environment": { "type": "boolean" }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "max_workers": { "type": "integer", "minimum": 1 },
+        "estimate_cache_dir": { "type": "string" },
+        "cache_read": { "type": "boolean" },
+        "cache_write": { "type": "boolean" }
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "n_bootstrap": { "type": "integer", "minimum": 1 },
+        "ci_levels": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "seed": { "type": "integer" },
+        "metrics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "paired": { "type": "boolean" },
+        "paired_metrics": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "ml_training": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "target_estimand": { "type": "string" },
+        "source": { "type": "object" },
+        "contamination": { "type": "object" },
+        "validation_fraction": { "type": "number" }
+      }
+    },
+    "seeds": {
+      "type": "object",
+      "properties": {
+        "global_seed": { "type": "integer" }
+      }
+    },
+    "validation": {
+      "type": "object"
+    }
+  }
+}

@@ -23,7 +23,7 @@ def test_observational_rejects_generator_grid_manifest() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 8},
             },
@@ -43,7 +43,7 @@ def test_observational_rejects_unknown_source_type() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {},
             },
@@ -67,7 +67,7 @@ def test_observational_rejects_contamination_block() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 8},
             },
@@ -96,7 +96,7 @@ def test_observational_inline_table_pipeline(
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "supports_ci": True,
                 "params": {"n_bootstrap": 24, "bootstrap_block_len": 10, "ci_levels": [0.95]},

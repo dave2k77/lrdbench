@@ -32,7 +32,7 @@ def test_stress_failure_map_includes_contamination_severity(
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "supports_ci": True,
                 "params": {"n_bootstrap": 8, "bootstrap_block_len": 8},

@@ -175,7 +175,7 @@ Example:
 ```yaml
 estimators:
   - name: DFA
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: false
     params:

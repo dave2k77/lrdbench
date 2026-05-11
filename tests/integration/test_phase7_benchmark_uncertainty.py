@@ -22,13 +22,13 @@ def test_benchmark_uncertainty_pipeline_exports_raw_and_report_tables(tmp_path: 
             "estimators": [
                 {
                     "name": "RS",
-                    "family": "time_domain",
+                    "family": "temporal",
                     "target_estimand": "hurst_scaling_proxy",
                     "params": {"n_bootstrap": 0},
                 },
                 {
                     "name": "DFA",
-                    "family": "time_domain",
+                    "family": "temporal",
                     "target_estimand": "hurst_scaling_proxy",
                     "params": {"n_bootstrap": 0, "min_scale": 8, "max_scale": 32},
                 },

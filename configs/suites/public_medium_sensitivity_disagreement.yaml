@@ -13,7 +13,7 @@ source:
       replicates: 3
 estimators:
   - name: DFA
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: false
     params:
@@ -32,7 +32,7 @@ estimators:
           min_scale: 16
           max_scale: 256
   - name: DMA
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: false
     variants:

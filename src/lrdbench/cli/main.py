@@ -15,6 +15,7 @@ def main(argv: list[str] | None = None) -> int:
     run_p = sub.add_parser("run", help="Run a benchmark from a YAML manifest")
     run_p.add_argument("manifest", type=Path, help="Path to benchmark_manifest.yaml")
     run_p.add_argument("--no-plugins", action="store_true", help="Skip automatic third-party estimator plugin discovery")
+    run_p.add_argument("--dry-run", action="store_true", help="Preview the record-estimator grid without fitting")
 
     validate_p = sub.add_parser("validate", help="Validate a YAML benchmark manifest")
     validate_p.add_argument("manifest", type=Path, help="Path to benchmark_manifest.yaml")
@@ -39,9 +40,25 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "run":
         from lrdbench.public_assets import resolve_manifest_argument
-        from lrdbench.runner import run_manifest_path
+        from lrdbench.runner import BenchmarkRunner, run_manifest_path
 
         with resolve_manifest_argument(args.manifest) as manifest_path:
+            if args.dry_run:
+                from lrdbench.manifest import load_manifest
+
+                manifest = load_manifest(manifest_path)
+                runner = BenchmarkRunner(discover_plugins=not args.no_plugins)
+                preview = runner.preview(manifest, manifest_path=manifest_path)
+                print(f"mode={preview['mode']}")
+                print(f"n_records={preview['n_records']}")
+                print(f"n_estimators={preview['n_estimators']}")
+                print(f"n_fit_jobs={preview['n_fit_jobs']}")
+                if preview["n_contaminated"]:
+                    print(f"n_clean={preview['n_clean']}")
+                    print(f"n_contaminated={preview['n_contaminated']}")
+                print(f"global_seed={preview['global_seed']}")
+                print("dry_run=completed (no estimators were fitted)")
+                return 0
             out = run_manifest_path(manifest_path, discover_plugins=not args.no_plugins)
         print(f"run_id={out.run_id}")
         print(f"result_store={out.result_store_path}")

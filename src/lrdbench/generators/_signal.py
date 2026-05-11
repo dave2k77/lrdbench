@@ -141,7 +141,14 @@ def simulate_fou(
     dt: float = 1.0,
     burnin: int | None = None,
 ) -> np.ndarray:
-    """Discrete fractional Ornstein-Uhlenbeck path driven by fGn innovations."""
+    """Discrete fractional Ornstein-Uhlenbeck path driven by fGn innovations.
+
+    This implementation uses a first-order Euler–Maruyama-style discretisation:
+    ``x_i = rho * x_{i-1} + epsilon_i`` where ``rho = exp(-theta*dt)`` and
+    ``epsilon`` is fGn scaled by ``sigma * dt**H``. It is **not** an exact
+    simulation of the continuous fractional Ornstein–Uhlenbeck process; it is
+    a reproducible benchmark-grade approximation suitable for moderate ``dt``.
+    """
     if n < 2:
         raise ValueError("n must be at least 2 for fOU")
     if not (0.0 < hurst < 1.0):

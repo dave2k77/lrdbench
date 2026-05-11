@@ -11,13 +11,36 @@ from lrdbench.interfaces import BaseEstimator
 from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
 
 
-def _gph_long_memory(x: np.ndarray, *, m: int | None = None) -> float | None:
-    """Geweke–Porter–Hudak regression slope as a crude long-memory proxy near 0 frequency."""
+def _apply_taper(x: np.ndarray, taper: str | None) -> np.ndarray:
+    """Apply a spectral taper to the series.
+
+    Supported values:
+    - ``None`` or ``'none'`` → no tapering (raw series).
+    - ``'cosine'`` → cosine bell (Hann-type) taper that reduces spectral leakage.
+    """
+    if taper is None or taper == "none":
+        return x
+    if taper == "cosine":
+        n = x.size
+        w = 0.5 * (1.0 - np.cos(2.0 * np.pi * np.arange(n) / (n - 1)))
+        return x * w
+    raise ValueError(f"unsupported taper: {taper!r}")
+
+
+def _log_periodogram_regression_d(
+    x: np.ndarray, *, m: int | None = None, taper: str | None = None
+) -> float | None:
+    """Log-periodogram regression slope as a long-memory parameter proxy.
+
+    This is the shared core used by both GPH and Periodogram estimators.
+    An optional ``taper`` can reduce periodogram bias from spectral leakage.
+    """
     x = np.asarray(x, dtype=float)
     n = x.size
     if n < 64:
         return None
     x = x - np.mean(x)
+    x = _apply_taper(x, taper)
     if m is None:
         m = max(2, int(n**0.5))
     m = min(m, n // 2 - 1)
@@ -36,7 +59,21 @@ def _gph_long_memory(x: np.ndarray, *, m: int | None = None) -> float | None:
     if denom < 1e-20:
         return None
     beta = float(np.sum((log_freq - x_mean) * (log_per - y_mean)) / denom)
-    return float(-0.5 * beta)
+    d = float(-0.5 * beta)
+    if not np.isfinite(d):
+        return None
+    return float(np.clip(d, -0.499, 0.499))
+
+
+# Backward-compatible aliases for internal callers
+def _gph_long_memory(x: np.ndarray, *, m: int | None = None) -> float | None:
+    """Geweke–Porter–Hudak regression slope as a crude long-memory proxy near 0 frequency."""
+    return _log_periodogram_regression_d(x, m=m, taper=None)
+
+
+def _log_periodogram_slope_d(x: np.ndarray, *, m: int | None = None) -> float | None:
+    """Log-periodogram regression memory parameter (GPH-type) in (-0.5, 0.5)."""
+    return _log_periodogram_regression_d(x, m=m, taper=None)
 
 
 class GPHEstimator(BaseEstimator):
@@ -66,7 +103,8 @@ class GPHEstimator(BaseEstimator):
         rng = np.random.default_rng(seed & (2**32 - 1))
 
         try:
-            d = _gph_long_memory(record.values)
+            taper = str(params.get("taper", "none")) or "none"
+            d = _log_periodogram_regression_d(record.values, taper=taper)
             dt = time.perf_counter() - t0
             if d is None:
                 return EstimateResult(
@@ -79,10 +117,13 @@ class GPHEstimator(BaseEstimator):
                     estimator_version=self.VERSION,
                 )
 
+            def _gph_stat(z: np.ndarray) -> float | None:
+                return _log_periodogram_regression_d(z, taper=taper)
+
             samples = bootstrap_statistic_distribution(
                 record.values,
                 rng,
-                _gph_long_memory,
+                _gph_stat,
                 n_boot=n_boot,
                 block_len=block_len,
             )
@@ -255,10 +296,11 @@ class PeriodogramRegressionEstimator(BaseEstimator):
 
     def fit(self, record: SeriesRecord) -> EstimateResult:
         params = dict(self._spec.parameter_schema)
+        taper = str(params.get("taper", "none")) or "none"
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _log_periodogram_slope_d(z, m=m)
+            return _log_periodogram_regression_d(z, m=m, taper=taper)
 
         return fit_with_block_bootstrap(
             record,

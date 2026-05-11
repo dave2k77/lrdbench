@@ -230,7 +230,7 @@ def test_reporter_exports_audit_tables(tmp_path: Path) -> None:
         estimator_specs=(
             EstimatorSpec(
                 name="RS",
-                family="time_domain",
+                family="temporal",
                 target_estimand="hurst_scaling_proxy",
                 assumptions=("stationary",),
                 supports_ci=True,
@@ -281,7 +281,7 @@ def test_reporter_exports_audit_tables(tmp_path: Path) -> None:
 
     estimator_rows = pd.read_csv(tables / "estimator_metadata.csv")
     assert estimator_rows.loc[0, "estimator_name"] == "RS"
-    assert estimator_rows.loc[0, "family"] == "time_domain"
+    assert estimator_rows.loc[0, "family"] == "temporal"
 
     failure_rows = pd.read_csv(tables / "failures.csv")
     assert failure_rows.loc[0, "n_invalid_estimates"] == 1

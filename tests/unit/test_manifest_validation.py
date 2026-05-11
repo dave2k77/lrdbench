@@ -30,7 +30,7 @@ def test_ground_truth_manifest_loads() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {},
             },
@@ -124,7 +124,7 @@ def test_stress_requires_contamination() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {},
             },
@@ -149,7 +149,7 @@ def test_unknown_manifest_key_rejected() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {},
             },

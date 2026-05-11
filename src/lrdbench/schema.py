@@ -107,6 +107,22 @@ class EstimateResult:
 
 @dataclass(frozen=True)
 class MetricSpec:
+    """Definition of a benchmark metric.
+
+    Attributes:
+        name: Machine-readable metric identifier (e.g. ``'bias'``).
+        symbol: Short symbol for tables (e.g. ``'B'``).
+        requires_truth: Whether the metric needs a ground-truth target value.
+        admissible_modes: Benchmark modes where this metric is valid.
+        aggregation_rule: How stratum-level values are combined (e.g.
+            ``'mean'``, ``'median'``).
+        optimisation_direction: Whether lower or higher values are better.
+        unit: Optional unit string for reporting.
+        null_policy: How missing values are handled.
+        nominal_levels: Coverage levels (e.g. ``(0.95,)``) for uncertainty
+            metrics; empty tuple uses evaluator defaults.
+        parameters: Extra metric-specific parameters.
+    """
     name: str
     symbol: str
     requires_truth: bool

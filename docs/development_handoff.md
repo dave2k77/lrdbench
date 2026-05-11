@@ -467,6 +467,42 @@ Public research release roadmap documented on 2026-04-25:
 - All alpha, beta, and release-candidate phases have been completed. The stable v1.0.2 package is
   now published on PyPI with the unchanged 1.0.0 public output contract.
 
+## Hardening pass: 2026-05-11
+
+Focus: design quality, mathematical accuracy, and onboarding friction.
+
+### Design & CLI improvements
+- Added `--dry-run` to `lrdbench run` and `BenchmarkRunner.preview()` for grid-size preview.
+- Added machine-readable manifest JSON Schema at `configs/contracts/manifest_schema.json`.
+
+### Documentation & onboarding
+- Rewrote `docs/architecture.md` into a full contributor guide.
+- Expanded `CONTRIBUTING.md` with validation commands and smoke-test verification.
+- Added `docs/faq.md` with troubleshooting for common failures.
+- Added `docs/parameter_glossary.md` covering all major estimator parameters.
+- Fleshed out all four Jupyter notebooks with explanatory text and new code cells.
+- Fixed terminology drift: all canonical manifests now use `family: temporal` consistently.
+
+### API documentation
+- Added comprehensive docstrings to all abstract base classes in `interfaces.py`.
+- Added docstrings to `BenchmarkRunner.run()`, `run_manifest_path()`, and key schema dataclasses.
+- Expanded bootstrap module docstrings with methodology notes.
+
+### Mathematical hardening
+- Deduplicated GPH / Periodogram regression cores into `_log_periodogram_regression_d()`.
+- Added optional cosine-bell spectral tapering (`params.taper: cosine`) to GPH and Periodogram.
+- Implemented Anis-Lloyd finite-sample correction for RS (`use_anis_lloyd_correction`).
+- Documented GHE `flat_slope_tol` heuristic explicitly; noted how to disable it.
+- Documented RS finite-sample bias and the Anis-Lloyd correction in estimator status.
+- Documented fOU as an Euler–Maruyama approximation in `simulate_fou` docstring.
+- Documented bootstrap block-length rationale in `docs/benchmark_protocol.md`.
+
+### Verification
+- `python -m pytest tests/ -q --tb=short -o "addopts="` — passed: 145 tests.
+- Notebook integration tests (`test_research_notebooks.py`) — all 4 passed.
+- Dry-run smoke checks confirmed for ground-truth and stress-test modes.
+- Spectral tapering and Anis-Lloyd correction produce plausible estimates in manual checks.
+
 ## Research Direction
 
 The project has two linked roles:

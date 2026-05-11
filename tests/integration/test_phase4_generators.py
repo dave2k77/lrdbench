@@ -45,7 +45,7 @@ def test_mrw_and_fou_manifest_pipeline(tmp_path: Path, monkeypatch: pytest.Monke
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "supports_ci": True,
                 "params": {"n_bootstrap": 8, "bootstrap_block_len": 8, "ci_levels": [0.95]},

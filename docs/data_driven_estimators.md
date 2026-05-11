@@ -103,7 +103,7 @@ ml_training:
 
 estimators:
   - name: RS
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: false
     supports_diagnostics: true

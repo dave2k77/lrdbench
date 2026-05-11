@@ -15,7 +15,7 @@ from lrdbench.schema import (
 def _estimator(name: str) -> EstimatorSpec:
     return EstimatorSpec(
         name=name,
-        family="time_domain",
+        family="temporal",
         target_estimand="hurst_scaling_proxy",
         assumptions=(),
         supports_ci=False,

@@ -26,7 +26,7 @@ contamination:
         strength: [0.5]
 estimators:
   - name: RS
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: true
     params:
@@ -34,7 +34,7 @@ estimators:
       bootstrap_block_len: 32
       ci_levels: [0.95]
   - name: DFA
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: false
     params:
@@ -42,7 +42,7 @@ estimators:
       max_scale: 128
       detrend_order: 1
   - name: DMA
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: false
     params:

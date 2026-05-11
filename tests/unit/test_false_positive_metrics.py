@@ -100,7 +100,7 @@ def test_false_positive_metric_rejected_in_observational_mode() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {"n_bootstrap": 8},
             },

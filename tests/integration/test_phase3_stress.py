@@ -37,7 +37,7 @@ def test_stress_manifest_rejects_empty_operators() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {},
             },
@@ -65,7 +65,7 @@ def test_relative_degradation_requires_mae() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "params": {},
             },
@@ -97,7 +97,7 @@ def test_stress_pipeline_inline_manifest(
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
                 "supports_ci": True,
                 "params": {"n_bootstrap": 24, "bootstrap_block_len": 10, "ci_levels": [0.95]},

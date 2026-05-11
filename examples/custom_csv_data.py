@@ -39,7 +39,7 @@ source:
       value_column: value
 estimators:
   - name: RS
-    family: time_domain
+    family: temporal
     target_estimand: hurst_scaling_proxy
     supports_ci: true
     params:

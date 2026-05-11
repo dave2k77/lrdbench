@@ -22,7 +22,7 @@ def _dummy_record(record_id: str, values: list[float]) -> SeriesRecord:
 def _dummy_espec(name: str = "RS", **params: object) -> EstimatorSpec:
     return EstimatorSpec(
         name=name,
-        family="time_domain",
+        family="temporal",
         target_estimand="hurst_scaling_proxy",
         assumptions=(),
         supports_ci=False,

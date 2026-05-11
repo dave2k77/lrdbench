@@ -37,7 +37,7 @@ def _record(record_id: str) -> SeriesRecord:
 def _variant(name: str, variant_name: str) -> EstimatorSpec:
     return EstimatorSpec(
         name=f"{name}::{variant_name}",
-        family="time_domain",
+        family="temporal",
         target_estimand="hurst_scaling_proxy",
         assumptions=(),
         supports_ci=False,
@@ -60,7 +60,7 @@ def test_manifest_expands_estimator_variants_with_base_registry_metadata() -> No
             "estimators": [
                 {
                     "name": "DFA",
-                    "family": "time_domain",
+                    "family": "temporal",
                     "target_estimand": "hurst_scaling_proxy",
                     "params": {"n_bootstrap": 0},
                     "variants": [

@@ -2,6 +2,56 @@
 
 ## Unreleased
 
+### Design & CLI
+- CLI: added `--dry-run` flag to `lrdbench run` to preview the record-estimator grid without
+  fitting estimators or writing outputs.
+- Core: added `BenchmarkRunner.preview()` method for dry-run record materialisation and grid-size
+  reporting.
+- Contracts: added machine-readable manifest JSON Schema at
+  `configs/contracts/manifest_schema.json`.
+
+### Documentation & Onboarding
+- Docs: rewrote `docs/architecture.md` into a full contributor guide covering the benchmark loop,
+  module responsibilities, extension points, provenance, and output contract.
+- Docs: expanded `CONTRIBUTING.md` with architecture pointers, validation commands, and smoke-test
+  verification steps.
+- Docs: added `docs/faq.md` covering installation errors, manifest validation, estimator invalidity,
+  bootstrap intervals, reproducibility checks, caching, plugins, and observational CSV workflows.
+- Docs: added `docs/parameter_glossary.md` with tables explaining common parameters across all
+  estimator families and execution blocks.
+- Docs: added bootstrap methodology section to `docs/benchmark_protocol.md` documenting the default
+  block-length choice and override mechanism.
+- Notebooks: fleshed out all four tutorial notebooks with explanatory markdown, intermediate
+  printouts, and additional code cells (estimates-vs-truth plots, failure-map inspection, stability
+  metrics, and custom-estimator walkthroughs).
+- Terminology: aligned all canonical suite manifests to use `family: temporal` consistently
+  (previously `time_domain` in YAMLs vs `temporal` in docs).
+
+### API Documentation
+- Core: added comprehensive docstrings to `BaseEstimator`, `BaseGenerator`, `BaseContamination`,
+  `BaseEvaluator`, `BaseReporter`, `BaseResultStore`, `BenchmarkRunner.run()`,
+  `run_manifest_path()`, `run_manifest_mapping()`, and key schema dataclasses
+  (`SeriesRecord`, `EstimateResult`, `EstimatorSpec`, `MetricSpec`, `TruthSpec`).
+- Core: expanded docstrings for `bootstrap_statistic_distribution`,
+  `symmetric_percentile_cis`, and `circular_block_resample`.
+
+### Mathematical Implementation Hardening
+- Estimators: deduplicated GPH and Periodogram regression cores into a shared
+  `_log_periodogram_regression_d()` with optional `taper` support.
+- Estimators: added cosine-bell (`taper: cosine`) spectral tapering to GPH and Periodogram
+  to reduce periodogram bias from spectral leakage.
+- Estimators: added Anis-Lloyd finite-sample correction to RS as an opt-in parameter
+  `use_anis_lloyd_correction`. Uses the exact 1976 formula computed via `scipy.special.gammaln`
+  for numerical stability.
+- Estimators: documented the GHE `flat_slope_tol` heuristic explicitly in docstrings and
+  `docs/estimator_status.md`. Users can disable it by setting `flat_slope_tol: 0.0`.
+- Estimators: documented the known finite-sample bias of the classical RS estimator in
+  `docs/estimator_status.md`.
+- Generators: updated `simulate_fou` docstring to state clearly that it uses a first-order
+  Euler–Maruyama-style discretisation and is not an exact simulation of the continuous fOU
+  process.
+
+### Plugin discovery (prior)
 - Plugin discovery: added automatic third-party estimator loading via `LRD_BENCH_ESTIMATOR_PLUGIN`
   (import-style) and `LRD_BENCH_ESTIMATOR_PLUGIN_PATH` (file-path) environment variables.
 - CLI: added `--no-plugins` flag to `lrdbench run` and `lrdbench list-estimators` to skip automatic

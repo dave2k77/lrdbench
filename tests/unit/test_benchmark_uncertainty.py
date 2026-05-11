@@ -122,7 +122,7 @@ def test_uncertainty_block_validation_rejects_invalid_levels() -> None:
         "estimators": [
             {
                 "name": "RS",
-                "family": "time_domain",
+                "family": "temporal",
                 "target_estimand": "hurst_scaling_proxy",
             }
         ],

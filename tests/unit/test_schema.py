@@ -19,7 +19,7 @@ def test_truth_spec_immutable() -> None:
 def test_estimator_spec_requires_target() -> None:
     e = EstimatorSpec(
         name="RS",
-        family="time_domain",
+        family="temporal",
         target_estimand="hurst_scaling_proxy",
         assumptions=(),
         supports_ci=False,

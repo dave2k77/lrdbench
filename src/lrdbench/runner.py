@@ -119,7 +119,29 @@ def _expand_contamination_grid(contamination: Mapping[str, Any]) -> list[tuple[s
 
 
 class BenchmarkRunner:
-    """Thin orchestrator: generate → estimate → evaluate → leaderboard → persist → report."""
+    """Orchestrate a complete benchmark run.
+
+    The runner implements the full benchmark loop:
+
+    1. Load and validate the manifest.
+    2. Materialise records from generators or observational sources.
+    3. Optionally train data-driven estimators.
+    4. Fit every enrolled estimator to every record.
+    5. Evaluate mode-appropriate metrics.
+    6. Build leaderboards.
+    7. Persist results to a :class:`CsvResultStore`.
+    8. Generate HTML/CSV/LaTeX report artefacts.
+
+    Example::
+
+        from lrdbench.runner import BenchmarkRunner
+        from lrdbench.manifest import load_manifest
+
+        runner = BenchmarkRunner()
+        manifest = load_manifest("my_suite.yaml")
+        output = runner.run(manifest)
+        print(output.run_id)
+    """
 
     def __init__(
         self,
@@ -164,6 +186,25 @@ class BenchmarkRunner:
         manifest_path: Path | None = None,
         base_dir: Path | None = None,
     ) -> BenchmarkRunOutput:
+        """Execute the full benchmark loop for ``manifest``.
+
+        Args:
+            manifest: A validated :class:`BenchmarkManifest`.
+            manifest_path: Path to the manifest file, used to resolve
+                relative paths (e.g. observational CSV files).
+            base_dir: Alternative directory for relative path resolution.
+                If ``None``, defaults to ``manifest_path.parent`` or
+                :obj:`Path.cwd()`.
+
+        Returns:
+            A :class:`BenchmarkRunOutput` containing the run ID, records,
+            estimates, metrics, leaderboards, and report bundle.
+
+        Raises:
+            NotImplementedError: If the manifest mode is not supported.
+            ValueError: If the manifest requests unsupported generator
+                parameters (e.g. ARFIMA with ``p != 0`` or ``q != 0``).
+        """
         if manifest.mode not in (
             BenchmarkMode.GROUND_TRUTH,
             BenchmarkMode.STRESS_TEST,
@@ -256,6 +297,58 @@ class BenchmarkRunner:
             plugin_provenance=tuple(self._plugin_provenance),
         )
 
+    def preview(
+        self,
+        manifest: BenchmarkManifest,
+        *,
+        manifest_path: Path | None = None,
+        base_dir: Path | None = None,
+    ) -> dict[str, object]:
+        """Dry-run preview: materialise records and report grid size without fitting.
+
+        Returns:
+            Dictionary with ``mode``, ``n_records``, ``n_estimators``,
+            ``n_fit_jobs``, ``n_clean``, ``n_contaminated``, and ``global_seed``.
+        """
+        if manifest.mode not in (
+            BenchmarkMode.GROUND_TRUTH,
+            BenchmarkMode.STRESS_TEST,
+            BenchmarkMode.OBSERVATIONAL,
+        ):
+            raise NotImplementedError(
+                f"mode {manifest.mode.value!r} is not implemented in this release "
+                f"(supported: ground_truth, stress_test, observational)"
+            )
+        global_seed = int(manifest.seed_spec.get("global_seed", 0))
+        resolve_dir = (
+            base_dir
+            if base_dir is not None
+            else (manifest_path.parent if manifest_path is not None else Path.cwd())
+        )
+
+        if manifest.mode is BenchmarkMode.GROUND_TRUTH:
+            records = self._generate_records_ground_truth(manifest, global_seed)
+        elif manifest.mode is BenchmarkMode.STRESS_TEST:
+            records = self._generate_records_stress_test(manifest, global_seed)
+        else:
+            records = load_observational_records(
+                manifest, base_dir=resolve_dir, global_seed=global_seed
+            )
+
+        n_records = len(records)
+        n_estimators = len(manifest.estimator_specs)
+        n_clean = sum(1 for r in records if r.annotations.get("stress_role") != "contaminated")
+        n_contaminated = n_records - n_clean
+        return {
+            "mode": manifest.mode.value,
+            "n_records": n_records,
+            "n_estimators": n_estimators,
+            "n_fit_jobs": n_records * n_estimators,
+            "n_clean": n_clean,
+            "n_contaminated": n_contaminated,
+            "global_seed": global_seed,
+        }
+
     def _generate_records_ground_truth(
         self, manifest: BenchmarkManifest, global_seed: int
     ) -> list[SeriesRecord]:
@@ -325,6 +418,16 @@ class BenchmarkRunner:
 
 
 def run_manifest_path(path: str | Path, *, discover_plugins: bool = True) -> BenchmarkRunOutput:
+    """Convenience entry-point: load a manifest from disk and run it.
+
+    Args:
+        path: Filesystem path to a YAML manifest.
+        discover_plugins: Whether to auto-discover third-party estimator
+            plugins via environment variables.
+
+    Returns:
+        The completed benchmark run output.
+    """
     p = Path(path)
     manifest = load_manifest(p)
     return BenchmarkRunner(discover_plugins=discover_plugins).run(manifest, manifest_path=p)
@@ -333,6 +436,19 @@ def run_manifest_path(path: str | Path, *, discover_plugins: bool = True) -> Ben
 def run_manifest_mapping(
     data: dict[str, Any], *, base_dir: Path | None = None, discover_plugins: bool = True
 ) -> BenchmarkRunOutput:
+    """Convenience entry-point: run a benchmark from an in-memory dictionary.
+
+    This is useful for programmatic benchmark construction or testing.
+
+    Args:
+        data: Dictionary matching the manifest schema.
+        base_dir: Directory used to resolve relative paths (e.g. CSV files).
+        discover_plugins: Whether to auto-discover third-party estimator
+            plugins via environment variables.
+
+    Returns:
+        The completed benchmark run output.
+    """
     manifest = manifest_from_mapping(data)
     return BenchmarkRunner(discover_plugins=discover_plugins).run(
         manifest, base_dir=base_dir or Path.cwd()
