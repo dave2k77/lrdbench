@@ -27,7 +27,7 @@ These estimators target `hurst_scaling_proxy`.
 
 | Name | Method | Main parameters |
 | --- | --- | --- |
-| `RS` | Rescaled-range scaling. | `n_bootstrap`, `bootstrap_block_len`, `ci_levels` |
+| `RS` | Rescaled-range log-log slope over subseries lengths. | `min_scale`, `max_scale`, `scale_ratio`, `use_anis_lloyd_correction`, bootstrap parameters |
 | `DFA` | Detrended fluctuation analysis on the cumulative profile. | `min_scale`, `max_scale`, `detrend_order`, bootstrap parameters |
 | `DMA` | Detrended moving-average fluctuation scaling. | `min_scale`, `max_scale`, bootstrap parameters |
 | `AbsoluteMoment` | Log-log slope of aggregation level versus absolute first moment of block-aggregated series. | `min_scale`, `max_scale`, `scale_ratio`, bootstrap parameters |

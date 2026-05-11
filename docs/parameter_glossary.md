@@ -9,11 +9,11 @@ This page explains the most common parameters you will see in manifest `estimato
 | `n_bootstrap` | int | 200 | Number of bootstrap replicates for confidence intervals. Set to 0 to skip bootstrap CIs. |
 | `bootstrap_block_len` | int | `max(4, n//10)` | Block length in samples for the circular block bootstrap. |
 | `ci_levels` | list[float] | `[0.95]` | Nominal coverage levels for symmetric percentile intervals. |
-| `min_scale` | int | varies | Minimum block size or scale (in samples) for DFA, DMA, and aggregation estimators. |
-| `max_scale` | int | varies | Maximum block size or scale (in samples). |
+| `min_scale` | int | varies | Minimum block size or scale (in samples) for RS, DFA, DMA, and aggregation estimators. RS defaults to 8. |
+| `max_scale` | int | varies | Maximum block size or scale (in samples). RS defaults to `n//2` so each fitted scale has at least two subseries. |
 | `detrend_order` | int | 1 | Polynomial detrending order for DFA and VarianceResidual. |
 | `scale_ratio` | float | 1.5 | Geometric spacing factor between consecutive aggregation scales. |
-| `use_anis_lloyd_correction` | bool | `False` | *(RS only)* Apply the Anis-Lloyd finite-sample bias correction. |
+| `use_anis_lloyd_correction` | bool | `False` | *(RS only)* Divide each scale's average R/S value by the Anis-Lloyd white-noise expectation before fitting the slope. |
 
 ## Spectral estimators (GPH, Periodogram, WhittleMLE, ModifiedLocalWhittle)
 
@@ -22,7 +22,7 @@ This page explains the most common parameters you will see in manifest `estimato
 | `n_bootstrap` | int | 200 | Number of bootstrap replicates for CIs. |
 | `bootstrap_block_len` | int | `max(4, n//10)` | Block length for the circular block bootstrap. |
 | `ci_levels` | list[float] | `[0.95]` | Nominal coverage levels. |
-| `m` | int | varies | Number of low-frequency Fourier frequencies used. GPH defaults to `n^0.5`; WhittleMLE defaults to `n//8`; ModifiedLocalWhittle defaults to `n^0.55`. |
+| `m` | int | varies | Number of low-frequency Fourier frequencies used. GPH and Periodogram default to `n^0.5`; WhittleMLE defaults to `n//8`; ModifiedLocalWhittle defaults to `n^0.55`. |
 | `taper` | str | `"none"` | Spectral taper. `"none"` uses the raw periodogram; `"cosine"` applies a cosine bell (Hann-type) window to reduce spectral leakage. |
 
 ## Geometric estimators (Higuchi, GHE)

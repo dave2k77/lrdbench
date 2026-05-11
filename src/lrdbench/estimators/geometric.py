@@ -115,41 +115,6 @@ def _ghe_hurst(
         return 0.5
     h_est = 0.5 * slope
     return float(np.clip(h_est, 1e-4, 1.0 - 1e-4))
-    x = np.asarray(x, dtype=float)
-    n = int(x.size)
-    if n < 128:
-        return None
-    x = x - np.mean(x)
-    h_max = max(h_min + 2, n // 8)
-    hs = np.unique(
-        np.round(np.geomspace(float(h_min), float(h_max), num=max(6, int(n_scales)))).astype(int)
-    )
-    log_h: list[float] = []
-    log_v: list[float] = []
-    for h in hs:
-        if h < 1 or h >= n // 2:
-            continue
-        dlt = x[h:] - x[:-h]
-        v = float(np.var(dlt, ddof=0))
-        v = max(v, 1e-30)
-        log_h.append(float(np.log(float(h))))
-        log_v.append(float(np.log(v)))
-    if len(log_h) < 4:
-        return None
-    xh = np.asarray(log_h, dtype=float)
-    yv = np.asarray(log_v, dtype=float)
-    xm = float(np.mean(xh))
-    ym = float(np.mean(yv))
-    denom = float(np.sum((xh - xm) ** 2))
-    if denom < 1e-20:
-        return None
-    slope = float(np.sum((xh - xm) * (yv - ym)) / denom)
-    if not np.isfinite(slope):
-        return None
-    if abs(slope) < float(flat_slope_tol):
-        return 0.5
-    h_est = 0.5 * slope
-    return float(np.clip(h_est, 1e-4, 1.0 - 1e-4))
 
 
 class HiguchiEstimator(BaseEstimator):

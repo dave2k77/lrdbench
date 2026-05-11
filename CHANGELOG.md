@@ -38,11 +38,15 @@
 ### Mathematical Implementation Hardening
 - Estimators: deduplicated GPH and Periodogram regression cores into a shared
   `_log_periodogram_regression_d()` with optional `taper` support.
+- Estimators: fixed GPH to honour the manifest `m` bandwidth parameter when using the shared
+  regression core.
 - Estimators: added cosine-bell (`taper: cosine`) spectral tapering to GPH and Periodogram
   to reduce periodogram bias from spectral leakage.
 - Estimators: added Anis-Lloyd finite-sample correction to RS as an opt-in parameter
   `use_anis_lloyd_correction`. Uses the exact 1976 formula computed via `scipy.special.gammaln`
   for numerical stability.
+- Estimators: corrected RS estimation to fit the R/S log-log slope across subseries scales rather
+  than deriving the Hurst proxy from a single full-record R/S value.
 - Estimators: documented the GHE `flat_slope_tol` heuristic explicitly in docstrings and
   `docs/estimator_status.md`. Users can disable it by setting `flat_slope_tol: 0.0`.
 - Estimators: documented the known finite-sample bias of the classical RS estimator in

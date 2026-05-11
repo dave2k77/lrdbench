@@ -25,17 +25,9 @@ def _anis_lloyd_expected_rs(n: int) -> float:
     return float(np.exp(log_ratio) * s)
 
 
-def _rs_hurst_proxy(x: np.ndarray, *, use_correction: bool = False) -> float | None:
-    """Rescaled-range Hurst proxy.
-
-    Args:
-        x: Input time series.
-        use_correction: If ``True``, apply the Anis-Lloyd finite-sample correction
-            for Gaussian white noise. This reduces the well-known upward bias near
-            ``H = 0.5`` and for small sample sizes.
-    """
+def _rs_value(x: np.ndarray) -> float | None:
     x = np.asarray(x, dtype=float)
-    if x.size < 16:
+    if x.size < 2:
         return None
     x = x - np.mean(x)
     y = np.cumsum(x)
@@ -43,15 +35,85 @@ def _rs_hurst_proxy(x: np.ndarray, *, use_correction: bool = False) -> float | N
     s = float(np.std(x, ddof=0))
     if s < 1e-12 or r < 1e-12:
         return None
+    return r / s
+
+
+def _rs_scales(
+    n: int,
+    *,
+    min_scale: int,
+    max_scale: int | None,
+    scale_ratio: float,
+) -> list[int]:
+    if n < 64:
+        return []
+    min_scale = max(8, int(min_scale))
+    if max_scale is None:
+        max_scale = max(min_scale + 2, n // 2)
+    max_scale = min(int(max_scale), n // 2)
+    if max_scale <= min_scale:
+        return []
+    scales: list[int] = []
+    s = min_scale
+    while s <= max_scale:
+        scales.append(int(s))
+        s = int(max(s + 1, round(s * max(1.01, float(scale_ratio)))))
+    return scales
+
+
+def _rs_hurst_proxy(
+    x: np.ndarray,
+    *,
+    use_correction: bool = False,
+    min_scale: int = 8,
+    max_scale: int | None = None,
+    scale_ratio: float = 1.5,
+) -> float | None:
+    """Rescaled-range Hurst proxy.
+
+    Args:
+        x: Input time series.
+        use_correction: If ``True``, apply the Anis-Lloyd finite-sample correction
+            for Gaussian white noise. This reduces the well-known upward bias near
+            ``H = 0.5`` and for small sample sizes.
+        min_scale: Minimum subseries length used for the log-log scaling fit.
+        max_scale: Maximum subseries length. Defaults to ``n // 2`` and is capped
+            at ``n // 2`` so each fitted scale has at least two subseries.
+        scale_ratio: Geometric spacing factor between candidate subseries lengths.
+    """
+    x = np.asarray(x, dtype=float)
     n = x.size
-    rs = r / s
+    if n < 64:
+        return None
+    log_scale: list[float] = []
+    log_rs: list[float] = []
+    for scale in _rs_scales(n, min_scale=min_scale, max_scale=max_scale, scale_ratio=scale_ratio):
+        n_blocks = n // scale
+        if n_blocks < 2:
+            continue
+        block_values: list[float] = []
+        for idx in range(n_blocks):
+            rs = _rs_value(x[idx * scale : (idx + 1) * scale])
+            if rs is not None and np.isfinite(rs) and rs > 0.0:
+                block_values.append(rs)
+        if not block_values:
+            continue
+        avg_rs = float(np.mean(block_values))
+        if use_correction:
+            expected = _anis_lloyd_expected_rs(scale)
+            if expected <= 0.0 or not np.isfinite(expected):
+                continue
+            avg_rs = avg_rs / expected
+        if avg_rs <= 0.0 or not np.isfinite(avg_rs):
+            continue
+        log_scale.append(np.log(float(scale)))
+        log_rs.append(np.log(avg_rs))
+    slope = _ols_slope(log_scale, log_rs)
+    if slope is None:
+        return None
     if use_correction:
-        expected = _anis_lloyd_expected_rs(n)
-        if expected > 0:
-            rs = rs / expected
-        # The correction removes the white-noise baseline; add 0.5 back
-        return float(np.log(rs) / np.log(n) + 0.5)
-    return float(np.log(rs) / np.log(n))
+        slope += 0.5
+    return float(np.clip(slope, 1e-4, 1.0 - 1e-4))
 
 
 class RSEstimator(BaseEstimator):
@@ -62,12 +124,16 @@ class RSEstimator(BaseEstimator):
     - ``n_bootstrap`` (int, default 200) – number of bootstrap replicates.
     - ``bootstrap_block_len`` (int, default ``max(4, n//10)``) – block length.
     - ``ci_levels`` (list, default ``[0.95]``) – nominal coverage levels.
+    - ``min_scale`` (int, default 8) – minimum R/S subseries length.
+    - ``max_scale`` (int, optional) – maximum R/S subseries length.
+    - ``scale_ratio`` (float, default 1.5) – geometric scale spacing.
     - ``use_anis_lloyd_correction`` (bool, default ``False``) – if ``True``,
-      apply the Anis-Lloyd finite-sample correction. This reduces systematic
-      bias near ``H = 0.5`` but assumes approximately Gaussian increments.
+      divide each scale's average R/S value by the Anis-Lloyd white-noise
+      expectation before fitting the slope, then add the 0.5 white-noise
+      baseline back to the fitted slope.
     """
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -90,7 +156,16 @@ class RSEstimator(BaseEstimator):
 
         try:
             use_corr = bool(params.get("use_anis_lloyd_correction", False))
-            h = _rs_hurst_proxy(record.values, use_correction=use_corr)
+            min_scale = int(params.get("min_scale", 8))
+            max_scale = int(params["max_scale"]) if params.get("max_scale") is not None else None
+            scale_ratio = float(params.get("scale_ratio", 1.5))
+            h = _rs_hurst_proxy(
+                record.values,
+                use_correction=use_corr,
+                min_scale=min_scale,
+                max_scale=max_scale,
+                scale_ratio=scale_ratio,
+            )
             dt = time.perf_counter() - t0
             if h is None:
                 return EstimateResult(
@@ -104,7 +179,13 @@ class RSEstimator(BaseEstimator):
                 )
 
             def _rs_stat(z: np.ndarray) -> float | None:
-                return _rs_hurst_proxy(z, use_correction=use_corr)
+                return _rs_hurst_proxy(
+                    z,
+                    use_correction=use_corr,
+                    min_scale=min_scale,
+                    max_scale=max_scale,
+                    scale_ratio=scale_ratio,
+                )
 
             samples = bootstrap_statistic_distribution(
                 record.values,
@@ -129,6 +210,10 @@ class RSEstimator(BaseEstimator):
                 "bootstrap_block_len": block_len,
                 "bootstrap_replicates_used": int(samples.size),
                 "bootstrap_point_std": bstd,
+                "min_scale": min_scale,
+                "max_scale": max_scale,
+                "scale_ratio": scale_ratio,
+                "use_anis_lloyd_correction": use_corr,
             }
             return EstimateResult(
                 record_id=record.record_id,

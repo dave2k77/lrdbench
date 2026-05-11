@@ -12,7 +12,7 @@
 Example suite manifests: `configs/suites/smoke_*.yaml`.
 
 A machine-readable JSON Schema for the manifest format is available at
-[`configs/contracts/manifest_schema.json`](../configs/contracts/manifest_schema.json).
+[`configs/contracts/manifest_schema.json`](https://github.com/dave2k77/lrdbench/blob/main/configs/contracts/manifest_schema.json).
 
 Bundled estimator names and target estimands are documented in
 [Bundled estimators](bundled_estimators.md). The default registry includes temporal aggregation

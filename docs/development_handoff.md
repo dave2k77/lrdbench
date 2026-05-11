@@ -490,8 +490,11 @@ Focus: design quality, mathematical accuracy, and onboarding friction.
 
 ### Mathematical hardening
 - Deduplicated GPH / Periodogram regression cores into `_log_periodogram_regression_d()`.
+- Fixed GPH bandwidth handling so `params.m` is passed through to the shared regression core.
 - Added optional cosine-bell spectral tapering (`params.taper: cosine`) to GPH and Periodogram.
 - Implemented Anis-Lloyd finite-sample correction for RS (`use_anis_lloyd_correction`).
+- Corrected RS to estimate the log-log R/S scaling slope across subseries lengths instead of using
+  a single full-record R/S ratio.
 - Documented GHE `flat_slope_tol` heuristic explicitly; noted how to disable it.
 - Documented RS finite-sample bias and the Anis-Lloyd correction in estimator status.
 - Documented fOU as an Euler–Maruyama approximation in `simulate_fou` docstring.

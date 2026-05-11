@@ -18,6 +18,8 @@ def _apply_taper(x: np.ndarray, taper: str | None) -> np.ndarray:
     - ``None`` or ``'none'`` → no tapering (raw series).
     - ``'cosine'`` → cosine bell (Hann-type) taper that reduces spectral leakage.
     """
+    if taper is not None:
+        taper = taper.lower()
     if taper is None or taper == "none":
         return x
     if taper == "cosine":
@@ -41,6 +43,7 @@ def _log_periodogram_regression_d(
         return None
     x = x - np.mean(x)
     x = _apply_taper(x, taper)
+    x = x - np.mean(x)
     if m is None:
         m = max(2, int(n**0.5))
     m = min(m, n // 2 - 1)
@@ -79,7 +82,7 @@ def _log_periodogram_slope_d(x: np.ndarray, *, m: int | None = None) -> float | 
 class GPHEstimator(BaseEstimator):
     """Geweke–Porter–Hudak log-periodogram regression for long-memory parameter d."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -94,9 +97,7 @@ class GPHEstimator(BaseEstimator):
         n_boot = int(params.get("n_bootstrap", 200))
         block_len = int(params.get("bootstrap_block_len", 0)) or max(4, record.values.size // 10)
         levels_raw = params.get("ci_levels")
-        ci_levels = (
-            tuple(float(x) for x in levels_raw) if levels_raw is not None else (0.95,)
-        )
+        ci_levels = tuple(float(x) for x in levels_raw) if levels_raw is not None else (0.95,)
         seed = 0
         if record.provenance is not None and record.provenance.seed is not None:
             seed = int(record.provenance.seed) + 7919
@@ -104,7 +105,8 @@ class GPHEstimator(BaseEstimator):
 
         try:
             taper = str(params.get("taper", "none")) or "none"
-            d = _log_periodogram_regression_d(record.values, taper=taper)
+            m = int(params["m"]) if params.get("m") is not None else None
+            d = _log_periodogram_regression_d(record.values, m=m, taper=taper)
             dt = time.perf_counter() - t0
             if d is None:
                 return EstimateResult(
@@ -118,7 +120,7 @@ class GPHEstimator(BaseEstimator):
                 )
 
             def _gph_stat(z: np.ndarray) -> float | None:
-                return _log_periodogram_regression_d(z, taper=taper)
+                return _log_periodogram_regression_d(z, m=m, taper=taper)
 
             samples = bootstrap_statistic_distribution(
                 record.values,
@@ -143,6 +145,8 @@ class GPHEstimator(BaseEstimator):
                 "bootstrap_block_len": block_len,
                 "bootstrap_replicates_used": int(samples.size),
                 "bootstrap_point_std": bstd,
+                "m": m,
+                "taper": taper,
             }
             return EstimateResult(
                 record_id=record.record_id,
@@ -167,37 +171,6 @@ class GPHEstimator(BaseEstimator):
                 failure_reason=f"exception:{type(exc).__name__}:{exc}",
                 estimator_version=self.VERSION,
             )
-
-
-def _log_periodogram_slope_d(x: np.ndarray, *, m: int | None = None) -> float | None:
-    """Log-periodogram regression memory parameter (GPH-type) in (-0.5, 0.5)."""
-    x = np.asarray(x, dtype=float)
-    n = x.size
-    if n < 64:
-        return None
-    x = x - np.mean(x)
-    if m is None:
-        m = max(2, int(n**0.5))
-    m = min(m, n // 2 - 1)
-    if m < 2:
-        return None
-    j = np.arange(1, m + 1, dtype=float)
-    lam = 2.0 * np.pi * j / n
-    fft = np.fft.rfft(x)
-    periodogram = (np.abs(fft[1 : m + 1]) ** 2) / n
-    periodogram = np.maximum(periodogram, 1e-20)
-    log_freq = np.log(4.0 * np.sin(lam / 2.0) ** 2)
-    log_per = np.log(periodogram)
-    x_mean = float(np.mean(log_freq))
-    y_mean = float(np.mean(log_per))
-    denom = float(np.sum((log_freq - x_mean) ** 2))
-    if denom < 1e-20:
-        return None
-    beta = float(np.sum((log_freq - x_mean) * (log_per - y_mean)) / denom)
-    d = float(-0.5 * beta)
-    if not np.isfinite(d):
-        return None
-    return float(np.clip(d, -0.499, 0.499))
 
 
 def _arfima_spectrum_shape(lam: np.ndarray, d: float) -> np.ndarray:
@@ -285,7 +258,7 @@ def _modified_local_whittle_d(x: np.ndarray, *, m: int | None = None) -> float |
 class PeriodogramRegressionEstimator(BaseEstimator):
     """Log-periodogram regression (memory parameter d, GPH-type)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
