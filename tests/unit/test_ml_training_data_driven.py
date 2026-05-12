@@ -389,3 +389,149 @@ def test_runner_invokes_data_driven_preparation(tmp_path: Path, monkeypatch: pyt
 
     assert calls == [output.run_id]
     assert output.result_store_path is not None
+
+
+def test_feature_vector_spectral_bands_are_non_overlapping() -> None:
+    for n in (16, 32, 64, 128, 256, 512, 1024):
+        x = np.sin(np.linspace(0.0, 10.0, n))
+        spec = np.abs(np.fft.rfft(x)) ** 2
+        n_spec = spec.size
+        end0 = max(2, n_spec // 32)
+        end1 = max(end0 + 1, n_spec // 16)
+        end2 = max(end1 + 1, n_spec // 8)
+        end3 = max(end2 + 1, n_spec // 4)
+        bands = [spec[1:end0].size, spec[end0:end1].size, spec[end1:end2].size, spec[end2:end3].size]
+        assert all(b > 0 for b in bands), f"overlap/empty bands at n={n}: {bands}"
+
+
+def test_sklearn_estimator_clips_to_training_bounds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(data_driven, "sklearn_available", lambda: True)
+    data_driven._cached_pickle.cache_clear()
+    model_path = tmp_path / "model.pkl"
+    data_driven._write_pickle(
+        model_path,
+        {
+            "model": PredictConstant(1.3),
+            "training_summary": {"n_training_records": 4, "target_min": 0.2, "target_max": 0.9},
+            "max_lag": 16,
+        },
+    )
+    rec = _record(np.sin(np.linspace(0.0, 12.0, 128)))
+
+    out = MLRandomForestEstimator(_spec("MLRandomForest", {"model_path": str(model_path)})).fit(rec)
+
+    assert out.valid
+    assert out.point == 0.9  # clipped to training max
+
+
+def test_sklearn_estimator_rejects_max_lag_mismatch(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(data_driven, "sklearn_available", lambda: True)
+    data_driven._cached_pickle.cache_clear()
+    model_path = tmp_path / "model.pkl"
+    data_driven._write_pickle(
+        model_path,
+        {"model": PredictConstant(0.5), "training_summary": {"n_training_records": 4}, "max_lag": 16},
+    )
+    rec = _record(np.sin(np.linspace(0.0, 12.0, 128)))
+
+    out = MLRandomForestEstimator(_spec("MLRandomForest", {"model_path": str(model_path), "max_lag": 32})).fit(rec)
+
+    assert not out.valid
+    assert "max_lag_mismatch" in out.failure_reason or "max_lag_mismatch" in (out.failure_reason or "")
+
+
+def test_train_torch_model_skips_empty_records(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+    records = [
+        _record(np.asarray([], dtype=float), truth=0.5, record_id="empty"),
+        _record(np.sin(np.linspace(0.0, 4.0, 64)), truth=0.5, record_id="ok"),
+        _record(np.sin(np.linspace(0.0, 4.0, 64)) + 1, truth=0.6, record_id="ok2"),
+    ]
+
+    summary = data_driven.train_torch_model(
+        "MLCNN", records, params={"sequence_length": 16}, artefact_path=tmp_path / "cnn.pt"
+    )
+
+    assert summary["n_training_records"] == 2
+
+
+def test_train_torch_model_rejects_too_short_sequence_length(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+    records = [
+        _record(np.sin(np.linspace(0.0, 4.0, 64)), truth=0.5),
+        _record(np.sin(np.linspace(0.0, 4.0, 64)) + 1, truth=0.6),
+    ]
+
+    with pytest.raises(ValueError, match="sequence_length must be >= 8"):
+        data_driven.train_torch_model(
+            "MLCNN", records, params={"sequence_length": 4}, artefact_path=tmp_path / "cnn.pt"
+        )
+
+
+def test_lstm_regressor_mean_pools_and_dropout_present(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+    import torch
+    import torch.nn as nn
+
+    model = data_driven._build_torch_model("lstm", 64)
+    # Variable sequence length should both yield (batch, 1) because of mean pooling
+    assert model(torch.randn(2, 1, 64)).shape == (2, 1)
+    assert model(torch.randn(2, 1, 32)).shape == (2, 1)
+
+    # Default hidden_size=32 -> 4*32 == 128 for lstm.weight_ih_l0 first dim
+    assert model.lstm.weight_ih_l0.shape[0] == 128
+
+    # Dropout module present in head
+    assert any(isinstance(m, nn.Dropout) for m in model.head.modules())
+
+
+def test_cnn_regressor_larger_defaults_and_dropout(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+    import torch.nn as nn
+
+    model = data_driven._build_torch_model("cnn_1d", 64)
+    # Defaults: conv1_channels=16, conv2_channels=32
+    assert model.net[0].out_channels == 16
+    assert model.net[4].out_channels == 32
+    # Three Dropout layers in Conv path
+    assert sum(1 for m in model.net.modules() if isinstance(m, nn.Dropout)) == 3
+
+
+def test_train_torch_model_saves_architecture_and_round_trips(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+    import torch
+
+    records = [
+        _record(np.sin(np.linspace(0.0, 4.0, 128)), truth=0.5, record_id="r0"),
+        _record(np.sin(np.linspace(0.0, 4.0, 128)) + 1, truth=0.6, record_id="r1"),
+        _record(np.sin(np.linspace(0.0, 4.0, 128)) + 2, truth=0.7, record_id="r2"),
+    ]
+
+    summary = data_driven.train_torch_model(
+        "MLLSTM",
+        records,
+        params={"sequence_length": 32, "hidden_size": 64, "num_layers": 2, "dropout": 0.3},
+        artefact_path=tmp_path / "lstm.pt",
+    )
+
+    assert summary["n_training_records"] == 3
+    bundle = torch.load(tmp_path / "lstm.pt", map_location="cpu", weights_only=True)
+    assert bundle["architecture"] == {"hidden_size": 64, "num_layers": 2, "dropout": 0.3}
+    assert bundle["state_dict"]["lstm.weight_ih_l0"].shape[0] == 256  # 4 * 64
+
+    rec = _record(np.sin(np.linspace(0.0, 4.0, 128)), record_id="infer")
+    out = MLLSTMEstimator(_spec("MLLSTM", {"model_path": str(tmp_path / "lstm.pt")})).fit(rec)
+    assert out.valid
+    assert out.diagnostics.get("architecture") == {"hidden_size": 64, "num_layers": 2, "dropout": 0.3}
+    assert isinstance(out.point, float)
+
+
+def test_lstm_rejects_zero_dropout_with_many_layers(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+
+    model = data_driven._build_torch_model("lstm", 64, cfg={"num_layers": 3, "dropout": 0.0})
+    # _build_torch_model silently bumps dropout to 0.2 when num_layers > 1 and dropout == 0.0
+    assert model.lstm.dropout > 0.0
+    assert model.pool_dropout.p == 0.2

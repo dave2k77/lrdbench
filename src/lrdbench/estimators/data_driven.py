@@ -101,13 +101,18 @@ def feature_vector(values: np.ndarray, *, max_lag: int = 16) -> np.ndarray:
         feats.extend([float(np.var(means)), float(np.mean(variances))])
 
     spec = np.abs(np.fft.rfft(x)) ** 2
-    if spec.size > 4 and float(np.sum(spec)) > 1e-12:
+    n_spec = spec.size
+    if n_spec > 4 and float(np.sum(spec)) > 1e-12:
         total = float(np.sum(spec))
+        end0 = max(2, n_spec // 32)
+        end1 = max(end0 + 1, n_spec // 16)
+        end2 = max(end1 + 1, n_spec // 8)
+        end3 = max(end2 + 1, n_spec // 4)
         bands = (
-            spec[1 : max(2, spec.size // 32)],
-            spec[max(1, spec.size // 32) : max(2, spec.size // 16)],
-            spec[max(1, spec.size // 16) : max(2, spec.size // 8)],
-            spec[max(1, spec.size // 8) : max(2, spec.size // 4)],
+            spec[1:end0],
+            spec[end0:end1],
+            spec[end1:end2],
+            spec[end2:end3],
         )
         feats.extend(float(np.sum(b) / total) if b.size else 0.0 for b in bands)
     else:
@@ -213,9 +218,24 @@ class _SklearnEstimator(BaseEstimator):
                     estimator_version=self.VERSION,
                 )
             bundle = _cached_pickle(str(model_path))
+            trained_max_lag = bundle.get("max_lag")
+            requested_max_lag = int(params.get("max_lag", 16))
+            if trained_max_lag is not None and int(trained_max_lag) != requested_max_lag:
+                return EstimateResult(
+                    record_id=record.record_id,
+                    estimator_name=self._spec.name,
+                    point=None,
+                    runtime_seconds=time.perf_counter() - t0,
+                    valid=False,
+                    failure_reason=f"max_lag_mismatch:trained={trained_max_lag}:requested={requested_max_lag}",
+                    estimator_version=self.VERSION,
+                )
             model = bundle["model"]
+            training_summary = dict(bundle.get("training_summary", {}))
+            target_min = float(training_summary.get("target_min", 0.0))
+            target_max = float(training_summary.get("target_max", 1.0))
             point = float(np.asarray(model.predict(x.reshape(1, -1))).reshape(-1)[0])
-            point = float(np.clip(point, 0.0, 1.0))
+            point = float(np.clip(point, target_min, target_max))
             return EstimateResult(
                 record_id=record.record_id,
                 estimator_name=self._spec.name,
@@ -226,7 +246,7 @@ class _SklearnEstimator(BaseEstimator):
                     "model_kind": self.MODEL_KIND,
                     "model_path": str(model_path),
                     "feature_version": "0.1.0",
-                    "training_summary": dict(bundle.get("training_summary", {})),
+                    "training_summary": training_summary,
                 },
                 estimator_version=self.VERSION,
             )
@@ -282,9 +302,10 @@ class _TorchSequenceEstimator(BaseEstimator):
                 estimator_version=self.VERSION,
             )
         try:
-            bundle = torch.load(str(model_path), map_location="cpu", weights_only=False)
+            bundle = torch.load(str(model_path), map_location="cpu", weights_only=True)
             seq_len = int(bundle["sequence_length"])
-            model = _build_torch_model(str(bundle["model_kind"]), seq_len)
+            arch_cfg = dict(bundle.get("architecture", {}))
+            model = _build_torch_model(str(bundle["model_kind"]), seq_len, cfg=arch_cfg)
             model.load_state_dict(bundle["state_dict"])
             model.eval()
             x = fixed_length_sequence(record.values, length=seq_len)
@@ -298,20 +319,25 @@ class _TorchSequenceEstimator(BaseEstimator):
                     failure_reason="insufficient_signal_for_data_driven_sequence",
                     estimator_version=self.VERSION,
                 )
+            training_summary = dict(bundle.get("training_summary", {}))
+            target_min = float(training_summary.get("target_min", 0.0))
+            target_max = float(training_summary.get("target_max", 1.0))
             with torch.no_grad():
                 xt = torch.as_tensor(x.reshape(1, 1, -1), dtype=torch.float32)
                 pred = model(xt).reshape(-1)[0].item()
+            point = float(np.clip(pred, target_min, target_max))
             return EstimateResult(
                 record_id=record.record_id,
                 estimator_name=self._spec.name,
-                point=float(np.clip(pred, 0.0, 1.0)),
+                point=point,
                 runtime_seconds=time.perf_counter() - t0,
                 valid=True,
                 diagnostics={
                     "model_kind": self.MODEL_KIND,
                     "model_path": str(model_path),
                     "sequence_length": seq_len,
-                    "training_summary": dict(bundle.get("training_summary", {})),
+                    "architecture": arch_cfg,
+                    "training_summary": training_summary,
                 },
                 estimator_version=self.VERSION,
             )
@@ -335,24 +361,32 @@ class MLLSTMEstimator(_TorchSequenceEstimator):
     MODEL_KIND = "lstm"
 
 
-def _build_torch_model(kind: str, sequence_length: int) -> Any:
+def _build_torch_model(kind: str, sequence_length: int, *, cfg: Mapping[str, Any] | None = None) -> Any:
     from torch import nn
 
+    _cfg = dict(cfg) if cfg else {}
+
     if kind == "cnn_1d":
+        c1 = int(_cfg.get("conv1_channels", 16))
+        c2 = int(_cfg.get("conv2_channels", 32))
+        dropout = float(_cfg.get("dropout", 0.2))
 
         class CNNRegressor(nn.Module):
             def __init__(self) -> None:
                 super().__init__()
                 self.net = nn.Sequential(
-                    nn.Conv1d(1, 8, kernel_size=7, padding=3),
+                    nn.Conv1d(1, c1, kernel_size=7, padding=3),
                     nn.ReLU(),
+                    nn.Dropout(dropout),
                     nn.AvgPool1d(2),
-                    nn.Conv1d(8, 16, kernel_size=5, padding=2),
+                    nn.Conv1d(c1, c2, kernel_size=5, padding=2),
                     nn.ReLU(),
+                    nn.Dropout(dropout),
                     nn.AdaptiveAvgPool1d(8),
                     nn.Flatten(),
-                    nn.Linear(16 * 8, 32),
+                    nn.Linear(c2 * 8, 32),
                     nn.ReLU(),
+                    nn.Dropout(dropout),
                     nn.Linear(32, 1),
                 )
 
@@ -362,17 +396,35 @@ def _build_torch_model(kind: str, sequence_length: int) -> Any:
         return CNNRegressor()
 
     if kind == "lstm":
+        hidden_size = int(_cfg.get("hidden_size", 32))
+        num_layers = int(_cfg.get("num_layers", 1))
+        dropout = float(_cfg.get("dropout", 0.2))
+        if num_layers > 1 and dropout == 0.0:
+            dropout = 0.2
 
         class LSTMRegressor(nn.Module):
             def __init__(self) -> None:
                 super().__init__()
-                self.lstm = nn.LSTM(input_size=1, hidden_size=16, batch_first=True)
-                self.head = nn.Sequential(nn.Linear(16, 16), nn.ReLU(), nn.Linear(16, 1))
+                self.lstm = nn.LSTM(
+                    input_size=1,
+                    hidden_size=hidden_size,
+                    num_layers=num_layers,
+                    batch_first=True,
+                    dropout=dropout if num_layers > 1 else 0.0,
+                )
+                self.pool_dropout = nn.Dropout(dropout)
+                self.head = nn.Sequential(
+                    nn.Linear(hidden_size, hidden_size),
+                    nn.ReLU(),
+                    nn.Dropout(dropout),
+                    nn.Linear(hidden_size, 1),
+                )
 
             def forward(self, x: Any) -> Any:
                 xt = x.transpose(1, 2)
-                _, (hidden, _) = self.lstm(xt)
-                return self.head(hidden[-1])
+                out, _ = self.lstm(xt)
+                pooled = self.pool_dropout(out.mean(dim=1))
+                return self.head(pooled)
 
         return LSTMRegressor()
 
@@ -448,7 +500,14 @@ def train_sklearn_model(
     if val_idx.size:
         val_pred = np.asarray(model.predict(xmat[val_idx]), dtype=float)
         summary["validation_mae"] = float(np.mean(np.abs(val_pred - yarr[val_idx])))
-    _write_pickle(artefact_path, {"model": model, "training_summary": summary})
+    _write_pickle(
+        artefact_path,
+        {
+            "model": model,
+            "training_summary": summary,
+            "max_lag": int(max_lag),
+        },
+    )
     return summary
 
 
@@ -466,13 +525,18 @@ def train_torch_model(
     from torch.utils.data import DataLoader, TensorDataset
 
     sequence_length = int(params.get("sequence_length", 256))
+    if sequence_length < 8:
+        raise ValueError(f"sequence_length must be >= 8, got {sequence_length}")
     torch.manual_seed(int(params.get("random_state", 0)))
     xs: list[np.ndarray] = []
     ys: list[float] = []
     for rec in records:
         if rec.truth is None or rec.truth.target_value is None:
             continue
-        seq = fixed_length_sequence(rec.values, length=sequence_length)
+        try:
+            seq = fixed_length_sequence(rec.values, length=sequence_length)
+        except Exception:
+            continue
         if seq.size == 0:
             continue
         xs.append(seq)
@@ -490,8 +554,17 @@ def train_torch_model(
     val_idx = order[:n_val]
     train_idx = order[n_val:]
     kind = "cnn_1d" if estimator_name == "MLCNN" else "lstm"
-    model = _build_torch_model(kind, sequence_length)
-    opt = torch.optim.Adam(model.parameters(), lr=float(params.get("learning_rate", 0.001)))
+    arch_cfg = {
+        k: params[k]
+        for k in ("conv1_channels", "conv2_channels", "hidden_size", "num_layers", "dropout")
+        if k in params
+    }
+    model = _build_torch_model(kind, sequence_length, cfg=arch_cfg)
+    opt = torch.optim.Adam(
+        model.parameters(),
+        lr=float(params.get("learning_rate", 0.001)),
+        weight_decay=float(params.get("weight_decay", 1e-4)),
+    )
     loss_fn = nn.MSELoss()
     loader = DataLoader(
         TensorDataset(x[train_idx], y[train_idx]),
@@ -528,6 +601,7 @@ def train_torch_model(
         {
             "model_kind": kind,
             "sequence_length": sequence_length,
+            "architecture": arch_cfg,
             "state_dict": model.state_dict(),
             "training_summary": summary,
         },

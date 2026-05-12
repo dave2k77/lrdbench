@@ -100,7 +100,9 @@ ml_training:
       - name: level_shift
         params:
           shift: [0.2]
+```
 
+```yaml
 estimators:
   - name: RS
     family: temporal
@@ -119,6 +121,22 @@ estimators:
       n_estimators: 100
       random_state: 7
       max_lag: 16
+  - name: MLLSTM
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      sequence_length: 256
+      hidden_size: 32
+      num_layers: 1
+      dropout: 0.2
+      learning_rate: 0.001
+      weight_decay: 0.0001
+      batch_size: 16
+      epochs: 10
+      random_state: 7
 ```
 
 `ml_training.source` is independent of the benchmark evaluation source. The runner trains models

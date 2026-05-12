@@ -176,9 +176,13 @@ estimators:
     supports_diagnostics: true
     params:
       sequence_length: 512
+      conv1_channels: 16
+      conv2_channels: 32
+      dropout: 0.2
       epochs: 20
       batch_size: 32
       learning_rate: 0.001
+      weight_decay: 0.0001
       random_state: 20260501
 
   - name: MLLSTM
@@ -189,9 +193,13 @@ estimators:
     supports_diagnostics: true
     params:
       sequence_length: 512
+      hidden_size: 32
+      num_layers: 1
+      dropout: 0.2
       epochs: 20
       batch_size: 32
       learning_rate: 0.001
+      weight_decay: 0.0001
       random_state: 20260501
 
 metrics:
