@@ -8,8 +8,11 @@ you touch.
 1. **Install in editable mode with dev dependencies:**
 
    ```bash
-   pip install -e ".[test,dev]"
+   pip install -e ".[test,dev,docs,reports]"
    ```
+
+   Use `pip install -e ".[all]"` only when you also need the heavier data-driven dependencies
+   (`scikit-learn` and `torch`).
 
 2. **Read the architecture overview:**
    [Architecture](architecture.md) explains the benchmark loop, key modules, and how to add
@@ -31,9 +34,14 @@ you touch.
 
    ```bash
    lrdbench list-suites
+   lrdbench run smoke_ground_truth --dry-run
    lrdbench run smoke_ground_truth
    lrdbench validate-output reports/<run_id>
    ```
+
+If you are working in a minimal environment without `pytest-cov`, use
+`python -m pytest -q -o addopts=''` for a no-coverage smoke check. Full submissions should still
+run the default `python -m pytest` after installing the `test` extra.
 
 ## Checklists and policies
 

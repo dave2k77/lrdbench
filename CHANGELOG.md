@@ -11,6 +11,13 @@
   `configs/contracts/manifest_schema.json`.
 
 ### Documentation & Onboarding
+- Docs: promoted dry-run workflow guidance into README, quickstart, benchmark protocol, and
+  contributor smoke-test instructions.
+- Docs: expanded API reference coverage for `BenchmarkRunner.preview()`, schema dataclasses,
+  validation/output-contract helpers, bootstrap utilities, plugin discovery, public assets, and
+  testing helpers.
+- Packaging/docs: clarified that the `all` optional extra includes data-driven dependencies and
+  documented lighter development-install alternatives.
 - Docs: rewrote `docs/architecture.md` into a full contributor guide covering the benchmark loop,
   module responsibilities, extension points, provenance, and output contract.
 - Docs: expanded `CONTRIBUTING.md` with architecture pointers, validation commands, and smoke-test

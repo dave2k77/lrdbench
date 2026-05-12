@@ -175,6 +175,19 @@ python examples/quickstart_pure.py
 The command prints the run identifier, result store, HTML report path, and output validation
 command. See the [quickstart tutorial](docs/tutorials/quickstart.md) for the full walkthrough.
 
+### Preview before running
+
+Use `--dry-run` when you want to inspect the benchmark grid before fitting estimators or writing
+outputs:
+
+```bash
+lrdbench run smoke_ground_truth --dry-run
+```
+
+The preview prints the benchmark mode, materialised record count, enrolled estimator count, total
+fit jobs, clean/contaminated split for stress tests, and global seed. This is the recommended first
+step before launching public-medium, custom, or data-driven suites.
+
 ### Data-driven smoke benchmark
 
 The RF/SVR data-driven smoke suite uses optional scikit-learn dependencies:

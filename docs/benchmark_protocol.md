@@ -11,6 +11,20 @@
 
 Example suite manifests: `configs/suites/smoke_*.yaml`.
 
+## Previewing a benchmark grid
+
+Before running an expensive manifest, preview the materialised record-estimator grid:
+
+```bash
+lrdbench run configs/suites/public_medium_stress_contamination.yaml --dry-run
+```
+
+`--dry-run` loads and validates the manifest, materialises synthetic or observational records, and
+prints the benchmark mode, record count, estimator count, total fit jobs, clean/contaminated split
+for stress tests, and global seed. It does **not** fit estimators, train data-driven models, write
+reports, or populate caches. The same capability is available programmatically through
+`BenchmarkRunner.preview()`.
+
 A machine-readable JSON Schema for the manifest format is available at
 [`configs/contracts/manifest_schema.json`](https://github.com/dave2k77/lrdbench/blob/main/configs/contracts/manifest_schema.json).
 

@@ -104,7 +104,7 @@ dev = [
 ]
 
 all = [
-  "lrdbench[reports,parquet,docs,notebooks,test,dev]"
+  "lrdbench[reports,parquet,ml,nn,data-driven,docs,notebooks,test,dev]"
 ]
 
 [project.scripts]

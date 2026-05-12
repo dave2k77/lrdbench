@@ -39,6 +39,16 @@ The same run can be launched through the CLI:
 lrdbench run configs/suites/smoke_ground_truth.yaml
 ```
 
+Before fitting anything, preview the grid with `--dry-run`:
+
+```bash
+lrdbench run configs/suites/smoke_ground_truth.yaml --dry-run
+```
+
+The dry run materialises records and prints `mode`, `n_records`, `n_estimators`, `n_fit_jobs`, and
+`global_seed` without writing reports. For stress-test manifests it also prints the clean versus
+contaminated record counts. Use this check before launching larger public or custom suites.
+
 Packaged suite names can also be inspected with:
 
 ```bash

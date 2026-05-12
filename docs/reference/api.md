@@ -9,6 +9,7 @@ Install the package and docs extras: `pip install -e ".[docs]"`.
     options:
       members:
         - run
+        - preview
         - __init__
 
 ::: lrdbench.runner.run_manifest_path
@@ -81,3 +82,51 @@ Install the package and docs extras: `pip install -e ".[docs]"`.
 ::: lrdbench.defaults.build_default_estimator_registry
 ::: lrdbench.defaults.build_default_generator_registry
 ::: lrdbench.defaults.build_default_contamination_registry
+
+## Schema dataclasses
+
+::: lrdbench.schema.BenchmarkManifest
+::: lrdbench.schema.SeriesRecord
+::: lrdbench.schema.EstimateResult
+::: lrdbench.schema.EstimatorSpec
+::: lrdbench.schema.MetricSpec
+::: lrdbench.schema.MetricValue
+::: lrdbench.schema.MetricBundle
+::: lrdbench.schema.LeaderboardSpec
+::: lrdbench.schema.LeaderboardRow
+::: lrdbench.schema.ReportSpec
+::: lrdbench.schema.ReportBundle
+::: lrdbench.schema.BenchmarkRunOutput
+::: lrdbench.schema.PluginProvenanceRecord
+
+## Validation and contracts
+
+::: lrdbench.validation.validate_manifest
+::: lrdbench.validation.validate_metric_admissibility
+::: lrdbench.validation.validate_truth_compatibility
+::: lrdbench.output_contract.public_output_contract
+::: lrdbench.output_contract.required_output_files
+::: lrdbench.output_contract.validate_output_contract
+
+## Bootstrap utilities
+
+::: lrdbench.bootstrap.circular_block_resample
+::: lrdbench.bootstrap.bootstrap_statistic_distribution
+::: lrdbench.bootstrap.symmetric_percentile_cis
+
+## Plugin discovery
+
+::: lrdbench.plugin_loader.PluginDiscoveryResult
+::: lrdbench.plugin_loader.discover_plugins_from_env
+::: lrdbench.plugin_loader.build_estimator_registry_with_plugins
+
+## Packaged assets and testing helpers
+
+::: lrdbench.public_assets.list_public_suites
+::: lrdbench.public_assets.resolve_manifest_argument
+::: lrdbench.testing.estimator_spec
+::: lrdbench.testing.synthetic_series_record
+::: lrdbench.testing.smoke_fit_estimator
+::: lrdbench.testing.assert_valid_estimate
+::: lrdbench.testing.assert_invalid_estimate
+
