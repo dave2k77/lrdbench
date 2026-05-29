@@ -19,6 +19,19 @@ from lrdbench.schema import (
 )
 
 
+def _observational_record_columns(rec: SeriesRecord) -> dict[str, Any]:
+    qc = rec.annotations.get("qc")
+    if not isinstance(qc, dict):
+        qc = {}
+    row: dict[str, Any] = {
+        "source_sha256": rec.annotations.get("source_sha256"),
+        "sampling_rate": rec.sampling_rate,
+    }
+    for key, value in qc.items():
+        row[f"qc_{key}"] = value
+    return row
+
+
 class CsvResultStore(BaseResultStore):
     """Minimal Phase 1 result store: CSV tables + numpy series sidecar files."""
 
@@ -64,6 +77,7 @@ class CsvResultStore(BaseResultStore):
                 "truth_family": rec.truth.process_family if rec.truth else None,
                 "target_estimand": rec.truth.target_estimand if rec.truth else None,
                 "target_value": rec.truth.target_value if rec.truth else None,
+                **_observational_record_columns(rec),
                 "annotations_json": json.dumps(dict(rec.annotations), sort_keys=True),
             }
             self._records_rows.append(row)

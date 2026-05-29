@@ -233,6 +233,103 @@ def validate_metric_admissibility(
         )
 
 
+def _validate_non_empty_string(value: object, *, field: str, index: int) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ManifestValidationError(
+            f"observational source.series[{index}].{field} must be a non-empty string"
+        )
+    return value.strip()
+
+
+def _validate_optional_positive_float(value: object, *, field: str, index: int) -> None:
+    if value is None:
+        return
+    if isinstance(value, bool):
+        raise ManifestValidationError(
+            f"observational source.series[{index}].{field} must be positive"
+        )
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ManifestValidationError(
+            f"observational source.series[{index}].{field} must be positive"
+        ) from exc
+    if numeric <= 0.0:
+        raise ManifestValidationError(
+            f"observational source.series[{index}].{field} must be positive"
+        )
+
+
+def _observational_record_id(
+    *, manifest_id: str, source_type: str, block: Mapping[str, Any], index: int
+) -> str:
+    raw_record_id = block.get("record_id")
+    if raw_record_id is not None:
+        return _validate_non_empty_string(raw_record_id, field="record_id", index=index)
+    if source_type == "csv_series_index":
+        path = _validate_non_empty_string(block.get("path"), field="path", index=index)
+        return path.rsplit("/", 1)[-1].rsplit("\\", 1)[-1].rsplit(".", 1)[0]
+    return f"{manifest_id}_inline_{index}"
+
+
+def _validate_observational_source(manifest: BenchmarkManifest) -> None:
+    src = manifest.source_spec
+    if src.get("type") == "generator_grid":
+        raise ManifestValidationError(
+            "observational mode cannot use synthetic generator_grid source"
+        )
+    allowed_obs_sources = frozenset({"csv_series_index", "inline_table"})
+    st = src.get("type")
+    if st not in allowed_obs_sources:
+        raise ManifestValidationError(
+            f"observational source.type must be one of {sorted(allowed_obs_sources)}, got {st!r}"
+        )
+    series = src.get("series")
+    if not isinstance(series, list) or len(series) == 0:
+        raise ManifestValidationError("observational source requires a non-empty series list")
+
+    seen_record_ids: set[str] = set()
+    for i, raw_block in enumerate(series):
+        if not isinstance(raw_block, Mapping):
+            raise ManifestValidationError(f"observational source.series[{i}] must be a mapping")
+        block = dict(raw_block)
+        rid = _observational_record_id(
+            manifest_id=manifest.manifest_id,
+            source_type=str(st),
+            block=block,
+            index=i,
+        )
+        if rid in seen_record_ids:
+            raise ManifestValidationError(f"duplicate record_id {rid!r}")
+        seen_record_ids.add(rid)
+
+        if st == "csv_series_index":
+            _validate_non_empty_string(block.get("path"), field="path", index=i)
+            if "value_column" in block:
+                _validate_non_empty_string(block.get("value_column"), field="value_column", index=i)
+            if "time_column" in block:
+                _validate_non_empty_string(block.get("time_column"), field="time_column", index=i)
+            if "missing_policy" in block:
+                policy = _validate_non_empty_string(
+                    block.get("missing_policy"), field="missing_policy", index=i
+                )
+                if policy not in {"drop", "error"}:
+                    raise ManifestValidationError(
+                        "observational source.series"
+                        f"[{i}].missing_policy must be one of ['drop', 'error']"
+                    )
+        elif st == "inline_table" and "values" not in block:
+            raise ManifestValidationError(
+                f"observational source.series[{i}].values is required for inline_table"
+            )
+
+        _validate_optional_positive_float(block.get("sampling_rate"), field="sampling_rate", index=i)
+        if "metadata" in block and not isinstance(block["metadata"], Mapping):
+            raise ManifestValidationError(
+                f"observational source.series[{i}].metadata must be a mapping"
+            )
+
+
 def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool = True) -> None:
     data = manifest.raw_yaml or {}
     if strict_unknown_keys:
@@ -287,20 +384,7 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
 
     # MV4
     if manifest.mode is BenchmarkMode.OBSERVATIONAL:
-        src = manifest.source_spec
-        if src.get("type") == "generator_grid":
-            raise ManifestValidationError(
-                "observational mode cannot use synthetic generator_grid source"
-            )
-        allowed_obs_sources = frozenset({"csv_series_index", "inline_table"})
-        st = src.get("type")
-        if st not in allowed_obs_sources:
-            raise ManifestValidationError(
-                f"observational source.type must be one of {sorted(allowed_obs_sources)}, got {st!r}"
-            )
-        series = src.get("series")
-        if not isinstance(series, list) or len(series) == 0:
-            raise ManifestValidationError("observational source requires a non-empty series list")
+        _validate_observational_source(manifest)
 
     # MV5
     for e in manifest.estimator_specs:

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from lrdbench.enums import BenchmarkMode, SourceType
 from lrdbench.observational_sources import load_observational_records
+from lrdbench.result_store import CsvResultStore
 from lrdbench.schema import BenchmarkManifest
+from lrdbench.strata import stratum_from_record
 
 
 def _manifest(source: dict[str, object]) -> BenchmarkManifest:
@@ -88,6 +92,173 @@ def test_csv_series_index_accepts_absolute_path(tmp_path: Path) -> None:
 
     assert records[0].record_id == "absolute"
     assert records[0].values.tolist() == [2.0, 4.0]
+
+
+def test_csv_series_index_loads_time_axis_sampling_rate_metadata_and_file_hash(
+    tmp_path: Path,
+) -> None:
+    csv_path = tmp_path / "rich.csv"
+    csv_text = "time,value\n0.0,1.0\n0.1,\n0.2,3.0\n0.3,4.0\n"
+    csv_path.write_text(csv_text, encoding="utf-8")
+    manifest = _manifest(
+        {
+            "type": "csv_series_index",
+            "series": [
+                {
+                    "path": "rich.csv",
+                    "record_id": "rich_a",
+                    "value_column": "value",
+                    "time_column": "time",
+                    "sampling_rate": 10.0,
+                    "metadata": {
+                        "subject": "sub-01",
+                        "session": "ses-01",
+                        "channel": "Cz",
+                        "condition": "rest",
+                    },
+                }
+            ],
+        }
+    )
+
+    records = load_observational_records(manifest, base_dir=tmp_path, global_seed=17)
+
+    rec = records[0]
+    assert rec.values.tolist() == [1.0, 3.0, 4.0]
+    assert rec.time_axis is not None
+    assert rec.time_axis.tolist() == [0.0, 0.2, 0.3]
+    assert rec.sampling_rate == 10.0
+    assert rec.annotations["time_column"] == "time"
+    assert rec.annotations["missing_policy"] == "drop"
+    assert rec.annotations["metadata"] == {
+        "subject": "sub-01",
+        "session": "ses-01",
+        "channel": "Cz",
+        "condition": "rest",
+    }
+    assert rec.annotations["subject"] == "sub-01"
+    assert rec.annotations["condition"] == "rest"
+    assert rec.annotations["source_sha256"] == hashlib.sha256(
+        csv_path.read_bytes()
+    ).hexdigest()
+    stratum = dict(stratum_from_record(rec))
+    assert stratum["subject"] == "sub-01"
+    assert stratum["session"] == "ses-01"
+    assert stratum["channel"] == "Cz"
+    assert stratum["condition"] == "rest"
+    assert rec.annotations["qc"] == {
+        "original_sample_count": 4,
+        "retained_sample_count": 3,
+        "missing_sample_count": 1,
+        "missing_fraction": 0.25,
+        "duration": 0.3,
+        "time_start": 0.0,
+        "time_end": 0.3,
+        "value_min": 1.0,
+        "value_max": 4.0,
+        "value_mean": pytest.approx(8.0 / 3.0),
+        "value_std": pytest.approx(1.247219128924647),
+    }
+
+
+def test_csv_result_store_exports_observational_qc_columns(tmp_path: Path) -> None:
+    csv_path = tmp_path / "rich.csv"
+    csv_path.write_text("time,value\n0.0,1.0\n0.1,\n0.2,3.0\n0.3,4.0\n", encoding="utf-8")
+    manifest = _manifest(
+        {
+            "type": "csv_series_index",
+            "series": [
+                {
+                    "path": "rich.csv",
+                    "record_id": "rich_a",
+                    "value_column": "value",
+                    "time_column": "time",
+                    "sampling_rate": 10.0,
+                    "metadata": {"subject": "sub-01"},
+                }
+            ],
+        }
+    )
+    records = load_observational_records(manifest, base_dir=tmp_path, global_seed=17)
+    store = CsvResultStore(tmp_path / "results")
+
+    store.write_records(records)
+    store.finalise()
+
+    rows = pd.read_csv(tmp_path / "results" / "raw" / "records.csv")
+    row = rows.iloc[0]
+    assert row["qc_original_sample_count"] == 4
+    assert row["qc_retained_sample_count"] == 3
+    assert row["qc_missing_sample_count"] == 1
+    assert row["qc_missing_fraction"] == 0.25
+    assert row["qc_duration"] == 0.3
+    assert row["qc_value_min"] == 1.0
+    assert row["qc_value_max"] == 4.0
+    assert row["source_sha256"] == records[0].annotations["source_sha256"]
+
+
+def test_csv_series_index_missing_policy_error_rejects_missing_values(
+    tmp_path: Path,
+) -> None:
+    csv_path = tmp_path / "missing.csv"
+    csv_path.write_text("time,value\n0.0,1.0\n0.1,\n", encoding="utf-8")
+    manifest = _manifest(
+        {
+            "type": "csv_series_index",
+            "series": [
+                {
+                    "path": "missing.csv",
+                    "record_id": "missing_error",
+                    "value_column": "value",
+                    "time_column": "time",
+                    "missing_policy": "error",
+                }
+            ],
+        }
+    )
+
+    with pytest.raises(ValueError, match="missing_policy='error'"):
+        load_observational_records(manifest, base_dir=tmp_path, global_seed=17)
+
+
+def test_csv_series_index_rejects_unknown_missing_policy(tmp_path: Path) -> None:
+    csv_path = tmp_path / "unknown_policy.csv"
+    csv_path.write_text("value\n1.0\n2.0\n", encoding="utf-8")
+    manifest = _manifest(
+        {
+            "type": "csv_series_index",
+            "series": [
+                {
+                    "path": "unknown_policy.csv",
+                    "record_id": "unknown_policy",
+                    "missing_policy": "ignore",
+                }
+            ],
+        }
+    )
+
+    with pytest.raises(ValueError, match="unknown missing_policy"):
+        load_observational_records(manifest, base_dir=tmp_path, global_seed=17)
+
+
+def test_csv_series_index_rejects_missing_time_column(tmp_path: Path) -> None:
+    csv_path = tmp_path / "missing_time_column.csv"
+    csv_path.write_text("value\n1.0\n2.0\n", encoding="utf-8")
+    manifest = _manifest(
+        {
+            "type": "csv_series_index",
+            "series": [
+                {
+                    "path": "missing_time_column.csv",
+                    "record_id": "missing_time_column",
+                    "time_column": "time",
+                }
+            ],
+        }
+    )
+
+    with pytest.raises(ValueError, match="missing required column"):
+        load_observational_records(manifest, base_dir=tmp_path, global_seed=17)
 
 
 def test_csv_series_index_rejects_missing_file(tmp_path: Path) -> None:

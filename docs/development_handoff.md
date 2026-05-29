@@ -1,6 +1,8 @@
 # Development Handoff
 
-Last updated: 2026-04-25
+Last updated: 2026-05-29
+
+For the concise current-facing research handoff, see [`current_research_next_steps.md`](current_research_next_steps.md). This file preserves the longer development history, local paper-workflow notes, and release-hardening log.
 
 ## Current State
 

@@ -20,6 +20,11 @@ def stratum_from_record(record: SeriesRecord) -> Mapping[str, Any]:
         "source_kind",
         "source_path",
         "series_index",
+        "subject",
+        "session",
+        "channel",
+        "condition",
+        "segment_id",
     )
     out: dict[str, Any] = {}
     for k in keys:

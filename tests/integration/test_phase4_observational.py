@@ -9,6 +9,24 @@ from lrdbench.runner import run_manifest_mapping, run_manifest_path
 from lrdbench.validation import ManifestValidationError
 
 
+def _observational_manifest(source: dict[str, object]) -> dict[str, object]:
+    return {
+        "manifest_id": "obs_validation",
+        "name": "observational validation",
+        "mode": "observational",
+        "source": source,
+        "estimators": [
+            {
+                "name": "RS",
+                "family": "temporal",
+                "target_estimand": "hurst_scaling_proxy",
+                "params": {"n_bootstrap": 8},
+            },
+        ],
+        "metrics": ["runtime"],
+    }
+
+
 def test_observational_rejects_generator_grid_manifest() -> None:
     data = {
         "manifest_id": "o1",
@@ -75,6 +93,98 @@ def test_observational_rejects_contamination_block() -> None:
         "metrics": ["runtime"],
     }
     with pytest.raises(ManifestValidationError, match="contamination"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_non_mapping_series_entries() -> None:
+    data = _observational_manifest(
+        {"type": "csv_series_index", "series": ["data/series.csv"]}
+    )
+
+    with pytest.raises(ManifestValidationError, match=r"series\[0\] must be a mapping"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_duplicate_record_ids() -> None:
+    data = _observational_manifest(
+        {
+            "type": "csv_series_index",
+            "series": [
+                {"record_id": "duplicate", "path": "a.csv"},
+                {"record_id": "duplicate", "path": "b.csv"},
+            ],
+        }
+    )
+
+    with pytest.raises(ManifestValidationError, match="duplicate record_id 'duplicate'"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_blank_record_id() -> None:
+    data = _observational_manifest(
+        {"type": "inline_table", "series": [{"record_id": "  ", "values": [1.0, 2.0]}]}
+    )
+
+    with pytest.raises(ManifestValidationError, match="record_id must be a non-empty string"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_csv_series_without_path() -> None:
+    data = _observational_manifest(
+        {"type": "csv_series_index", "series": [{"record_id": "s1"}]}
+    )
+
+    with pytest.raises(ManifestValidationError, match="path must be a non-empty string"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_blank_value_column() -> None:
+    data = _observational_manifest(
+        {
+            "type": "csv_series_index",
+            "series": [{"record_id": "s1", "path": "s1.csv", "value_column": ""}],
+        }
+    )
+
+    with pytest.raises(ManifestValidationError, match="value_column must be a non-empty string"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_invalid_sampling_rate() -> None:
+    data = _observational_manifest(
+        {
+            "type": "csv_series_index",
+            "series": [{"record_id": "s1", "path": "s1.csv", "sampling_rate": 0}],
+        }
+    )
+
+    with pytest.raises(ManifestValidationError, match="sampling_rate must be positive"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_non_mapping_metadata() -> None:
+    data = _observational_manifest(
+        {
+            "type": "csv_series_index",
+            "series": [{"record_id": "s1", "path": "s1.csv", "metadata": ["bad"]}],
+        }
+    )
+
+    with pytest.raises(ManifestValidationError, match="metadata must be a mapping"):
+        manifest_from_mapping(data)
+
+
+def test_observational_rejects_unknown_missing_policy() -> None:
+    data = _observational_manifest(
+        {
+            "type": "csv_series_index",
+            "series": [
+                {"record_id": "s1", "path": "s1.csv", "missing_policy": "ignore"}
+            ],
+        }
+    )
+
+    with pytest.raises(ManifestValidationError, match="missing_policy must be one of"):
         manifest_from_mapping(data)
 
 

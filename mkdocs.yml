@@ -90,6 +90,8 @@ nav:
   - Read the Docs: readthedocs.md
   - Meta:
       - Public release roadmap: public_release_roadmap.md
+      - Current research next steps: current_research_next_steps.md
+      - Observational readiness plan: observational_readiness_plan.md
       - Development handoff: development_handoff.md
       - Contributor checklist: contributor_checklist.md
       - Leaderboard submission policy: leaderboard_submission_policy.md
