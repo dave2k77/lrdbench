@@ -31,7 +31,7 @@ class PredictConstant:
         self.value = value
         self.fit_x_shape: tuple[int, ...] | None = None
 
-    def fit(self, x: np.ndarray, y: np.ndarray) -> "PredictConstant":
+    def fit(self, x: np.ndarray, y: np.ndarray) -> PredictConstant:
         self.fit_x_shape = tuple(x.shape)
         self.fit_y_shape = tuple(y.shape)
         return self

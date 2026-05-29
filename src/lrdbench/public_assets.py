@@ -21,7 +21,7 @@ def _packaged_suite_dir() -> resources.abc.Traversable:
 
 
 def list_public_suites() -> tuple[str, ...]:
-    names = set()
+    names: set[str] = set()
     source_dir = _source_suite_dir()
     if source_dir.is_dir():
         names.update(path.stem for path in source_dir.glob(f"*{_SUITE_SUFFIX}"))

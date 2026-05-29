@@ -1,0 +1,4 @@
+estimator_name,ground_truth_max_variant_drift,ground_truth_parameter_variant_sensitivity,stress_max_variant_drift,stress_parameter_variant_sensitivity
+DFA,0.045245,0.019216,0.049598,0.020966
+DMA,0.060429,0.025039,0.052907,0.021938
+WaveletOLS,0.07706,0.0331,0.085286,0.036677

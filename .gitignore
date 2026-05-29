@@ -16,6 +16,7 @@ coverage.xml
 .benchmarks/
 .lrdbench_cache/
 reports/
+release_artifacts/
 # Paper workflow: keep locally only (not synced to the remote repo).
 paper_support/
 configs/suites/paper/

@@ -110,7 +110,12 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(rows, indent=2, sort_keys=True))
         else:
             for row in rows:
-                modes = ",".join(row["admissible_modes"])
+                admissible_modes = row["admissible_modes"]
+                modes = (
+                    ",".join(str(mode) for mode in admissible_modes)
+                    if isinstance(admissible_modes, list)
+                    else str(admissible_modes)
+                )
                 truth = "truth" if row["requires_truth"] else "truth_free"
                 print(
                     f"{row['name']}\t{row['symbol']}\t{truth}\t{modes}\t"

@@ -59,7 +59,7 @@ def fixed_length_sequence(values: np.ndarray, *, length: int) -> np.ndarray:
         return x.astype(np.float32)
     src = np.linspace(0.0, 1.0, num=x.size)
     dst = np.linspace(0.0, 1.0, num=target)
-    return np.interp(dst, src, x).astype(np.float32)
+    return np.asarray(np.interp(dst, src, x), dtype=np.float32)
 
 
 def feature_vector(values: np.ndarray, *, max_lag: int = 16) -> np.ndarray:
@@ -361,7 +361,9 @@ class MLLSTMEstimator(_TorchSequenceEstimator):
     MODEL_KIND = "lstm"
 
 
-def _build_torch_model(kind: str, sequence_length: int, *, cfg: Mapping[str, Any] | None = None) -> Any:
+def _build_torch_model(
+    kind: str, sequence_length: int, *, cfg: Mapping[str, Any] | None = None
+) -> Any:
     from torch import nn
 
     _cfg = dict(cfg) if cfg else {}

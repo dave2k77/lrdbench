@@ -9,7 +9,7 @@ from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from importlib import metadata
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pandas as pd
 
@@ -679,9 +679,9 @@ class SimpleHtmlCsvReporter(BaseReporter):
                 fig_dir.mkdir(parents=True, exist_ok=True)
                 rows = rows[:30]
                 labels = [f"{r['estimator_name']}:{r['metric_name']}" for r in rows]
-                values = [float(r["value"]) for r in rows]
-                low = [float(r["ci_low"]) for r in rows]
-                high = [float(r["ci_high"]) for r in rows]
+                values = [float(cast(float | str, r["value"])) for r in rows]
+                low = [float(cast(float | str, r["ci_low"])) for r in rows]
+                high = [float(cast(float | str, r["ci_high"])) for r in rows]
                 xerr = [
                     [max(0.0, v - lo) for v, lo in zip(values, low, strict=True)],
                     [max(0.0, hi - v) for v, hi in zip(values, high, strict=True)],

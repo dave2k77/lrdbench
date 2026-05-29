@@ -221,12 +221,10 @@ pretty = true
 [[tool.mypy.overrides]]
 module = [
   "yaml",
-  "yaml.*",
   "scipy.*",
   "pandas",
-  "pandas.*",
+  "seaborn",
   "pywt",
-  "pywt.*",
   "sklearn.*",
   "torch",
   "torch.*"

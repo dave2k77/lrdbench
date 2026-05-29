@@ -455,7 +455,7 @@ def _block_means(x: np.ndarray, block_size: int) -> np.ndarray:
     if n_blocks < 2:
         return np.empty(0, dtype=float)
     trimmed = x[: n_blocks * block_size]
-    return np.mean(trimmed.reshape(n_blocks, block_size), axis=1)
+    return np.asarray(np.mean(trimmed.reshape(n_blocks, block_size), axis=1), dtype=float)
 
 
 def _ols_slope(xs: list[float], ys: list[float]) -> float | None:

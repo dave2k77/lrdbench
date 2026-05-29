@@ -1,0 +1,3 @@
+run_label,run_id,manifest_id,mode,local_report_path
+ground_truth,2800af31-ae35-4d12-af1d-dd5f4ed17223,neural_classical_workstation_ground_truth_v1,ground_truth,reports/neural_classical_workstation/2800af31-ae35-4d12-af1d-dd5f4ed17223
+stress,5357f529-6c14-40e8-b3ad-027cd06539a8,neural_classical_workstation_stress_v1,stress_test,reports/neural_classical_workstation/5357f529-6c14-40e8-b3ad-027cd06539a8

@@ -1,0 +1,5 @@
+contamination_operator,count_coverage_collapse,count_estimate_drift,count_relative_degradation_ratio,max_coverage_collapse,max_estimate_drift,max_relative_degradation_ratio,mean_coverage_collapse,mean_estimate_drift,mean_relative_degradation_ratio,median_coverage_collapse,median_estimate_drift,median_relative_degradation_ratio
+heavy_tail_noise,9600,9600,9440,1.0,0.541355,34586.696256,0.118958,0.042645,12.58143,0.0,0.025543,1.021386
+level_shift,7200,7200,7080,1.0,0.0,1.0,0.021667,0.0,1.0,0.0,0.0,1.0
+outliers,14400,14400,14160,1.0,0.569157,52150.784156,0.117986,0.043825,13.048702,0.0,0.022494,1.032692
+polynomial_trend,14400,14400,14160,1.0,0.933584,2565.175589,0.330764,0.112182,8.319876,0.0,0.023735,1.031911

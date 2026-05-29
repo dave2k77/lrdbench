@@ -1,0 +1,171 @@
+manifest_id: neural_classical_workstation_ground_truth_v1
+name: neural_classical_workstation_ground_truth
+description: Workstation-scale clean synthetic calibration suite for the neural classical estimator benchmark.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: fGn
+      params:
+        H: [0.5, 0.6, 0.7, 0.8]
+        n: [512, 1024, 2048, 4096]
+        sigma: [1.0]
+      replicates: 10
+estimators:
+  - name: RS
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    supports_diagnostics: true
+    params:
+      n_bootstrap: 32
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_scales
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_scales
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: DMA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: short_windows
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_windows
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_windows
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: AbsoluteMoment
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+  - name: Variance
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+  - name: VarianceResidual
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+      detrend_order: 1
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_scales: 18
+  - name: Higuchi
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      k_max: 32
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: broad_band
+        params:
+          wavelet: db2
+          j_drop_low: 1
+          j_drop_high: 1
+      - name: conservative_band
+        params:
+          wavelet: db4
+          j_drop_low: 1
+          j_drop_high: 2
+      - name: upper_band
+        params:
+          wavelet: db2
+          j_drop_low: 2
+          j_drop_high: 1
+metrics:
+  - bias
+  - mae
+  - rmse
+  - false_positive_lrd_rate
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - parameter_variant_sensitivity
+  - max_variant_drift
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+  - name: coverage_error
+    levels: [0.95]
+leaderboards:
+  - name: neural_classical_workstation_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.6
+      validity_rate: 0.25
+      runtime: 0.15
+    ranking_rule: weighted_rank
+    tie_break_rule: mae
+uncertainty:
+  enabled: true
+  n_bootstrap: 500
+  ci_levels: [0.95]
+  seed: 20260601
+  metrics: [mae, false_positive_lrd_rate, validity_rate, parameter_variant_sensitivity, max_variant_drift]
+  paired: true
+  paired_metrics: [mae]
+report:
+  formats: [html, csv, latex]
+  export_root: reports/neural_classical_workstation
+  figure_set:
+    - disagreement_heatmap
+    - sensitivity_heatmap
+    - benchmark_uncertainty_intervals
+    - false_positive_lrd
+seeds:
+  global_seed: 20260601
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/neural_classical_workstation
+  cache_read: true
+  cache_write: true

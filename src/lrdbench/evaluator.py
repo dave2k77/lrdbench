@@ -124,9 +124,7 @@ class GroundTruthEvaluator(BaseEvaluator):
         estimates: Sequence[EstimateResult],
     ) -> MetricBundle:
         if manifest.mode not in (BenchmarkMode.GROUND_TRUTH, BenchmarkMode.STRESS_TEST):
-            raise ValueError(
-                f"GroundTruthEvaluator does not support mode {manifest.mode.value!r}"
-            )
+            raise ValueError(f"GroundTruthEvaluator does not support mode {manifest.mode.value!r}")
         idx = _index_estimates(estimates)
         per_series: list[MetricValue] = []
         run_id = manifest.manifest_id
@@ -637,9 +635,7 @@ class GroundTruthEvaluator(BaseEvaluator):
                 vals_a = by_family[family_a]
                 vals_b = by_family[family_b]
                 disagreements = [
-                    abs(point_a - point_b)
-                    for _, point_a in vals_a
-                    for _, point_b in vals_b
+                    abs(point_a - point_b) for _, point_a in vals_a for _, point_b in vals_b
                 ]
                 rows.append(
                     MetricValue(
@@ -943,10 +939,15 @@ class GroundTruthEvaluator(BaseEvaluator):
                 continue
             if mv.stratum.get("level") == "balanced_global":
                 continue
-            global_grouped[(mv.estimator_name, mv.metric_name, mv.metadata.get("nominal"))].append(mv)
+            global_grouped[(mv.estimator_name, mv.metric_name, mv.metadata.get("nominal"))].append(
+                mv
+            )
 
         for (ename, metric_name, metric_nominal), mvs in global_grouped.items():
-            values = np.asarray([float(mv.value) for mv in mvs], dtype=float)
+            values = np.asarray(
+                [float(mv.value) for mv in mvs if mv.value is not None],
+                dtype=float,
+            )
             if values.size == 0:
                 continue
             samples = []
@@ -1008,11 +1009,7 @@ class GroundTruthEvaluator(BaseEvaluator):
         rows: list[MetricValue] = []
         for (metric_name, sk_t, metric_nominal), by_record in by_group.items():
             estimator_names = sorted(
-                {
-                    ename
-                    for estimator_map in by_record.values()
-                    for ename in estimator_map
-                }
+                {ename for estimator_map in by_record.values() for ename in estimator_map}
             )
             for est_a, est_b in combinations(estimator_names, 2):
                 diffs: list[float] = []

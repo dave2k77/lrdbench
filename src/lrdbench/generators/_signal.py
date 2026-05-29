@@ -128,7 +128,7 @@ def simulate_mrw(
     field = field / sd
 
     omega = np.sqrt(float(lambda2)) * field - 0.5 * float(lambda2)
-    return float(sigma) * base * np.exp(omega)
+    return np.asarray(float(sigma) * base * np.exp(omega), dtype=float)
 
 
 def simulate_fou(

@@ -283,7 +283,7 @@ def discover_plugins_from_env() -> tuple[PluginDiscoveryResult, ...]:
     # 2. File-path plugins
     raw_paths = (os.environ.get("LRD_BENCH_ESTIMATOR_PLUGIN_PATH") or "").strip()
     if raw_paths:
-        for p_str in raw_paths.split(":"):
+        for p_str in raw_paths.split(os.pathsep):
             p_str = p_str.strip()
             if not p_str:
                 continue
