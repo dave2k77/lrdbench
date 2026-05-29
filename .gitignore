@@ -17,6 +17,7 @@ coverage.xml
 .lrdbench_cache/
 reports/
 release_artifacts/
+benchmark_experiment/*_paper_spine.md
 # Paper workflow: keep locally only (not synced to the remote repo).
 paper_support/
 configs/suites/paper/
