@@ -15,6 +15,7 @@ venv/
 coverage.xml
 .benchmarks/
 .lrdbench_cache/
+.tmp/
 reports/
 release_artifacts/
 benchmark_experiment/*_paper_spine.md

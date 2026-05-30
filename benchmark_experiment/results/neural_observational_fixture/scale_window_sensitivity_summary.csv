@@ -1,0 +1,7 @@
+estimator_name,metric_name,mean,median,max,count
+WaveletOLS,max_variant_drift,0.139462,0.133668,0.262735,8
+DFA,max_variant_drift,0.109521,0.111169,0.176422,8
+DMA,max_variant_drift,0.090557,0.096614,0.121351,8
+WaveletOLS,parameter_variant_sensitivity,0.05782,0.054978,0.109782,8
+DFA,parameter_variant_sensitivity,0.046455,0.048225,0.074058,8
+DMA,parameter_variant_sensitivity,0.037057,0.039511,0.049552,8

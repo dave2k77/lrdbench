@@ -1,0 +1,13 @@
+estimator_name,rank,score,components_json
+DFA::balanced_scales,1,2.95,"{""instability"": 0.027048669498888536, ""max_variant_drift"": null, ""runtime"": 0.006411512500108074, ""validity_rate"": 1.0}"
+DFA::short_scales,2,4.85,"{""instability"": 0.03336307162348985, ""max_variant_drift"": null, ""runtime"": 0.012269256249737737, ""validity_rate"": 1.0}"
+AbsoluteMoment,3,5.05,"{""instability"": 0.07421736588693605, ""max_variant_drift"": null, ""runtime"": 0.0003560499999366584, ""validity_rate"": 1.0}"
+Higuchi,4,5.3,"{""instability"": 1.1102230246251565e-16, ""max_variant_drift"": null, ""runtime"": 0.02064760625080453, ""validity_rate"": 1.0}"
+RS,5,5.9,"{""instability"": 0.0227520449621464, ""max_variant_drift"": null, ""runtime"": 0.019054768750265794, ""validity_rate"": 1.0}"
+GHE,6,6.85,"{""instability"": 0.028529003370403153, ""max_variant_drift"": null, ""runtime"": 0.04935476874993583, ""validity_rate"": 1.0}"
+DMA::short_windows,7,6.9,"{""instability"": 0.04103093863086825, ""max_variant_drift"": null, ""runtime"": 0.021169506249862025, ""validity_rate"": 1.0}"
+VarianceResidual,8,7.1,"{""instability"": 0.028515351702858745, ""max_variant_drift"": null, ""runtime"": 0.008878299999878436, ""validity_rate"": 1.0}"
+DMA::balanced_windows,9,7.3,"{""instability"": 0.06868480311696988, ""max_variant_drift"": null, ""runtime"": 0.02073203125019063, ""validity_rate"": 1.0}"
+Variance,10,8.1,"{""instability"": 0.0724376059342176, ""max_variant_drift"": null, ""runtime"": 0.000307125000290398, ""validity_rate"": 1.0}"
+WaveletOLS::conservative_band,11,8.8,"{""instability"": 0.059151906412262104, ""max_variant_drift"": null, ""runtime"": 0.0009009562497794832, ""validity_rate"": 1.0}"
+WaveletOLS::broad_band,12,8.9,"{""instability"": 0.059318758313555535, ""max_variant_drift"": null, ""runtime"": 0.0010680812490591052, ""validity_rate"": 1.0}"

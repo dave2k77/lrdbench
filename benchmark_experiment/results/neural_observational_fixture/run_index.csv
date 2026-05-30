@@ -1,0 +1,2 @@
+run_label,run_id,manifest_id,mode,n_records,n_estimators,n_fit_jobs,local_report_path
+neural_observational_fixture,8e08181f-7f9c-40a8-be83-e8c1c0c5424c,neural_observational_fixture_v1,observational,8,15,120,C:/Users/davia/biomedical_engineering/benchmarking/lrdbench/reports/neural_observational_fixture/8e08181f-7f9c-40a8-be83-e8c1c0c5424c

@@ -1173,7 +1173,11 @@ class ObservationalEvaluator(GroundTruthEvaluator):
         if not est.valid or est.point is None:
             return []
         eps = float(dict(manifest.preprocessing_spec).get("sensitivity_eps", 1e-4))
-        builder = self._estimator_registry.get(estimator_spec.name)
+        estimator_params = dict(estimator_spec.parameter_schema)
+        registry_name = str(
+            estimator_params.get("_base_estimator_name", estimator_spec.name)
+        ).split("::", 1)[0]
+        builder = self._estimator_registry.get(registry_name)
         scaled = replace(record, values=record.values * (1.0 + eps))
         est2 = builder(estimator_spec).fit(scaled)
         if not est2.valid or est2.point is None:

@@ -1,0 +1,2 @@
+run,mode,run_id,manifest,dataset,dataset_doi,license,subjects,channels,records,samples_per_record,sampling_rate_hz,window_duration_seconds,estimators
+OpenNeuro ds002691 EEG pilot,observational,3762d43d-5610-4ce2-a931-bf11aac9317a,openneuro_ds002691_pilot_v1,OpenNeuro ds002691 Internal attention study,10.18112/openneuro.ds002691.v1.1.0,CC0,4,4,16,2500,250.0,10.0,12

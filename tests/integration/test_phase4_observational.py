@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from lrdbench.manifest import manifest_from_mapping
+from lrdbench.manifest import load_manifest, manifest_from_mapping
 from lrdbench.runner import run_manifest_mapping, run_manifest_path
 from lrdbench.validation import ManifestValidationError
 
@@ -248,3 +248,65 @@ def test_smoke_observational_yaml(
     out = run_manifest_path(manifest)
     assert out.run_id
     assert len(out.records) == 1
+
+
+@pytest.mark.integration
+def test_openneuro_ds002691_pilot_manifest(repo_root: Path) -> None:
+    manifest_path = repo_root / "configs" / "suites" / "openneuro_ds002691_pilot.yaml"
+    manifest = load_manifest(manifest_path)
+
+    assert manifest.mode.value == "observational"
+    assert manifest.manifest_id == "openneuro_ds002691_pilot_v1"
+    assert len(manifest.source_spec["series"]) == 16
+    assert all(not spec.requires_truth for spec in manifest.metric_specs)
+    assert {
+        block["metadata"]["dataset"] for block in manifest.source_spec["series"]
+    } == {"openneuro_ds002691"}
+    assert {
+        block["metadata"]["subject"] for block in manifest.source_spec["series"]
+    } == {"sub-001", "sub-002", "sub-003", "sub-004"}
+    assert {
+        block["metadata"]["channel"] for block in manifest.source_spec["series"]
+    } == {"E1", "E8", "E16", "E24"}
+    assert all(
+        (manifest_path.parent / block["path"]).is_file()
+        for block in manifest.source_spec["series"]
+    )
+
+
+@pytest.mark.integration
+def test_neural_observational_fixture_yaml(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, repo_root: Path
+) -> None:
+    manifest_path = repo_root / "configs" / "suites" / "neural_observational_fixture.yaml"
+    manifest = load_manifest(manifest_path)
+
+    assert manifest.mode.value == "observational"
+    assert all(not spec.requires_truth for spec in manifest.metric_specs)
+    assert {spec.name for spec in manifest.metric_specs} >= {
+        "validity_rate",
+        "runtime",
+        "ci_width",
+        "instability",
+        "preprocessing_sensitivity",
+        "cross_estimator_dispersion",
+        "pairwise_estimator_disagreement",
+        "family_level_disagreement",
+        "parameter_variant_sensitivity",
+        "max_variant_drift",
+    }
+
+    monkeypatch.chdir(tmp_path)
+    out = run_manifest_path(manifest_path, discover_plugins=False)
+
+    assert out.run_id
+    assert len(out.records) >= 4
+    assert {record.truth for record in out.records} == {None}
+    assert {record.annotations["subject"] for record in out.records} >= {"sub-01", "sub-02"}
+    assert {record.annotations["condition"] for record in out.records} >= {"rest", "task"}
+    assert all("source_sha256" in record.annotations for record in out.records)
+    assert all("qc" in record.annotations for record in out.records)
+    assert any(
+        metric.metric_name == "pairwise_estimator_disagreement"
+        for metric in out.metrics.aggregate
+    )

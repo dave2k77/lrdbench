@@ -1,0 +1,265 @@
+manifest_id: neural_observational_fixture_v1
+name: neural_observational_fixture
+description: Non-sensitive multi-record neural-like observational suite for truth-free manuscript workflow rehearsal.
+mode: observational
+source:
+  type: csv_series_index
+  series:
+    - record_id: sub-01_ses-01_Cz_rest_seg-0001
+      path: data/neural_observational_fixture/sub-01_ses-01_Cz_rest_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-01
+        session: ses-01
+        channel: Cz
+        condition: rest
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+    - record_id: sub-01_ses-01_Pz_rest_seg-0001
+      path: data/neural_observational_fixture/sub-01_ses-01_Pz_rest_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-01
+        session: ses-01
+        channel: Pz
+        condition: rest
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+    - record_id: sub-01_ses-01_Cz_task_seg-0001
+      path: data/neural_observational_fixture/sub-01_ses-01_Cz_task_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-01
+        session: ses-01
+        channel: Cz
+        condition: task
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+    - record_id: sub-01_ses-01_Pz_task_seg-0001
+      path: data/neural_observational_fixture/sub-01_ses-01_Pz_task_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-01
+        session: ses-01
+        channel: Pz
+        condition: task
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+    - record_id: sub-02_ses-01_Cz_rest_seg-0001
+      path: data/neural_observational_fixture/sub-02_ses-01_Cz_rest_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-02
+        session: ses-01
+        channel: Cz
+        condition: rest
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+    - record_id: sub-02_ses-01_Pz_rest_seg-0001
+      path: data/neural_observational_fixture/sub-02_ses-01_Pz_rest_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-02
+        session: ses-01
+        channel: Pz
+        condition: rest
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+    - record_id: sub-02_ses-01_Cz_task_seg-0001
+      path: data/neural_observational_fixture/sub-02_ses-01_Cz_task_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-02
+        session: ses-01
+        channel: Cz
+        condition: task
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+    - record_id: sub-02_ses-01_Pz_task_seg-0001
+      path: data/neural_observational_fixture/sub-02_ses-01_Pz_task_seg-0001.csv
+      value_column: value
+      time_column: time_seconds
+      sampling_rate: 500.0
+      missing_policy: error
+      metadata:
+        subject: sub-02
+        session: ses-01
+        channel: Pz
+        condition: task
+        segment_id: seg-0001
+        preprocessing: fixture_demeaned_none_filtered_none
+estimators:
+  - name: RS
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    supports_diagnostics: true
+    params:
+      n_bootstrap: 32
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_scales
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_scales
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: DMA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: short_windows
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_windows
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_windows
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: AbsoluteMoment
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+  - name: Variance
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+  - name: VarianceResidual
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+      detrend_order: 1
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_scales: 18
+  - name: Higuchi
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      k_max: 32
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: broad_band
+        params:
+          wavelet: db2
+          j_drop_low: 1
+          j_drop_high: 1
+      - name: conservative_band
+        params:
+          wavelet: db4
+          j_drop_low: 1
+          j_drop_high: 2
+      - name: upper_band
+        params:
+          wavelet: db2
+          j_drop_low: 2
+          j_drop_high: 1
+metrics:
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - family_level_disagreement
+  - parameter_variant_sensitivity
+  - max_variant_drift
+  - name: ci_width
+    levels: [0.95]
+  - instability
+  - preprocessing_sensitivity
+preprocessing:
+  sensitivity_eps: 1.0e-4
+leaderboards:
+  - name: neural_observational_stability
+    mode: observational
+    component_metrics: [instability, validity_rate, runtime, max_variant_drift]
+    weights:
+      instability: 0.35
+      validity_rate: 0.30
+      runtime: 0.15
+      max_variant_drift: 0.20
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+uncertainty:
+  enabled: true
+  n_bootstrap: 200
+  ci_levels: [0.95]
+  seed: 20260603
+  metrics: [validity_rate, parameter_variant_sensitivity, max_variant_drift]
+  paired: false
+report:
+  formats: [html, csv, latex]
+  export_root: reports/neural_observational_fixture
+  figure_set:
+    - disagreement_heatmap
+    - sensitivity_heatmap
+    - benchmark_uncertainty_intervals
+seeds:
+  global_seed: 20260603
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/neural_observational_fixture
+  cache_read: true
+  cache_write: true

@@ -17,10 +17,18 @@ failure modes visible against known synthetic ground truth.
   workstation ground-truth and stress runs.
 - `results/neural_classical_workstation/`: compact public result tables derived
   from the completed runs.
+- `results/neural_observational_fixture/`: compact truth-free summaries from
+  the first clean observational-mode workflow rehearsal.
+- `results/openneuro_ds002691_pilot/`: compact truth-free summaries from the
+  first real open-data EEG observational pilot.
 - `../configs/suites/neural_classical_workstation_ground_truth.yaml`: exact
   ground-truth manifest.
 - `../configs/suites/neural_classical_workstation_stress.yaml`: exact stress
   manifest.
+- `../configs/suites/neural_observational_fixture.yaml`: exact observational
+  fixture manifest.
+- `../configs/suites/openneuro_ds002691_pilot.yaml`: exact OpenNeuro EEG
+  observational pilot manifest.
 
 Full row-level outputs are intentionally not tracked in git because several
 report tables are hundreds of MB. Publish those as release/archive artifacts and
@@ -32,9 +40,16 @@ link them from the result page.
 | --- | --- | --- | --- |
 | Ground truth | `ground_truth` | `2800af31-ae35-4d12-af1d-dd5f4ed17223` | `neural_classical_workstation_ground_truth_v1` |
 | Stress | `stress_test` | `5357f529-6c14-40e8-b3ad-027cd06539a8` | `neural_classical_workstation_stress_v1` |
+| Observational fixture | `observational` | `8e08181f-7f9c-40a8-be83-e8c1c0c5424c` | `neural_observational_fixture_v1` |
+| OpenNeuro EEG pilot | `observational` | `3762d43d-5610-4ce2-a931-bf11aac9317a` | `openneuro_ds002691_pilot_v1` |
 
 The stress run evaluates 3,200 records and 48,000 estimator fits. The
-ground-truth run evaluates 160 clean fGn records and 2,400 estimator fits.
+ground-truth run evaluates 160 clean fGn records and 2,400 estimator fits. The
+observational fixture evaluates 8 no-truth neural-like CSV records and 120
+estimator fits, preserving subject/session/channel/condition metadata and QC
+summaries. The OpenNeuro pilot evaluates 16 truth-free records from four
+subjects and four EEG channels in the CC0 `ds002691` internal-attention dataset,
+using 10-second windows and 192 estimator fits.
 
 ## Headline Findings
 

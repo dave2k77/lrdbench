@@ -1,0 +1,12 @@
+{
+  "dataset": "OpenNeuro ds002691",
+  "name": "Internal attention study",
+  "doi": "10.18112/openneuro.ds002691.v1.1.0",
+  "license": "CC0",
+  "authors": [
+    "Arnaud Delorme",
+    "Dean Radin"
+  ],
+  "source_url": "https://openneuro.org/datasets/ds002691/versions/1.1.0",
+  "pilot_use": "truth-free observational-mode EEG benchmark pilot"
+}

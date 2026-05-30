@@ -1,0 +1,23 @@
+{
+  "InstitutionAddress": "101 San Antonio Rd, Petaluma, CA",
+  "InstitutionName": "Institute of Noetic Sciences",
+  "InstitutionalDepartmentName": "Science",
+  "PowerLineFrequency": 60,
+  "ManufacturersModelName": "EGI Net Amps 300",
+  "TaskName": "internalattention",
+  "EEGChannelCount": 32,
+  "EEGReference": "common",
+  "RecordingType": "continuous",
+  "RecordingDuration": 729.324,
+  "SamplingFrequency": 250,
+  "EOGChannelCount": 0,
+  "ECGChannelCount": 0,
+  "EMGChannelCount": 0,
+  "SoftwareFilters": {
+    "FilterDescription": {
+      "Description": "n\/a"
+    }
+  },
+  "Instructions": "There are 4 verbal instructions given to subject by an automated computer program connected to a speakerphone: The instructions were to wait until the experiment starts, relax, get ready as the trial is about to start, and mentally concentrate on the target.",
+  "TaskDescription": "All the experiment is performed eyes closed. Relax periods last for about 9 seconds, are then followed by a period of 6 seconds where the participants is asked to \"get ready\" for the trial, followed by a period of 15 seconds of concentration. This sequence is repeated 20 times for each participant."
+}

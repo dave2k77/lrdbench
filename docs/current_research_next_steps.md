@@ -8,9 +8,11 @@ This page is the short, current-facing handoff for work after the stable public 
 
 - Public package status: stable `1.0.2` release, with unchanged public output contract `1.0.0`.
 - Public library focus: maintain schema/API/output-contract stability, keep docs coherent, and avoid changing public CSV columns without a contract-version bump.
-- Current research focus: use the completed `neural_classical_workstation` benchmark campaign to prepare committee/manuscript figures and define the next observational neural-data benchmark.
+- Current research focus: use the completed `neural_classical_workstation` benchmark campaign, clean observational-mode fixture, and OpenNeuro `ds002691` EEG pilot to prepare committee/manuscript figures and observational workflow text.
 - Completed synthetic campaign: `benchmark_experiment/neural_classical_workstation_analysis.md` summarises the ground-truth and stress-test runs.
 - Compact tracked results: `benchmark_experiment/results/neural_classical_workstation/` contains the public summary CSVs and checksums; large row-level report directories should be published separately as release or archive assets when cited.
+- Observational fixture results: `benchmark_experiment/results/neural_observational_fixture/` contains compact truth-free summaries from a no-truth, neural-like CSV workflow rehearsal; use it to verify report shape and analysis code, not as empirical evidence.
+- OpenNeuro EEG pilot results: `benchmark_experiment/results/openneuro_ds002691_pilot/` contains compact truth-free summaries from the first real open-data EEG observational run. Interpret it as workflow/diagnostic evidence only, not as estimator-accuracy or CI-coverage evidence.
 
 ## Dedicated local environment
 
@@ -33,16 +35,20 @@ Do not rely on bare `python` for repository verification on this machine; it may
    - false-positive LRD at `H = 0.5`;
    - estimator disagreement heatmap;
    - scale/window sensitivity heatmap.
-2. Keep the scientific claims separated in all writeups:
+2. Add the OpenNeuro `ds002691` pilot to the observational-mode manuscript section:
+   - cite DOI `10.18112/openneuro.ds002691.v1.1.0` and CC0 license;
+   - report the subset shape: four subjects, four channels, 16 ten-second windows;
+   - emphasize metadata/QC preservation, estimator validity/runtime/CI-width/disagreement summaries, and no benchmark truth.
+3. Keep the scientific claims separated in all writeups:
    - synthetic truth-based claims;
    - stress-test degradation claims;
    - observational neural stability and failure-pattern claims.
-3. Decide publication packaging for large outputs:
+4. Decide publication packaging for large outputs:
    - keep compact summaries and checksums in git;
    - publish full report directories as GitHub Release or Zenodo assets if externally cited;
    - update citation/DOI guidance only after an archive exists.
-4. Before adding new metrics or report columns, add or update output-contract tests first.
-5. When touching evaluator or reporter logic, keep changes narrow and regression-test the exact metric/report behavior.
+5. Before adding new metrics or report columns, add or update output-contract tests first.
+6. When touching evaluator or reporter logic, keep changes narrow and regression-test the exact metric/report behavior.
 
 ## Observational neural-data entry criteria
 
@@ -82,5 +88,6 @@ Use smoke-suite validation before benchmark-run changes:
 PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_ground_truth.yaml
 PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_stress_test.yaml
 PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_observational.yaml
+PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/openneuro_ds002691_pilot.yaml
 PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_data_driven.yaml
 ```
