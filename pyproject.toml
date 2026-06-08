@@ -116,7 +116,7 @@ packages = ["src/lrdbench"]
 [tool.hatch.build.targets.wheel.force-include]
 "configs/contracts" = "src/lrdbench/configs/contracts"
 "configs/suites/benchmark_rs_gph.yaml" = "src/lrdbench/configs/suites/benchmark_rs_gph.yaml"
-"configs/suites/data" = "src/lrdbench/configs/suites/data"
+"configs/suites/data/smoke_series.csv" = "src/lrdbench/configs/suites/data/smoke_series.csv"
 "configs/suites/public_medium_canonical_ground_truth.yaml" = "src/lrdbench/configs/suites/public_medium_canonical_ground_truth.yaml"
 "configs/suites/public_medium_null_false_positive.yaml" = "src/lrdbench/configs/suites/public_medium_null_false_positive.yaml"
 "configs/suites/public_medium_sensitivity_disagreement.yaml" = "src/lrdbench/configs/suites/public_medium_sensitivity_disagreement.yaml"
@@ -149,6 +149,9 @@ include = [
   "/lrdbench_repo_schema.txt",
   "/mkdocs.yml",
   "/.readthedocs.yaml"
+]
+exclude = [
+  "configs/suites/data/openneuro_ds002691_pilot/raw",
 ]
 
 [tool.pytest.ini_options]
