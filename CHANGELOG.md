@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.0.3
+
 ### Design & CLI
 - CLI: added `--dry-run` flag to `lrdbench run` to preview the record-estimator grid without
   fitting estimators or writing outputs.
