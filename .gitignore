@@ -25,3 +25,7 @@ configs/suites/paper/
 tests/integration/test_paper_workflow.py
 *.swp
 .DS_Store
+
+# Raw OpenNeuro EEG source data: kept locally only, never committed
+# (130 MB, exceeds PyPI limits; the pilot suite uses the derived CSVs).
+configs/suites/data/openneuro_ds002691_pilot/raw/*.set
