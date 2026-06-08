@@ -4,7 +4,7 @@
 
 **Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs and Read the Docs).
 
-Current public release: `1.0.2`. No DOI is attached yet; cite the software using `CITATION.cff`
+Current public release: `1.0.3`. No DOI is attached yet; cite the software using `CITATION.cff`
 and the GitHub release.
 
 `lrdbench` is a research-oriented benchmarking framework for studying the behaviour of long-range dependence (LRD) estimators across three distinct settings:
@@ -18,7 +18,7 @@ The framework is designed to support:
 - rigorous comparison of classical and new LRD estimators;
 - bundled temporal, spectral, geometric, wavelet, aggregation, and data-driven estimator families;
 - uncertainty-aware benchmarking, including empirical interval coverage where applicable;
-- robustness analysis under heavy tails, nonstationarity, artefacts, level shifts, outliers, polynomial trends, and low-frequency contamination;
+- robustness analysis under the bundled contamination operators: heavy-tailed noise, level shifts, outliers, and polynomial trends;
 - experimental data-driven baselines, including Random Forest, SVR, CNN, and LSTM estimators;
 - transparent failure analysis and validity-rate reporting;
 - manifest-driven, provenance-complete, reproducible benchmark execution.
