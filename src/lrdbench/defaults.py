@@ -39,6 +39,7 @@ from lrdbench.generators.fbm import FBMGenerator
 from lrdbench.generators.fgn import FGNGenerator
 from lrdbench.generators.fou import FOUGenerator
 from lrdbench.generators.mrw import MRWGenerator
+from lrdbench.generators.nonstationary_lrd import NonstationaryLRDGenerator
 from lrdbench.interfaces import BaseEstimator
 from lrdbench.registries import ContaminationRegistry, EstimatorRegistry, GeneratorRegistry
 from lrdbench.schema import EstimatorSpec
@@ -51,6 +52,7 @@ def build_default_generator_registry() -> GeneratorRegistry:
     reg.register("ARFIMA", ARFIMAGenerator())
     reg.register("MRW", MRWGenerator())
     reg.register("fOU", FOUGenerator())
+    reg.register("NonstationaryLRD", NonstationaryLRDGenerator())
     return reg
 
 
