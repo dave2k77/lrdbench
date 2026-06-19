@@ -1,0 +1,143 @@
+manifest_id: neural_nonstationary_lrd_correction_medium_temporal_v1
+name: neural_nonstationary_lrd_correction_medium_temporal
+description: Medium correction-aware temporal benchmark for nonstationary LRD cases with empirical and oracle preprocessing operators.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: NonstationaryLRD
+      params:
+        case: [pure_short]
+        H: [0.5]
+        n: [1024, 4096]
+        sigma: [1.0]
+      replicates: 20
+    - family: NonstationaryLRD
+      params:
+        case: [pure_lrd]
+        H: [0.6, 0.7, 0.8]
+        n: [1024, 4096]
+        sigma: [1.0]
+      replicates: 20
+    - family: NonstationaryLRD
+      params:
+        case:
+          - short_smooth_gain
+          - short_piecewise_gain
+          - short_randomwalk_gain
+          - short_bursty_t
+          - short_regime_switch
+          - short_qsoc
+        H: [0.5]
+        n: [1024, 4096]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 20
+    - family: NonstationaryLRD
+      params:
+        case:
+          - lrd_smooth_gain
+          - lrd_piecewise_gain
+          - lrd_randomwalk_gain
+          - lrd_drift
+          - lrd_qsoc
+        H: [0.6, 0.7, 0.8]
+        n: [1024, 4096]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 20
+preprocessing:
+  include_raw: true
+  operators:
+    - name: rolling_zscore
+      params:
+        window: [64, 128, 256, 512]
+    - name: polynomial_detrend
+      params:
+        order: [1]
+    - name: oracle_gain
+      params: {}
+    - name: oracle_drift
+      params: {}
+    - name: oracle_state_zscore
+      params:
+        bins: [2]
+estimators:
+  - name: RS
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 512
+      use_anis_lloyd_correction: true
+      n_bootstrap: 0
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+      n_bootstrap: 0
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 128
+      - name: balanced_scales
+        params:
+          min_scale: 12
+          max_scale: 256
+      - name: long_scales
+        params:
+          min_scale: 16
+          max_scale: 512
+metrics:
+  - bias
+  - mae
+  - rmse
+  - validity_rate
+  - runtime
+  - false_positive_lrd_rate
+  - correction_drift
+  - correction_degradation_ratio
+  - name: oracle_gap
+    label: gain
+    empirical_operator: rolling_zscore
+    oracle_operator: oracle_gain
+  - name: oracle_gap
+    label: drift
+    empirical_operator: polynomial_detrend
+    oracle_operator: oracle_drift
+  - name: oracle_gap
+    label: state
+    empirical_operator: rolling_zscore
+    oracle_operator: oracle_state_zscore
+  - parameter_variant_sensitivity
+  - max_variant_drift
+leaderboards:
+  - name: neural_nonstationary_lrd_correction_temporal_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.65
+      validity_rate: 0.25
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports/neural_nonstationary_lrd_correction_medium_temporal
+  figure_set:
+    - sensitivity_heatmap
+    - false_positive_lrd
+seeds:
+  global_seed: 20260616
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/neural_nonstationary_lrd_correction_medium_temporal
+  cache_read: true
+  cache_write: true

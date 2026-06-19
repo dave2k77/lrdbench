@@ -27,6 +27,9 @@ def main(argv: list[str] | None = None) -> int:
     estimators_p.add_argument("--format", choices=("text", "json"), default="text")
     estimators_p.add_argument("--no-plugins", action="store_true", help="Show only built-in estimators")
 
+    preprocessing_p = sub.add_parser("list-preprocessing", help="List preprocessing/correction operators")
+    preprocessing_p.add_argument("--format", choices=("text", "json"), default="text")
+
     plugins_p = sub.add_parser("list-plugins", help="List discovered third-party estimator plugins")
     plugins_p.add_argument("--format", choices=("text", "json"), default="text")
 
@@ -56,6 +59,8 @@ def main(argv: list[str] | None = None) -> int:
                 if preview["n_contaminated"]:
                     print(f"n_clean={preview['n_clean']}")
                     print(f"n_contaminated={preview['n_contaminated']}")
+                if preview["n_preprocessed"]:
+                    print(f"n_preprocessed={preview['n_preprocessed']}")
                 print(f"global_seed={preview['global_seed']}")
                 print("dry_run=completed (no estimators were fitted)")
                 return 0
@@ -133,6 +138,17 @@ def main(argv: list[str] | None = None) -> int:
 
             reg, _ = build_estimator_registry_with_plugins()
             rows = [{"name": name} for name in reg.list()]
+        if args.format == "json":
+            print(json.dumps(rows, indent=2, sort_keys=True))
+        else:
+            for row in rows:
+                print(row["name"])
+        return 0
+
+    if args.command == "list-preprocessing":
+        from lrdbench.defaults import build_default_preprocessing_registry
+
+        rows = [{"name": name} for name in build_default_preprocessing_registry().list()]
         if args.format == "json":
             print(json.dumps(rows, indent=2, sort_keys=True))
         else:

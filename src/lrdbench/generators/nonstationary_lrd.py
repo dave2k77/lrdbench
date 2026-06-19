@@ -311,7 +311,9 @@ class NonstationaryLRDGenerator(BaseGenerator):
         else:  # pragma: no cover - guarded above
             raise ValueError(f"unhandled NonstationaryLRD case: {case!r}")
 
-        values = sigma * _standardize(z)
+        z_mean = float(np.mean(z))
+        z_std = float(np.std(z)) + 1e-12
+        values = sigma * ((z - z_mean) / z_std)
         generating_params = dict(params)
         generating_params["resolved_target_H"] = target_h
         truth = TruthSpec(
@@ -366,5 +368,15 @@ class NonstationaryLRDGenerator(BaseGenerator):
             source_name=self.family,
             truth=truth,
             annotations=annotations,
+            latent_components={
+                "gain": np.asarray(gain, dtype=float),
+                "drift": np.asarray(drift, dtype=float),
+                "observed_drift": sigma * np.asarray(drift, dtype=float) / z_std,
+                "state": np.asarray(state, dtype=float),
+                "latent_lrd": np.asarray(lrd, dtype=float),
+                "latent_short": np.asarray(short, dtype=float),
+                "pre_standardized_mean": z_mean,
+                "pre_standardized_std": z_std,
+            },
             provenance=prov,
         )

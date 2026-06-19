@@ -1,0 +1,104 @@
+manifest_id: neural_nonstationary_lrd_correction_pilot_v1
+name: neural_nonstationary_lrd_correction_pilot
+description: Correction-aware pilot benchmark for conditional-stationarity and variance-trap nonstationary LRD cases.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: NonstationaryLRD
+      params:
+        case:
+          - pure_lrd
+          - lrd_smooth_gain
+          - lrd_randomwalk_gain
+          - lrd_drift
+          - lrd_qsoc
+          - short_regime_switch
+        H: [0.7]
+        n: [1024]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 10
+preprocessing:
+  include_raw: true
+  operators:
+    - name: rolling_zscore
+      params:
+        window: [64, 128, 256, 512]
+    - name: polynomial_detrend
+      params:
+        order: [1]
+    - name: oracle_gain
+      params: {}
+    - name: oracle_drift
+      params: {}
+    - name: oracle_state_zscore
+      params:
+        bins: [2]
+estimators:
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+      n_bootstrap: 0
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_scales
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_scales
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: RS
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 256
+      n_bootstrap: 0
+metrics:
+  - bias
+  - mae
+  - validity_rate
+  - runtime
+  - false_positive_lrd_rate
+  - correction_drift
+  - correction_degradation_ratio
+  - name: oracle_gap
+    oracle_operator: oracle_gain
+  - parameter_variant_sensitivity
+  - max_variant_drift
+leaderboards:
+  - name: neural_nonstationary_lrd_correction_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.65
+      validity_rate: 0.25
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports/neural_nonstationary_lrd_correction_pilot
+  figure_set:
+    - sensitivity_heatmap
+    - false_positive_lrd
+seeds:
+  global_seed: 20260616
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/neural_nonstationary_lrd_correction_pilot
+  cache_read: true
+  cache_write: true

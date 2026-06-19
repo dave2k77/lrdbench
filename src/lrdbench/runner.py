@@ -12,6 +12,7 @@ from lrdbench.defaults import (
     build_default_contamination_registry,
     build_default_estimator_registry,
     build_default_generator_registry,
+    build_default_preprocessing_registry,
 )
 from lrdbench.enums import BenchmarkMode
 from lrdbench.evaluator import GroundTruthEvaluator, ObservationalEvaluator
@@ -21,7 +22,12 @@ from lrdbench.leaderboard import WeightedRankLeaderboardBuilder
 from lrdbench.manifest import load_manifest, manifest_from_mapping
 from lrdbench.ml_training import prepare_data_driven_estimators
 from lrdbench.observational_sources import load_observational_records
-from lrdbench.registries import ContaminationRegistry, EstimatorRegistry, GeneratorRegistry
+from lrdbench.registries import (
+    ContaminationRegistry,
+    EstimatorRegistry,
+    GeneratorRegistry,
+    PreprocessingRegistry,
+)
 from lrdbench.reporter import SimpleHtmlCsvReporter
 from lrdbench.result_store import CsvResultStore
 from lrdbench.schema import (
@@ -46,6 +52,11 @@ def _record_id(manifest_id: str, family: str, params: dict[str, Any], rep: int) 
 
 def _contam_record_id(manifest_id: str, clean_id: str, op_name: str, op_params: dict[str, Any]) -> str:
     key = f"{manifest_id}|{clean_id}|{op_name}|{sorted(op_params.items())}"
+    return hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
+
+
+def _preproc_record_id(manifest_id: str, raw_id: str, op_name: str, op_params: dict[str, Any]) -> str:
+    key = f"{manifest_id}|{raw_id}|preproc|{op_name}|{sorted(op_params.items())}"
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
 
 
@@ -118,6 +129,21 @@ def _expand_contamination_grid(contamination: Mapping[str, Any]) -> list[tuple[s
     return out
 
 
+def _expand_preprocessing_grid(preprocessing: Mapping[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    out: list[tuple[str, dict[str, Any]]] = []
+    for block in preprocessing.get("operators", []):
+        name = str(block["name"])
+        params = dict(block.get("params") or {})
+        keys = list(params)
+        val_lists: list[list[Any]] = []
+        for k in keys:
+            v = params[k]
+            val_lists.append(v if isinstance(v, list) else [v])
+        for combo in itertools.product(*val_lists):
+            out.append((name, dict(zip(keys, combo, strict=True))))
+    return out
+
+
 class BenchmarkRunner:
     """Orchestrate a complete benchmark run.
 
@@ -149,10 +175,12 @@ class BenchmarkRunner:
         generators: GeneratorRegistry | None = None,
         estimators: EstimatorRegistry | None = None,
         contaminations: ContaminationRegistry | None = None,
+        preprocessing: PreprocessingRegistry | None = None,
         discover_plugins: bool = True,
     ) -> None:
         self.generators = generators or build_default_generator_registry()
         self.contaminations = contaminations or build_default_contamination_registry()
+        self.preprocessing = preprocessing or build_default_preprocessing_registry()
         self._plugin_provenance: list[PluginProvenanceRecord] = []
         if estimators is not None:
             self.estimators = estimators
@@ -234,6 +262,8 @@ class BenchmarkRunner:
                 manifest, base_dir=resolve_dir, global_seed=global_seed
             )
             evaluator = ObservationalEvaluator(self.estimators)
+
+        records = self._apply_preprocessing(manifest, records, global_seed)
 
         report_spec = manifest.report_spec or ReportSpec(
             formats=("html", "csv"),
@@ -334,11 +364,15 @@ class BenchmarkRunner:
             records = load_observational_records(
                 manifest, base_dir=resolve_dir, global_seed=global_seed
             )
+        records = self._apply_preprocessing(manifest, records, global_seed)
 
         n_records = len(records)
         n_estimators = len(manifest.estimator_specs)
         n_clean = sum(1 for r in records if r.annotations.get("stress_role") != "contaminated")
         n_contaminated = n_records - n_clean
+        n_preprocessed = sum(
+            1 for r in records if r.annotations.get("preprocessing_role") == "corrected"
+        )
         return {
             "mode": manifest.mode.value,
             "n_records": n_records,
@@ -346,6 +380,7 @@ class BenchmarkRunner:
             "n_fit_jobs": n_records * n_estimators,
             "n_clean": n_clean,
             "n_contaminated": n_contaminated,
+            "n_preprocessed": n_preprocessed,
             "global_seed": global_seed,
         }
 
@@ -415,6 +450,58 @@ class BenchmarkRunner:
                 )
                 records.append(contaminated)
         return records
+
+    def _apply_preprocessing(
+        self,
+        manifest: BenchmarkManifest,
+        records: list[SeriesRecord],
+        global_seed: int,
+    ) -> list[SeriesRecord]:
+        spec = dict(manifest.preprocessing_spec)
+        if not spec:
+            return records
+        scenarios = _expand_preprocessing_grid(spec)
+        if not scenarios:
+            return records
+        include_raw = bool(spec.get("include_raw", True))
+        out: list[SeriesRecord] = []
+        for rec in records:
+            raw = replace(
+                rec,
+                annotations={
+                    **dict(rec.annotations),
+                    "preprocessing_role": "raw",
+                    "pair_group_id": str(rec.annotations.get("pair_group_id", rec.record_id)),
+                    "preprocessing_operator": "raw",
+                    "preprocessing_family": "raw",
+                    "preprocessing_kind": "raw",
+                    "preprocessing_severity": "raw",
+                    "correction_target": "raw",
+                },
+            )
+            if include_raw:
+                out.append(raw)
+            for op_name, op_params in scenarios:
+                op = self.preprocessing.get(op_name)
+                nid = _preproc_record_id(manifest.manifest_id, raw.record_id, op_name, op_params)
+                pseed = _stable_seed(
+                    global_seed,
+                    manifest.manifest_id,
+                    "preproc",
+                    raw.record_id,
+                    op_name,
+                    tuple(sorted(op_params.items())),
+                )
+                out.append(
+                    op.apply(
+                        raw,
+                        params=op_params,
+                        seed=pseed,
+                        manifest_id=manifest.manifest_id,
+                        new_record_id=nid,
+                    )
+                )
+        return out
 
 
 def run_manifest_path(path: str | Path, *, discover_plugins: bool = True) -> BenchmarkRunOutput:
