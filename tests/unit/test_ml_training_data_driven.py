@@ -18,6 +18,7 @@ from lrdbench.estimators.data_driven import (
     MLSVREstimator,
     feature_vector,
     fixed_length_sequence,
+    standardize_series,
     train_sklearn_model,
 )
 from lrdbench.manifest import manifest_from_mapping
@@ -130,6 +131,56 @@ def test_fixed_length_sequence_handles_empty_constant_and_bad_length() -> None:
     assert np.array_equal(fixed_length_sequence(np.ones(20), length=16), np.zeros(16, dtype=np.float32))
     with pytest.raises(ValueError, match="sequence_length"):
         fixed_length_sequence(np.arange(20, dtype=float), length=7)
+
+
+def test_fixed_length_sequence_downsamples_by_block_mean_aggregation() -> None:
+    # 16 -> 8 means factor 2: block means [0.5, 2.5, ..., 14.5], then standardised.
+    out = fixed_length_sequence(np.arange(16, dtype=float), length=8)
+    assert out.shape == (8,)
+    expected = np.arange(16, dtype=float).reshape(8, 2).mean(axis=1)
+    expected = (expected - expected.mean()) / expected.std()
+    assert np.allclose(out, expected, atol=1e-5)
+
+
+def test_fixed_length_sequence_factor_one_is_contiguous_crop() -> None:
+    # length <= n < 2*length -> factor 1 -> crop of the leading `length` samples.
+    x = np.linspace(0.0, 1.0, 30)
+    out = fixed_length_sequence(x, length=16)
+    expected = standardize_series(x[:16])
+    assert out.shape == (16,)
+    assert np.allclose(out, expected, atol=1e-5)
+
+
+def test_fixed_length_sequence_upsamples_short_series_to_target_length() -> None:
+    out = fixed_length_sequence(np.sin(np.linspace(0.0, 6.0, 40)), length=64)
+    assert out.shape == (64,)
+    assert np.all(np.isfinite(out))
+
+
+@pytest.mark.statistical
+def test_fixed_length_sequence_preserves_hurst_under_downsampling() -> None:
+    gen = build_default_generator_registry().get("fGn")
+    rec = gen.generate(
+        record_id="hurst-preserve", params={"H": 0.8, "n": 8192}, seed=20260619, manifest_id="t"
+    )
+    full = np.asarray(rec.values, dtype=float)
+    downsampled = fixed_length_sequence(full, length=512)  # factor 16 aggregation
+
+    def aggregated_variance_hurst(x: np.ndarray) -> float:
+        x = x - float(np.mean(x))
+        scales = [2, 4, 8, 16, 32]
+        variances = []
+        for m in scales:
+            trimmed = x[: x.size - (x.size % m)].reshape(-1, m).mean(axis=1)
+            variances.append(float(np.var(trimmed)))
+        slope = float(np.polyfit(np.log(scales), np.log(variances), 1)[0])
+        return 1.0 + slope / 2.0
+
+    h_full = aggregated_variance_hurst(full)
+    h_down = aggregated_variance_hurst(downsampled)
+    assert h_full > 0.65  # source genuinely carries long-range dependence
+    # Block-mean downsampling keeps the scaling; linear interpolation would not.
+    assert abs(h_full - h_down) < 0.2
 
 
 def test_sklearn_estimators_report_missing_dependency(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -535,3 +586,75 @@ def test_lstm_rejects_zero_dropout_with_many_layers(monkeypatch: pytest.MonkeyPa
     # _build_torch_model silently bumps dropout to 0.2 when num_layers > 1 and dropout == 0.0
     assert model.lstm.dropout > 0.0
     assert model.pool_dropout.p == 0.2
+
+
+def test_sklearn_estimator_rejects_non_finite_prediction(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(data_driven, "sklearn_available", lambda: True)
+    data_driven._cached_pickle.cache_clear()
+    model_path = tmp_path / "model.pkl"
+    data_driven._write_pickle(
+        model_path,
+        {"model": PredictConstant(np.nan), "training_summary": {"n_training_records": 4}},
+    )
+    rec = _record(np.sin(np.linspace(0.0, 12.0, 128)))
+
+    out = MLRandomForestEstimator(_spec("MLRandomForest", {"model_path": str(model_path)})).fit(rec)
+
+    assert not out.valid
+    assert out.point is None
+    assert out.failure_reason == "non_finite_prediction"
+
+
+def test_torch_estimator_rejects_non_finite_prediction(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+    import torch
+
+    records = [
+        _record(np.sin(np.linspace(0.0, 4.0, 64)), truth=0.5, record_id="r0"),
+        _record(np.sin(np.linspace(0.0, 4.0, 64)) + 1, truth=0.6, record_id="r1"),
+    ]
+    model_path = tmp_path / "cnn.pt"
+    data_driven.train_torch_model(
+        "MLCNN", records, params={"sequence_length": 16}, artefact_path=model_path
+    )
+    # Corrupt every weight to NaN so the forward pass emits a non-finite prediction.
+    bundle = torch.load(model_path, map_location="cpu", weights_only=True)
+    bundle["state_dict"] = {
+        k: torch.full_like(v, float("nan")) for k, v in bundle["state_dict"].items()
+    }
+    torch.save(bundle, model_path)
+    data_driven._cached_torch_model.cache_clear()
+
+    rec = _record(np.sin(np.linspace(0.0, 12.0, 128)), record_id="infer")
+    out = MLCNNEstimator(_spec("MLCNN", {"model_path": str(model_path)})).fit(rec)
+
+    assert not out.valid
+    assert out.point is None
+    assert out.failure_reason == "non_finite_prediction"
+
+
+def test_torch_model_is_cached_across_fits(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(data_driven, "torch_available", lambda: True)
+    data_driven._cached_torch_model.cache_clear()
+    records = [
+        _record(np.sin(np.linspace(0.0, 4.0, 64)), truth=0.5, record_id="r0"),
+        _record(np.sin(np.linspace(0.0, 4.0, 64)) + 1, truth=0.6, record_id="r1"),
+    ]
+    model_path = tmp_path / "lstm.pt"
+    data_driven.train_torch_model(
+        "MLLSTM", records, params={"sequence_length": 16}, artefact_path=model_path
+    )
+
+    est = MLLSTMEstimator(_spec("MLLSTM", {"model_path": str(model_path)}))
+    rec = _record(np.sin(np.linspace(0.0, 12.0, 128)), record_id="infer")
+    first = est.fit(rec)
+    second = est.fit(rec)
+
+    assert first.valid and second.valid
+    assert first.point == second.point  # deterministic, same cached weights
+    info = data_driven._cached_torch_model.cache_info()
+    assert info.hits >= 1  # second fit reused the cached model
