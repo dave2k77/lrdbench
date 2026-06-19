@@ -146,6 +146,27 @@ estimators:
           wavelet: db4
           j_drop_low: 1
           j_drop_high: 2
+  - name: Higuchi
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: short_k
+        params:
+          k_max: 32
+      - name: long_k
+        params:
+          k_max: 64
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_scales: 16
+      h_min: 1
+      flat_slope_tol: 0.08
 metrics:
   - bias
   - mae
