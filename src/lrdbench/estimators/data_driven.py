@@ -49,17 +49,42 @@ def standardize_series(values: np.ndarray) -> np.ndarray:
 
 
 def fixed_length_sequence(values: np.ndarray, *, length: int) -> np.ndarray:
-    x = standardize_series(values)
-    if x.size == 0:
-        return x
+    """Coerce a series to exactly ``length`` samples while preserving its scaling.
+
+    Long-range dependence is a *scaling* property, so the resampling operator must not
+    distort it. Linear interpolation onto a different grid acts as an (uncontrolled)
+    low-pass filter and biases the apparent Hurst exponent, so it is avoided for the
+    common downsampling case.
+
+    - ``n == length``: returned unchanged (after cleaning/standardisation).
+    - ``n > length`` (downsampling): **non-overlapping block-mean aggregation** by the
+      integer factor ``n // length``. This is the same coarse-graining used by the
+      aggregated-variance Hurst estimator and preserves the self-similar scaling of the
+      process (a factor of 1 degenerates to a contiguous crop, which is exact). At most
+      ``factor - 1`` trailing samples are dropped.
+    - ``n < length`` (upsampling): linear interpolation. Upsampling cannot manufacture
+      fine-scale detail, but interpolation preserves the low-frequency content that
+      governs ``H``; this branch is only reached for series shorter than the model's
+      input length, which the suites avoid.
+
+    The output is standardised (mean 0, unit variance) so the network sees a consistent
+    amplitude regardless of the aggregation factor; standardisation is affine and does
+    not change ``H``.
+    """
     target = int(length)
     if target < 8:
         raise ValueError("sequence_length must be >= 8")
-    if x.size == target:
-        return x.astype(np.float32)
-    src = np.linspace(0.0, 1.0, num=x.size)
-    dst = np.linspace(0.0, 1.0, num=target)
-    return np.asarray(np.interp(dst, src, x), dtype=np.float32)
+    x = _as_clean_1d(values)
+    if x.size == 0:
+        return np.asarray([], dtype=np.float32)
+    if x.size > target:
+        factor = x.size // target
+        x = x[: target * factor].reshape(target, factor).mean(axis=1)
+    elif x.size < target:
+        src = np.linspace(0.0, 1.0, num=x.size)
+        dst = np.linspace(0.0, 1.0, num=target)
+        x = np.interp(dst, src, x)
+    return standardize_series(x).astype(np.float32)
 
 
 def feature_vector(values: np.ndarray, *, max_lag: int = 16) -> np.ndarray:
@@ -148,6 +173,28 @@ def _cached_pickle(path: str) -> Any:
     return _load_pickle(path)
 
 
+@lru_cache(maxsize=8)
+def _cached_torch_model(path: str, mtime_ns: int) -> tuple[Any, int, dict[str, Any], dict[str, Any]]:
+    """Load + build a torch model once per (path, mtime).
+
+    Rebuilding the module and reloading the state dict on every ``fit`` call is
+    wasteful across large suites. Keying the cache on the file mtime guarantees a
+    rewritten artefact (same path) is never served stale. ``mtime_ns`` is unused in
+    the body but is part of the cache key.
+    """
+    import torch
+
+    del mtime_ns  # cache-key only
+    bundle = torch.load(path, map_location="cpu", weights_only=True)
+    seq_len = int(bundle["sequence_length"])
+    arch_cfg = dict(bundle.get("architecture", {}))
+    model = _build_torch_model(str(bundle["model_kind"]), seq_len, cfg=arch_cfg)
+    model.load_state_dict(bundle["state_dict"])
+    model.eval()
+    training_summary = dict(bundle.get("training_summary", {}))
+    return model, seq_len, arch_cfg, training_summary
+
+
 def _write_pickle(path: Path, obj: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -234,8 +281,18 @@ class _SklearnEstimator(BaseEstimator):
             training_summary = dict(bundle.get("training_summary", {}))
             target_min = float(training_summary.get("target_min", 0.0))
             target_max = float(training_summary.get("target_max", 1.0))
-            point = float(np.asarray(model.predict(x.reshape(1, -1))).reshape(-1)[0])
-            point = float(np.clip(point, target_min, target_max))
+            raw = float(np.asarray(model.predict(x.reshape(1, -1))).reshape(-1)[0])
+            if not np.isfinite(raw):
+                return EstimateResult(
+                    record_id=record.record_id,
+                    estimator_name=self._spec.name,
+                    point=None,
+                    runtime_seconds=time.perf_counter() - t0,
+                    valid=False,
+                    failure_reason="non_finite_prediction",
+                    estimator_version=self.VERSION,
+                )
+            point = float(np.clip(raw, target_min, target_max))
             return EstimateResult(
                 record_id=record.record_id,
                 estimator_name=self._spec.name,
@@ -302,12 +359,10 @@ class _TorchSequenceEstimator(BaseEstimator):
                 estimator_version=self.VERSION,
             )
         try:
-            bundle = torch.load(str(model_path), map_location="cpu", weights_only=True)
-            seq_len = int(bundle["sequence_length"])
-            arch_cfg = dict(bundle.get("architecture", {}))
-            model = _build_torch_model(str(bundle["model_kind"]), seq_len, cfg=arch_cfg)
-            model.load_state_dict(bundle["state_dict"])
-            model.eval()
+            mtime_ns = Path(str(model_path)).stat().st_mtime_ns
+            model, seq_len, arch_cfg, training_summary = _cached_torch_model(
+                str(model_path), mtime_ns
+            )
             x = fixed_length_sequence(record.values, length=seq_len)
             if x.size == 0:
                 return EstimateResult(
@@ -319,12 +374,21 @@ class _TorchSequenceEstimator(BaseEstimator):
                     failure_reason="insufficient_signal_for_data_driven_sequence",
                     estimator_version=self.VERSION,
                 )
-            training_summary = dict(bundle.get("training_summary", {}))
             target_min = float(training_summary.get("target_min", 0.0))
             target_max = float(training_summary.get("target_max", 1.0))
             with torch.no_grad():
                 xt = torch.as_tensor(x.reshape(1, 1, -1), dtype=torch.float32)
                 pred = model(xt).reshape(-1)[0].item()
+            if not np.isfinite(pred):
+                return EstimateResult(
+                    record_id=record.record_id,
+                    estimator_name=self._spec.name,
+                    point=None,
+                    runtime_seconds=time.perf_counter() - t0,
+                    valid=False,
+                    failure_reason="non_finite_prediction",
+                    estimator_version=self.VERSION,
+                )
             point = float(np.clip(pred, target_min, target_max))
             return EstimateResult(
                 record_id=record.record_id,
