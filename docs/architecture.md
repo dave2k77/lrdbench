@@ -33,6 +33,8 @@ Reports  ←  HTML / CSV / LaTeX / figures
 
 `BenchmarkRunner.run()` in `runner.py` is the single entry point that wires these stages together. Each stage is implemented by a dedicated module so that individual pieces can be tested and replaced in isolation.
 
+If a manifest declares `preprocessing.operators`, the runner materializes additional corrected records after source materialization and before estimation. These records keep the original truth target, add `preprocessing_*` stratum fields, and preserve `raw_record_id` / `pair_group_id` annotations for raw-vs-corrected comparisons.
+
 ## Key modules
 
 | Module | Responsibility |
@@ -64,6 +66,12 @@ Reports  ←  HTML / CSV / LaTeX / figures
 2. Register it in `defaults.build_default_contamination_registry()`.
 3. Reference the operator name in a manifest `contamination.operators` block.
 
+### Adding a preprocessing or correction operator
+
+1. Subclass `BasePreprocessing` and implement `name`, `family`, `kind`, `version`, and `apply()`.
+2. Register it in `defaults.build_default_preprocessing_registry()`.
+3. Reference the operator name in a manifest `preprocessing.operators` block.
+
 ### Adding an estimator
 
 1. Subclass `BaseEstimator` and implement `spec` and `fit()`.
@@ -79,7 +87,7 @@ Every synthetic record carries a `ProvenanceRecord` with:
 - the generator `seed` derived deterministically from the manifest's `global_seed`,
 - timestamps and software version metadata.
 
-Contaminated records extend this history via `contamination_history`, preserving the clean parent id, operator name, parameters, and severity label.
+Contaminated records extend this history via `contamination_history`, preserving the clean parent id, operator name, parameters, and severity label. Preprocessed records extend `preprocessing_history` so empirical corrections and oracle corrections remain auditable.
 
 Every run writes `manifest/environment.json` containing Python version, platform, package versions, seed policy, and execution settings. This makes a report self-describing: given the manifest, the package version, and the data sources, the run should be bitwise reproducible.
 

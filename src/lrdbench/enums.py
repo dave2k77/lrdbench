@@ -12,6 +12,7 @@ class BenchmarkMode(StrEnum):
 class SourceType(StrEnum):
     SYNTHETIC = "synthetic"
     CONTAMINATED = "contaminated"
+    PREPROCESSED = "preprocessed"
     OBSERVATIONAL = "observational"
     CUSTOM = "custom"
 

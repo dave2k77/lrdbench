@@ -59,6 +59,14 @@ _SENSITIVITY_METRIC_NAMES = frozenset(
     }
 )
 
+_CORRECTION_METRIC_NAMES = frozenset(
+    {
+        "correction_drift",
+        "correction_degradation_ratio",
+        "oracle_gap",
+    }
+)
+
 _LEADERBOARD_COLUMNS = ("estimator_name", "rank", "score")
 _FAILURE_MAP_COLUMNS = ("estimator_name", "stratum_json")
 _DISAGREEMENT_COLUMNS = (
@@ -71,6 +79,19 @@ _DISAGREEMENT_COLUMNS = (
     "metadata_json",
 )
 _SENSITIVITY_COLUMNS = _DISAGREEMENT_COLUMNS
+_CORRECTION_COLUMNS = (
+    "record_id",
+    "estimator_name",
+    "metric_name",
+    "value",
+    "stratum_json",
+    "preprocessing_operator",
+    "preprocessing_kind",
+    "correction_target",
+    "raw_record_id",
+    "oracle_record_id",
+    "oracle_operator",
+)
 _BENCHMARK_UNCERTAINTY_COLUMNS = (
     "estimator_name",
     "metric_name",
@@ -154,6 +175,10 @@ def _write_latex_table(
 
 def _write_csv_rows(path: Path, rows: Sequence[Mapping[str, Any]], columns: Sequence[str]) -> None:
     pd.DataFrame(rows, columns=list(columns)).to_csv(path, index=False)
+
+
+def _is_correction_metric(metric_name: str) -> bool:
+    return metric_name in _CORRECTION_METRIC_NAMES or metric_name.startswith("oracle_gap:")
 
 
 def _columns_for_rows(rows: Sequence[Mapping[str, Any]], minimum: Sequence[str]) -> tuple[str, ...]:
@@ -555,6 +580,32 @@ class SimpleHtmlCsvReporter(BaseReporter):
                 format="csv",
                 path=stress_path,
             )
+
+        correction_rows = [
+            {
+                "record_id": m.record_id,
+                "estimator_name": m.estimator_name,
+                "metric_name": m.metric_name,
+                "value": m.value,
+                "stratum_json": json.dumps(dict(m.stratum), sort_keys=True),
+                "preprocessing_operator": m.metadata.get("preprocessing_operator"),
+                "preprocessing_kind": m.metadata.get("preprocessing_kind"),
+                "correction_target": m.metadata.get("correction_target"),
+                "raw_record_id": m.metadata.get("raw_record_id"),
+                "oracle_record_id": m.metadata.get("oracle_record_id"),
+                "oracle_operator": m.metadata.get("oracle_operator"),
+            }
+            for m in metrics.per_series
+            if m.record_id is not None and _is_correction_metric(m.metric_name)
+        ]
+        correction_path = tables / "correction_metrics.csv"
+        _write_csv_rows(correction_path, correction_rows, _CORRECTION_COLUMNS)
+        _record_artifact(
+            artefact_id=f"{run_id}_correction_metrics_csv",
+            artefact_type="metric_export",
+            format="csv",
+            path=correction_path,
+        )
 
         if (
             manifest.mode is BenchmarkMode.STRESS_TEST

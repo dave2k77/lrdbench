@@ -127,9 +127,12 @@ packages = ["src/lrdbench"]
 "configs/suites/public_small_stress_contamination.yaml" = "src/lrdbench/configs/suites/public_small_stress_contamination.yaml"
 "configs/suites/smoke_ground_truth.yaml" = "src/lrdbench/configs/suites/smoke_ground_truth.yaml"
 "configs/suites/smoke_nonstationary_lrd.yaml" = "src/lrdbench/configs/suites/smoke_nonstationary_lrd.yaml"
+"configs/suites/smoke_nonstationary_lrd_corrections.yaml" = "src/lrdbench/configs/suites/smoke_nonstationary_lrd_corrections.yaml"
 "configs/suites/smoke_observational.yaml" = "src/lrdbench/configs/suites/smoke_observational.yaml"
 "configs/suites/smoke_stress_test.yaml" = "src/lrdbench/configs/suites/smoke_stress_test.yaml"
 "configs/suites/smoke_data_driven.yaml" = "src/lrdbench/configs/suites/smoke_data_driven.yaml"
+"configs/suites/neural_nonstationary_lrd_correction_pilot.yaml" = "src/lrdbench/configs/suites/neural_nonstationary_lrd_correction_pilot.yaml"
+"configs/suites/neural_nonstationary_lrd_correction_medium_temporal.yaml" = "src/lrdbench/configs/suites/neural_nonstationary_lrd_correction_medium_temporal.yaml"
 "configs/suites/neural_nonstationary_lrd_classical_medium.yaml" = "src/lrdbench/configs/suites/neural_nonstationary_lrd_classical_medium.yaml"
 "configs/suites/neural_nonstationary_lrd_pilot.yaml" = "src/lrdbench/configs/suites/neural_nonstationary_lrd_pilot.yaml"
 

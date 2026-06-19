@@ -1,0 +1,59 @@
+manifest_id: smoke_nonstationary_lrd_corrections_v1
+name: smoke_nonstationary_lrd_corrections
+description: Smoke benchmark for nonstationary LRD correction and oracle preprocessing operators.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: NonstationaryLRD
+      params:
+        case:
+          - lrd_randomwalk_gain
+        H: [0.7]
+        n: [256]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 1
+preprocessing:
+  include_raw: true
+  operators:
+    - name: rolling_zscore
+      params:
+        window: [64]
+    - name: oracle_gain
+      params: {}
+estimators:
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 96
+      detrend_order: 1
+metrics:
+  - mae
+  - correction_drift
+  - correction_degradation_ratio
+  - name: oracle_gap
+    oracle_operator: oracle_gain
+leaderboards:
+  - name: smoke_nonstationary_lrd_corrections_accuracy
+    mode: ground_truth
+    component_metrics: [mae]
+    weights:
+      mae: 1.0
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports/smoke_nonstationary_lrd_corrections
+seeds:
+  global_seed: 20260616
+execution:
+  max_workers: 1
+  estimate_cache_dir: .lrdbench_cache/smoke_nonstationary_lrd_corrections
+  cache_read: false
+  cache_write: false

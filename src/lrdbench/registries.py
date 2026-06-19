@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from lrdbench.interfaces import BaseContamination, BaseEstimator, BaseGenerator
+from lrdbench.interfaces import BaseContamination, BaseEstimator, BaseGenerator, BasePreprocessing
 
 if TYPE_CHECKING:
     from lrdbench.schema import EstimatorSpec
@@ -35,6 +35,10 @@ class GeneratorRegistry(Registry[BaseGenerator]):
 
 
 class ContaminationRegistry(Registry[BaseContamination]):
+    pass
+
+
+class PreprocessingRegistry(Registry[BasePreprocessing]):
     pass
 
 
