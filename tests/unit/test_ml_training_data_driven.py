@@ -26,6 +26,14 @@ from lrdbench.ml_training import prepare_data_driven_estimators, requested_data_
 from lrdbench.runner import BenchmarkRunner
 from lrdbench.schema import BenchmarkManifest, EstimatorSpec, SeriesRecord, TruthSpec
 
+# Tests that monkeypatch ``torch_available`` to True still need torch actually
+# installed (they import torch or build real models). Skip them when the optional
+# ``nn`` extra is absent, e.g. on CI installing only ``.[test,dev]``.
+requires_torch = pytest.mark.skipif(
+    not data_driven.torch_available(),
+    reason="torch not installed; install lrdbench[nn]",
+)
+
 
 class PredictConstant:
     def __init__(self, value: float) -> None:
@@ -491,6 +499,7 @@ def test_sklearn_estimator_rejects_max_lag_mismatch(monkeypatch: pytest.MonkeyPa
     assert "max_lag_mismatch" in out.failure_reason or "max_lag_mismatch" in (out.failure_reason or "")
 
 
+@requires_torch
 def test_train_torch_model_skips_empty_records(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(data_driven, "torch_available", lambda: True)
     records = [
@@ -506,6 +515,7 @@ def test_train_torch_model_skips_empty_records(monkeypatch: pytest.MonkeyPatch, 
     assert summary["n_training_records"] == 2
 
 
+@requires_torch
 def test_train_torch_model_rejects_too_short_sequence_length(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(data_driven, "torch_available", lambda: True)
     records = [
@@ -519,6 +529,7 @@ def test_train_torch_model_rejects_too_short_sequence_length(monkeypatch: pytest
         )
 
 
+@requires_torch
 def test_lstm_regressor_mean_pools_and_dropout_present(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(data_driven, "torch_available", lambda: True)
     import torch
@@ -536,6 +547,7 @@ def test_lstm_regressor_mean_pools_and_dropout_present(monkeypatch: pytest.Monke
     assert any(isinstance(m, nn.Dropout) for m in model.head.modules())
 
 
+@requires_torch
 def test_cnn_regressor_larger_defaults_and_dropout(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(data_driven, "torch_available", lambda: True)
     import torch.nn as nn
@@ -548,6 +560,7 @@ def test_cnn_regressor_larger_defaults_and_dropout(monkeypatch: pytest.MonkeyPat
     assert sum(1 for m in model.net.modules() if isinstance(m, nn.Dropout)) == 3
 
 
+@requires_torch
 def test_train_torch_model_saves_architecture_and_round_trips(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -579,6 +592,7 @@ def test_train_torch_model_saves_architecture_and_round_trips(
     assert isinstance(out.point, float)
 
 
+@requires_torch
 def test_lstm_rejects_zero_dropout_with_many_layers(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(data_driven, "torch_available", lambda: True)
 
@@ -607,6 +621,7 @@ def test_sklearn_estimator_rejects_non_finite_prediction(
     assert out.failure_reason == "non_finite_prediction"
 
 
+@requires_torch
 def test_torch_estimator_rejects_non_finite_prediction(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -637,6 +652,7 @@ def test_torch_estimator_rejects_non_finite_prediction(
     assert out.failure_reason == "non_finite_prediction"
 
 
+@requires_torch
 def test_torch_model_is_cached_across_fits(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setattr(data_driven, "torch_available", lambda: True)
     data_driven._cached_torch_model.cache_clear()
