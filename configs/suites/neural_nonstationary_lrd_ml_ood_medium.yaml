@@ -1,0 +1,192 @@
+manifest_id: neural_nonstationary_lrd_ml_ood_medium_v1
+name: neural_nonstationary_lrd_ml_ood_medium
+description: >
+  Out-of-distribution stress of the data-driven estimators. ML/NN models are trained ONLY on
+  the smooth_gain nonstationarity family (plus the pure_short/pure_lrd baselines), then evaluated
+  on UNSEEN nonstationarity families (regime_switch, piecewise_gain, randomwalk_gain, drift).
+  Tests whether the models learned a transferable ability to discount nonstationarity or merely
+  memorised the training case types. Classical estimators are included unchanged for reference.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    # null / short-memory cases (true H = 0.5); pure_short is an in-distribution anchor,
+    # the rest are UNSEEN nonstationarity families.
+    - family: NonstationaryLRD
+      params:
+        case:
+          - pure_short
+          - short_regime_switch
+          - short_piecewise_gain
+          - short_randomwalk_gain
+        H: [0.5]
+        n: [1024, 4096]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 10
+    # long-memory cases; pure_lrd is the anchor, the rest are UNSEEN families.
+    - family: NonstationaryLRD
+      params:
+        case:
+          - pure_lrd
+          - lrd_drift
+          - lrd_piecewise_gain
+          - lrd_randomwalk_gain
+        H: [0.6, 0.7, 0.8]
+        n: [1024, 4096]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 10
+ml_training:
+  enabled: true
+  target_estimand: hurst_scaling_proxy
+  validation_fraction: 0.2
+  source:
+    type: generator_grid
+    generators:
+      # ONLY smooth_gain nonstationarity is seen during training (plus the pure baselines).
+      - family: NonstationaryLRD
+        params:
+          case:
+            - pure_short
+            - short_smooth_gain
+          H: [0.5]
+          n: [1024, 4096]
+          gain_amplitude: [0.8]
+          sigma: [1.0]
+        replicates: 12
+      - family: NonstationaryLRD
+        params:
+          case:
+            - pure_lrd
+            - lrd_smooth_gain
+          H: [0.6, 0.65, 0.7, 0.75, 0.8]
+          n: [1024, 4096]
+          gain_amplitude: [0.8]
+          sigma: [1.0]
+        replicates: 12
+estimators:
+  # --- classical representatives (one per family) ---
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+      min_scale: 12
+      max_scale: 256
+  - name: GPH
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      m: 64
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      wavelet: db2
+      j_drop_low: 1
+      j_drop_high: 1
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_scales: 16
+      h_min: 1
+      flat_slope_tol: 0.08
+  # --- data-driven baselines (trained run-locally on the smooth_gain-only grid) ---
+  - name: MLRandomForest
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_estimators: 200
+      min_samples_leaf: 1
+      max_lag: 16
+      random_state: 20260619
+      n_jobs: 1
+  - name: MLSVR
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      C: 10.0
+      epsilon: 0.03
+      kernel: rbf
+      max_lag: 16
+  - name: MLCNN
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      sequence_length: 256
+      conv1_channels: 16
+      conv2_channels: 32
+      dropout: 0.2
+      epochs: 15
+      batch_size: 32
+      learning_rate: 0.001
+      weight_decay: 0.0001
+      random_state: 20260619
+  - name: MLLSTM
+    family: data_driven
+    target_estimand: hurst_scaling_proxy
+    assumptions: [trained_on_manifest_synthetic_distribution]
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      sequence_length: 256
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.2
+      epochs: 15
+      batch_size: 32
+      learning_rate: 0.001
+      weight_decay: 0.0001
+      random_state: 20260619
+metrics:
+  - bias
+  - mae
+  - rmse
+  - validity_rate
+  - runtime
+  - false_positive_lrd_rate
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+leaderboards:
+  - name: ml_ood_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.65
+      validity_rate: 0.25
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports/neural_nonstationary_lrd_ml_ood_medium
+  figure_set:
+    - disagreement_heatmap
+    - false_positive_lrd
+seeds:
+  global_seed: 20260619
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/neural_nonstationary_lrd_ml_ood_medium
+  cache_read: true
+  cache_write: true

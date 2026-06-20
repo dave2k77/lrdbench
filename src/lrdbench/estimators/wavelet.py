@@ -16,7 +16,15 @@ def _collect_detail_scales(
     j_drop_high: int,
     j_drop_low: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
-    """Return (j_index 1..J finest-to-coarse, sample variance, n_k) per retained detail level."""
+    """Return (level 1..J finest-to-coarse, sample variance, n_k) per retained detail level.
+
+    ``pywt.wavedec`` returns ``[cA_J, cD_J, cD_{J-1}, ..., cD_1]``, so the k-th
+    element of ``coeffs[1:]`` is ``cD_{J-k}`` and its DWT level (octave) is
+    ``J - k``: level 1 is the finest detail (``cD_1``, highest frequency) and
+    level J is the coarsest (``cD_J``, lowest frequency). For fGn-type signals
+    the detail variance obeys ``Var(d_level) ∝ 2^{level (2H-1)}``, so a positive
+    slope of log2-variance against level corresponds to long-range dependence.
+    """
     x = np.asarray(x, dtype=float)
     if x.size < 128:
         return None
@@ -26,17 +34,21 @@ def _collect_detail_scales(
         return None
     coeffs = pywt.wavedec(x, wavelet=wavelet, mode="symmetric", level=max_level)
     details = coeffs[1:]
+    n_levels = len(details)
     j_keep: list[float] = []
     v_keep: list[float] = []
     n_keep: list[float] = []
-    for idx, d in enumerate(details, start=1):
-        if idx <= j_drop_high or idx > len(details) - j_drop_low:
+    for k, d in enumerate(details):
+        level = n_levels - k
+        # ``j_drop_high`` removes the finest (highest-frequency) levels;
+        # ``j_drop_low`` removes the coarsest (lowest-frequency) levels.
+        if level <= j_drop_high or level > n_levels - j_drop_low:
             continue
         if d.size < 2:
             continue
         v = float(np.var(d, ddof=1))
         v = max(v, 1e-30)
-        j_keep.append(float(idx))
+        j_keep.append(float(level))
         v_keep.append(v)
         n_keep.append(float(d.size))
     if len(j_keep) < 3:
@@ -77,7 +89,10 @@ def _wls_slope_log2(j: np.ndarray, v: np.ndarray, n: np.ndarray) -> float | None
 def _hurst_from_log2_slope(slope: float | None) -> float | None:
     if slope is None or not np.isfinite(slope):
         return None
-    h = 0.5 * (slope + 2.0)
+    # fGn convention: with the detail variance scaling as 2^{level (2H-1)},
+    # the slope of log2-variance versus DWT level equals (2H-1), so
+    # H = (slope + 1) / 2.
+    h = 0.5 * (slope + 1.0)
     return float(np.clip(h, 1e-4, 1.0 - 1e-4))
 
 
@@ -98,7 +113,8 @@ def _wavelet_whittle_h(
     def nll(h: float) -> float:
         if not 0.05 < h < 0.995:
             return 1e12
-        beta = 2.0 * h - 2.0
+        # Detail variance scales as 2^{level (2H-1)} for fGn-type signals.
+        beta = 2.0 * h - 1.0
         mu = 2.0 ** (beta * j_arr)
         den = float(np.sum(n_arr * mu))
         if den <= 0.0 or not np.isfinite(den):
@@ -150,7 +166,7 @@ def _wavelet_jensen_h(
 class WaveletAbryVeitchEstimator(BaseEstimator):
     """Abry–Veitch-type log-scale regression on wavelet detail variances (Hurst proxy)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -185,7 +201,7 @@ class WaveletAbryVeitchEstimator(BaseEstimator):
 class WaveletBardetEstimator(BaseEstimator):
     """Weighted log-scale regression (Bardet-type wavelet Hurst proxy)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -220,7 +236,7 @@ class WaveletBardetEstimator(BaseEstimator):
 class WaveletOLSEstimator(BaseEstimator):
     """Plain OLS on log2 wavelet detail variances vs scale index (log-scale regression)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -255,7 +271,7 @@ class WaveletOLSEstimator(BaseEstimator):
 class WaveletJensenEstimator(BaseEstimator):
     """Two-band wavelet slope extrapolation (Jensen-style bias reduction)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -290,7 +306,7 @@ class WaveletJensenEstimator(BaseEstimator):
 class WaveletWhittleEstimator(BaseEstimator):
     """Wavelet-domain Gaussian Whittle-type fit to detail variances across scales."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec

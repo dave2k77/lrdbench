@@ -1,0 +1,57 @@
+manifest_id: smoke_nonstationary_lrd_v1
+name: smoke_nonstationary_lrd
+description: Tiny benchmark for joint LRD/nonstationarity generator cases.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: NonstationaryLRD
+      params:
+        case: [pure_short, pure_lrd, short_regime_switch, lrd_randomwalk_gain, lrd_qsoc]
+        H: [0.7]
+        n: [256]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 1
+estimators:
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+      min_scale: 8
+      max_scale: 96
+  - name: Periodogram
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      m: 16
+metrics:
+  - bias
+  - mae
+  - validity_rate
+  - runtime
+leaderboards:
+  - name: smoke_nonstationary_lrd_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.6
+      validity_rate: 0.3
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports/smoke_nonstationary_lrd
+seeds:
+  global_seed: 20260616
+execution:
+  max_workers: 1
+  cache_read: false
+  cache_write: false

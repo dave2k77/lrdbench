@@ -26,6 +26,7 @@
   },
   "conditional_files": {
     "tables/stress_metrics.csv": "present for stress_test reports",
+    "tables/correction_metrics.csv": "present when correction/preprocessing metrics are requested",
     "raw/leaderboards.csv": "present when leaderboard rows are generated",
     "manifest/benchmark_manifest.yaml": "present when the manifest was loaded from YAML",
     "figures/*.png": "present when requested report.figure_set entries have data",
@@ -43,6 +44,7 @@
     "tables/estimator_disagreement.csv": ["scope", "record_id", "estimator_name", "metric_name", "value", "stratum_json", "metadata_json"],
     "tables/scale_window_sensitivity.csv": ["scope", "record_id", "estimator_name", "metric_name", "value", "stratum_json", "metadata_json"],
     "tables/stress_metrics.csv": ["record_id", "estimator_name", "metric_name", "value", "stratum_json", "contamination_operator", "clean_record_id", "nominal"],
+    "tables/correction_metrics.csv": ["record_id", "estimator_name", "metric_name", "value", "stratum_json", "preprocessing_operator", "preprocessing_kind", "correction_target", "raw_record_id", "oracle_record_id", "oracle_operator"],
     "artefacts/artefact_index.csv": ["artefact_id", "run_id", "artefact_type", "format", "path", "hash", "created_at", "depends_on_json"],
     "raw/records.csv": ["record_id", "source_type", "source_name", "n", "values_path", "truth_family", "target_estimand", "target_value", "annotations_json"],
     "raw/estimates.csv": ["record_id", "estimator_name", "point", "ci_low", "ci_high", "stderr", "valid", "runtime_seconds", "failure_reason", "warnings", "bootstrap_cis_json"],

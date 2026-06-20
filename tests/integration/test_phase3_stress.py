@@ -145,3 +145,21 @@ def test_smoke_stress_yaml(
     assert out.run_id
     stress_csv = Path(out.report_bundle.summary_table_path or "").parent / "stress_metrics.csv"
     assert stress_csv.is_file()
+
+
+@pytest.mark.integration
+def test_smoke_nonstationary_lrd_yaml(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, repo_root: Path
+) -> None:
+    manifest = repo_root / "configs" / "suites" / "smoke_nonstationary_lrd.yaml"
+    monkeypatch.chdir(tmp_path)
+    out = run_manifest_path(manifest)
+    assert out.run_id
+    assert len(out.records) == 5
+    cases = {r.annotations.get("nonstationary_case") for r in out.records}
+    assert {"pure_short", "pure_lrd", "short_regime_switch", "lrd_randomwalk_gain", "lrd_qsoc"} <= cases
+    target_values = {r.annotations["nonstationary_case"]: r.truth.target_value for r in out.records if r.truth}
+    assert target_values["pure_short"] == 0.5
+    assert target_values["short_regime_switch"] == 0.5
+    assert target_values["pure_lrd"] == 0.7
+    assert target_values["lrd_randomwalk_gain"] == 0.7

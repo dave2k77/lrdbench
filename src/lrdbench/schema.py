@@ -65,6 +65,7 @@ class SeriesRecord:
     contamination_history: tuple[TransformationRecord, ...] = ()
     preprocessing_history: tuple[TransformationRecord, ...] = ()
     annotations: Mapping[str, Any] = field(default_factory=dict)
+    latent_components: Mapping[str, Any] = field(default_factory=dict)
     provenance: ProvenanceRecord | None = None
 
     def __post_init__(self) -> None:

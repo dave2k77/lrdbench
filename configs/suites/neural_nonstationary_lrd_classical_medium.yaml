@@ -1,0 +1,212 @@
+manifest_id: neural_nonstationary_lrd_classical_medium_v1
+name: neural_nonstationary_lrd_classical_medium
+description: Medium estimator-only benchmark for classical LRD estimators across nonstationary signal classes.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: NonstationaryLRD
+      params:
+        case: [pure_short]
+        H: [0.5]
+        n: [1024, 4096]
+        sigma: [1.0]
+      replicates: 20
+    - family: NonstationaryLRD
+      params:
+        case: [pure_lrd]
+        H: [0.6, 0.7, 0.8]
+        n: [1024, 4096]
+        sigma: [1.0]
+      replicates: 20
+    - family: NonstationaryLRD
+      params:
+        case:
+          - short_smooth_gain
+          - short_piecewise_gain
+          - short_randomwalk_gain
+          - short_bursty_t
+          - short_regime_switch
+          - short_qsoc
+        H: [0.5]
+        n: [1024, 4096]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 20
+    - family: NonstationaryLRD
+      params:
+        case:
+          - lrd_smooth_gain
+          - lrd_piecewise_gain
+          - lrd_randomwalk_gain
+          - lrd_drift
+          - lrd_qsoc
+        H: [0.6, 0.7, 0.8]
+        n: [1024, 4096]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 20
+estimators:
+  - name: RS
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      min_scale: 8
+      max_scale: 512
+      use_anis_lloyd_correction: true
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 128
+      - name: balanced_scales
+        params:
+          min_scale: 12
+          max_scale: 256
+      - name: long_scales
+        params:
+          min_scale: 16
+          max_scale: 512
+  - name: DMA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: short_windows
+        params:
+          min_scale: 8
+          max_scale: 128
+      - name: balanced_windows
+        params:
+          min_scale: 12
+          max_scale: 256
+      - name: long_windows
+        params:
+          min_scale: 16
+          max_scale: 512
+  - name: GPH
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: narrow_low_band
+        params:
+          m: 32
+      - name: wider_low_band
+        params:
+          m: 64
+  - name: Periodogram
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: narrow_low_band
+        params:
+          m: 32
+      - name: wider_low_band
+        params:
+          m: 64
+  - name: ModifiedLocalWhittle
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      m: 64
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: broad_band
+        params:
+          wavelet: db2
+          j_drop_low: 1
+          j_drop_high: 1
+      - name: upper_band
+        params:
+          wavelet: db2
+          j_drop_low: 2
+          j_drop_high: 1
+      - name: conservative_band
+        params:
+          wavelet: db4
+          j_drop_low: 1
+          j_drop_high: 2
+  - name: Higuchi
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: short_k
+        params:
+          k_max: 32
+      - name: long_k
+        params:
+          k_max: 64
+  - name: GHE
+    family: geometric
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      n_scales: 16
+      h_min: 1
+      flat_slope_tol: 0.08
+metrics:
+  - bias
+  - mae
+  - rmse
+  - validity_rate
+  - runtime
+  - false_positive_lrd_rate
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - parameter_variant_sensitivity
+  - max_variant_drift
+leaderboards:
+  - name: neural_nonstationary_lrd_classical_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.65
+      validity_rate: 0.25
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+uncertainty:
+  enabled: true
+  n_bootstrap: 200
+  ci_levels: [0.95]
+  seed: 20260616
+  metrics: [mae, false_positive_lrd_rate, parameter_variant_sensitivity, max_variant_drift]
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports/neural_nonstationary_lrd_classical_medium
+  figure_set:
+    - disagreement_heatmap
+    - sensitivity_heatmap
+    - benchmark_uncertainty_intervals
+    - false_positive_lrd
+seeds:
+  global_seed: 20260616
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/neural_nonstationary_lrd_classical_medium
+  cache_read: true
+  cache_write: true

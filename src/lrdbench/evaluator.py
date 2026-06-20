@@ -53,6 +53,14 @@ SENSITIVITY_METRICS = frozenset(
     }
 )
 
+CORRECTION_PAIR_METRICS = frozenset(
+    {
+        "correction_drift",
+        "correction_degradation_ratio",
+        "oracle_gap",
+    }
+)
+
 
 def _index_estimates(estimates: Sequence[EstimateResult]) -> dict[tuple[str, str], EstimateResult]:
     out: dict[tuple[str, str], EstimateResult] = {}
@@ -126,6 +134,7 @@ class GroundTruthEvaluator(BaseEvaluator):
         if manifest.mode not in (BenchmarkMode.GROUND_TRUTH, BenchmarkMode.STRESS_TEST):
             raise ValueError(f"GroundTruthEvaluator does not support mode {manifest.mode.value!r}")
         idx = _index_estimates(estimates)
+        records_by_id = {record.record_id: record for record in records}
         per_series: list[MetricValue] = []
         run_id = manifest.manifest_id
 
@@ -151,6 +160,20 @@ class GroundTruthEvaluator(BaseEvaluator):
                             continue
                         for row in self._stress_pair_rows(
                             run_id=run_id,
+                            record=rec,
+                            estimator_spec=es,
+                            est=est,
+                            ms=ms,
+                            stratum_dict=stratum_dict,
+                            sk=sk,
+                            idx=idx,
+                        ):
+                            per_series.append(row)
+                        continue
+                    if ms.name in CORRECTION_PAIR_METRICS:
+                        for row in self._correction_pair_rows(
+                            run_id=run_id,
+                            records_by_id=records_by_id,
                             record=rec,
                             estimator_spec=es,
                             est=est,
@@ -335,6 +358,156 @@ class GroundTruthEvaluator(BaseEvaluator):
             return rows
 
         return []
+
+    def _correction_pair_rows(
+        self,
+        *,
+        run_id: str,
+        records_by_id: dict[str, SeriesRecord],
+        record: SeriesRecord,
+        estimator_spec: EstimatorSpec,
+        est: EstimateResult,
+        ms: MetricSpec,
+        stratum_dict: dict[str, Any],
+        sk: tuple[tuple[str, Any], ...],
+        idx: dict[tuple[str, str], EstimateResult],
+    ) -> list[MetricValue]:
+        if record.annotations.get("preprocessing_role") != "corrected":
+            return []
+        raw_id = record.annotations.get("raw_record_id")
+        if not isinstance(raw_id, str):
+            return []
+        raw_est = idx.get((raw_id, estimator_spec.name))
+        if raw_est is None:
+            return []
+
+        meta_base: dict[str, Any] = {
+            "stratum_key": sk,
+            "raw_record_id": raw_id,
+            "preprocessing_operator": record.annotations.get("preprocessing_operator"),
+            "preprocessing_kind": record.annotations.get("preprocessing_kind"),
+            "correction_target": record.annotations.get("correction_target"),
+        }
+
+        if ms.name == "correction_drift":
+            if not est.valid or est.point is None or not raw_est.valid or raw_est.point is None:
+                return []
+            return [
+                MetricValue(
+                    run_id=run_id,
+                    record_id=record.record_id,
+                    estimator_name=estimator_spec.name,
+                    metric_name=ms.name,
+                    value=abs(float(est.point) - float(raw_est.point)),
+                    stratum=stratum_dict,
+                    metadata=meta_base,
+                )
+            ]
+
+        truth = record.truth
+        if truth is None or truth.target_value is None:
+            return []
+        if not est.valid or est.point is None:
+            return []
+        y = float(truth.target_value)
+
+        if ms.name == "correction_degradation_ratio":
+            if not raw_est.valid or raw_est.point is None:
+                return []
+            raw_err = abs(float(raw_est.point) - y)
+            if raw_err < 1e-12:
+                return []
+            corrected_err = abs(float(est.point) - y)
+            return [
+                MetricValue(
+                    run_id=run_id,
+                    record_id=record.record_id,
+                    estimator_name=estimator_spec.name,
+                    metric_name=ms.name,
+                    value=corrected_err / raw_err,
+                    stratum=stratum_dict,
+                    metadata=meta_base,
+                )
+            ]
+
+        if ms.name == "oracle_gap":
+            params = dict(ms.parameters)
+            if record.annotations.get("preprocessing_kind") != "empirical":
+                return []
+            empirical_operator = params.get("empirical_operator")
+            if (
+                empirical_operator is not None
+                and record.annotations.get("preprocessing_operator") != empirical_operator
+            ):
+                return []
+            empirical_target = params.get("empirical_target")
+            if (
+                empirical_target is not None
+                and record.annotations.get("correction_target") != empirical_target
+            ):
+                return []
+            oracle = self._find_oracle_record(record, records_by_id, params)
+            if oracle is None:
+                return []
+            oracle_est = idx.get((oracle.record_id, estimator_spec.name))
+            if oracle_est is None or not oracle_est.valid or oracle_est.point is None:
+                return []
+            empirical_err = abs(float(est.point) - y)
+            oracle_err = abs(float(oracle_est.point) - y)
+            label = params.get("label")
+            metric_name = f"oracle_gap:{label}" if label else ms.name
+            return [
+                MetricValue(
+                    run_id=run_id,
+                    record_id=record.record_id,
+                    estimator_name=estimator_spec.name,
+                    metric_name=metric_name,
+                    value=empirical_err - oracle_err,
+                    stratum=stratum_dict,
+                    metadata={
+                        **meta_base,
+                        "oracle_gap_label": label,
+                        "oracle_record_id": oracle.record_id,
+                        "oracle_operator": oracle.annotations.get("preprocessing_operator"),
+                        "oracle_correction_target": oracle.annotations.get("correction_target"),
+                    },
+                )
+            ]
+
+        return []
+
+    def _find_oracle_record(
+        self,
+        record: SeriesRecord,
+        records_by_id: dict[str, SeriesRecord],
+        params: dict[str, Any],
+    ) -> SeriesRecord | None:
+        group_id = record.annotations.get("pair_group_id")
+        raw_id = record.annotations.get("raw_record_id")
+        requested_operator = params.get("oracle_operator")
+        requested_target = params.get("oracle_target")
+        candidates = [
+            rec
+            for rec in records_by_id.values()
+            if rec.annotations.get("pair_group_id") == group_id
+            and rec.annotations.get("raw_record_id") == raw_id
+            and rec.annotations.get("preprocessing_kind") == "oracle"
+        ]
+        if requested_operator is not None:
+            candidates = [
+                rec
+                for rec in candidates
+                if rec.annotations.get("preprocessing_operator") == requested_operator
+            ]
+        if requested_target is not None:
+            candidates = [
+                rec
+                for rec in candidates
+                if rec.annotations.get("correction_target") == requested_target
+            ]
+        if not candidates:
+            return None
+        return sorted(candidates, key=lambda rec: rec.record_id)[0]
 
     def _per_series_rows(
         self,
