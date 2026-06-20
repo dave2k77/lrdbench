@@ -29,3 +29,15 @@ tests/integration/test_paper_workflow.py
 # Raw OpenNeuro EEG source data: kept locally only, never committed
 # (130 MB, exceeds PyPI limits; the pilot suite uses the derived CSVs).
 configs/suites/data/openneuro_ds002691_pilot/raw/*.set
+
+# Research collateral / knowledge base: kept locally only, not part of the
+# framework repo (summaries, synthesis, slides, agent skills, PDF tooling, and
+# standalone research reports/handoff notes).
+summaries/
+synthesis/
+slides/
+research-skills/
+tools/
+lrdbench-nonstationary-lrd-cli-handoff.md
+nonstationarity-lrd-mini-research-report.md
+nonstationary-lrd-benchmark-report.tex

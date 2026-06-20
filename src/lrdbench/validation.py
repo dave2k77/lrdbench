@@ -108,6 +108,39 @@ def _validate_uncertainty_block(spec: Mapping[str, Any] | None) -> None:
         raise ManifestValidationError("uncertainty.paired must be a boolean")
 
 
+def _validate_preprocessing_block(spec: Mapping[str, Any] | None) -> None:
+    pp = dict(spec or {})
+    if not pp:
+        return
+    allowed = frozenset({"include_raw", "operators", "sensitivity_eps"})
+    bad = set(pp) - allowed
+    if bad:
+        raise ManifestValidationError(f"unknown preprocessing block keys: {sorted(bad)}")
+    if "include_raw" in pp and not isinstance(pp["include_raw"], bool):
+        raise ManifestValidationError("preprocessing.include_raw must be a boolean")
+    if "sensitivity_eps" in pp:
+        try:
+            eps = float(pp["sensitivity_eps"])
+        except (TypeError, ValueError) as exc:
+            raise ManifestValidationError("preprocessing.sensitivity_eps must be numeric") from exc
+        if eps <= 0.0:
+            raise ManifestValidationError("preprocessing.sensitivity_eps must be positive")
+    ops = pp.get("operators")
+    if ops is None:
+        return
+    if not isinstance(ops, list):
+        raise ManifestValidationError("preprocessing.operators must be a list")
+    for i, raw in enumerate(ops):
+        if not isinstance(raw, Mapping):
+            raise ManifestValidationError(f"preprocessing.operators[{i}] must be a mapping")
+        if not isinstance(raw.get("name"), str) or not raw["name"].strip():
+            raise ManifestValidationError(
+                f"preprocessing.operators[{i}].name must be a non-empty string"
+            )
+        if "params" in raw and not isinstance(raw["params"], Mapping):
+            raise ManifestValidationError(f"preprocessing.operators[{i}].params must be a mapping")
+
+
 def _estimator_base_name(estimator: EstimatorSpec) -> str:
     params = dict(estimator.parameter_schema)
     return str(params.get("_base_estimator_name", estimator.name)).split("::", 1)[0]
@@ -394,6 +427,7 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
     # MV5b (Phase 5 execution)
     _validate_execution_block(manifest.execution_spec)
     _validate_uncertainty_block(manifest.uncertainty_spec)
+    _validate_preprocessing_block(manifest.preprocessing_spec)
     _validate_ml_training_block(
         manifest.ml_training_spec,
         estimators=manifest.estimator_specs,

@@ -110,6 +110,53 @@ class BaseContamination(ABC):
         raise NotImplementedError
 
 
+class BasePreprocessing(ABC):
+    """Abstract base for preprocessing and correction operators.
+
+    A preprocessing operator transforms a :class:`SeriesRecord` into a new
+    record before estimation. Unlike contaminations, these operators represent
+    correction hypotheses, including empirical corrections such as rolling
+    z-scoring and simulation oracles that use latent components.
+    """
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Registry key for this operator (e.g. ``'rolling_zscore'``)."""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def family(self) -> str:
+        """Broad correction category (e.g. ``'empirical_variance'``)."""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def kind(self) -> str:
+        """Correction kind, normally ``'empirical'`` or ``'oracle'``."""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def version(self) -> str:
+        """Human-readable version string for provenance tracking."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def apply(
+        self,
+        record: SeriesRecord,
+        *,
+        params: Mapping[str, Any],
+        seed: int | None,
+        manifest_id: str | None,
+        new_record_id: str,
+    ) -> SeriesRecord:
+        """Apply preprocessing to ``record`` and return a new record."""
+        raise NotImplementedError
+
+
 class BaseEstimator(ABC):
     """Abstract base for long-range dependence estimators.
 

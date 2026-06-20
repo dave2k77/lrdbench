@@ -77,7 +77,23 @@
       }
     },
     "preprocessing": {
-      "type": "object"
+      "type": "object",
+      "description": "Optional preprocessing/correction operators materialized before estimation.",
+      "properties": {
+        "include_raw": { "type": "boolean" },
+        "sensitivity_eps": { "type": "number" },
+        "operators": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "params": { "type": "object" }
+            }
+          }
+        }
+      }
     },
     "estimators": {
       "type": "array",

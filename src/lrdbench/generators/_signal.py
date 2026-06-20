@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from numpy.linalg import cholesky
+from scipy.signal import fftconvolve
 
 
 def fgn_autocovariance(hurst: float, n: int) -> np.ndarray:
@@ -84,7 +85,10 @@ def simulate_arfima_zero_d_zero(
     trunc = min(10 * n, 50000)
     psi = arfima_ma_coefficients(d, trunc)
     eps = rng.standard_normal(n + trunc)
-    x = np.convolve(eps, psi, mode="valid")[:n]
+    # FFT convolution: O((n+trunc) log(n+trunc)) vs O(n*trunc) for the direct
+    # method. The truncated MA filter can have ~50k taps, so the direct
+    # ``np.convolve`` dominates generation cost for the larger benchmark suites.
+    x = fftconvolve(eps, psi, mode="valid")[:n]
     return float(sigma) * x
 
 

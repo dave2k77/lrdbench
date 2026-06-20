@@ -326,6 +326,51 @@ def test_wavelet_estimators_return_bounded_points_on_fgn() -> None:
         assert 0.0 < float(out.point) < 1.0
 
 
+def test_hurst_from_log2_slope_uses_fgn_convention() -> None:
+    # fGn detail variance scales as 2^{level (2H-1)}, so slope = 2H - 1 and
+    # H = (slope + 1) / 2. Locks the conversion against the old 0.5*(slope+2).
+    from lrdbench.estimators.wavelet import _hurst_from_log2_slope
+
+    assert abs(float(_hurst_from_log2_slope(0.0)) - 0.5) < 1e-9
+    assert abs(float(_hurst_from_log2_slope(0.4)) - 0.7) < 1e-9
+    assert abs(float(_hurst_from_log2_slope(0.8)) - 0.9) < 1e-9
+
+
+def test_wavelet_log_scale_estimators_recover_and_track_hurst_on_fgn() -> None:
+    # Regression guard for the wavelet log-scale convention. The earlier
+    # reversed-index + wrong-conversion bug produced H_hat ~= 1.5 - H_true
+    # (anti-correlated with H); this test requires estimates to both land near
+    # the truth and increase monotonically with it.
+    from lrdbench.estimators.wavelet import (
+        _collect_detail_scales,
+        _hurst_from_log2_slope,
+        _ols_slope_log2,
+        _wavelet_whittle_h,
+    )
+
+    def ols_h(x: np.ndarray) -> float | None:
+        packed = _collect_detail_scales(x, wavelet="db4", j_drop_high=1, j_drop_low=1)
+        if packed is None:
+            return None
+        j, v, _ = packed
+        return _hurst_from_log2_slope(_ols_slope_log2(j, v))
+
+    def whittle_h(x: np.ndarray) -> float | None:
+        return _wavelet_whittle_h(x, wavelet="db4", j_drop_high=1, j_drop_low=1)
+
+    for est in (ols_h, whittle_h):
+        means = {}
+        for h_true in (0.6, 0.9):
+            vals = [
+                est(simulate_fgn(4096, h_true, np.random.default_rng(900 + s)))
+                for s in range(12)
+            ]
+            kept = [float(v) for v in vals if v is not None]
+            means[h_true] = float(np.mean(kept))
+            assert abs(means[h_true] - h_true) < 0.12, (est, h_true, means[h_true])
+        assert means[0.9] - means[0.6] > 0.15, (est, means)
+
+
 def test_wavelet_estimators_report_invalid_for_short_signal() -> None:
     rec = _record(np.arange(32, dtype=float))
     reg = build_default_estimator_registry()

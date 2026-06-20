@@ -11,6 +11,23 @@ from lrdbench.interfaces import BaseEstimator
 from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
 
 
+def _as_target_estimand(value: float | None, target_estimand: str) -> float | None:
+    """Map the native ARFIMA memory parameter ``d`` to the declared estimand.
+
+    Spectral long-memory estimators natively produce the fractional-integration
+    parameter ``d`` in ``(-1/2, 1/2)``. When a suite declares
+    ``hurst_scaling_proxy`` (i.e. compares against a Hurst exponent ``H``),
+    convert via the fractional-noise identity ``H = d + 1/2`` so the estimate
+    is on the same scale as the ground truth. For ``long_memory_parameter``
+    targets the raw ``d`` is returned unchanged.
+    """
+    if value is None:
+        return None
+    if target_estimand == "hurst_scaling_proxy":
+        return float(value) + 0.5
+    return float(value)
+
+
 def _apply_taper(x: np.ndarray, taper: str | None) -> np.ndarray:
     """Apply a spectral taper to the series.
 
@@ -82,7 +99,7 @@ def _log_periodogram_slope_d(x: np.ndarray, *, m: int | None = None) -> float | 
 class GPHEstimator(BaseEstimator):
     """Geweke–Porter–Hudak log-periodogram regression for long-memory parameter d."""
 
-    VERSION = "0.3.0"
+    VERSION = "0.4.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -106,7 +123,10 @@ class GPHEstimator(BaseEstimator):
         try:
             taper = str(params.get("taper", "none")) or "none"
             m = int(params["m"]) if params.get("m") is not None else None
-            d = _log_periodogram_regression_d(record.values, m=m, taper=taper)
+            estimand = self._spec.target_estimand
+            d = _as_target_estimand(
+                _log_periodogram_regression_d(record.values, m=m, taper=taper), estimand
+            )
             dt = time.perf_counter() - t0
             if d is None:
                 return EstimateResult(
@@ -120,7 +140,9 @@ class GPHEstimator(BaseEstimator):
                 )
 
             def _gph_stat(z: np.ndarray) -> float | None:
-                return _log_periodogram_regression_d(z, m=m, taper=taper)
+                return _as_target_estimand(
+                    _log_periodogram_regression_d(z, m=m, taper=taper), estimand
+                )
 
             samples = bootstrap_statistic_distribution(
                 record.values,
@@ -258,7 +280,7 @@ def _modified_local_whittle_d(x: np.ndarray, *, m: int | None = None) -> float |
 class PeriodogramRegressionEstimator(BaseEstimator):
     """Log-periodogram regression (memory parameter d, GPH-type)."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -270,10 +292,13 @@ class PeriodogramRegressionEstimator(BaseEstimator):
     def fit(self, record: SeriesRecord) -> EstimateResult:
         params = dict(self._spec.parameter_schema)
         taper = str(params.get("taper", "none")) or "none"
+        estimand = self._spec.target_estimand
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _log_periodogram_regression_d(z, m=m, taper=taper)
+            return _as_target_estimand(
+                _log_periodogram_regression_d(z, m=m, taper=taper), estimand
+            )
 
         return fit_with_block_bootstrap(
             record,
@@ -288,7 +313,7 @@ class PeriodogramRegressionEstimator(BaseEstimator):
 class WhittleMLEEstimator(BaseEstimator):
     """Gaussian Whittle likelihood for ARFIMA(0,d,0) spectral density."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -299,10 +324,11 @@ class WhittleMLEEstimator(BaseEstimator):
 
     def fit(self, record: SeriesRecord) -> EstimateResult:
         params = dict(self._spec.parameter_schema)
+        estimand = self._spec.target_estimand
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _whittle_arfima_d(z, m=m)
+            return _as_target_estimand(_whittle_arfima_d(z, m=m), estimand)
 
         return fit_with_block_bootstrap(
             record,
@@ -317,7 +343,7 @@ class WhittleMLEEstimator(BaseEstimator):
 class ModifiedLocalWhittleEstimator(BaseEstimator):
     """Modified (Gaussian) local Whittle estimator of long-memory parameter d."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -328,10 +354,11 @@ class ModifiedLocalWhittleEstimator(BaseEstimator):
 
     def fit(self, record: SeriesRecord) -> EstimateResult:
         params = dict(self._spec.parameter_schema)
+        estimand = self._spec.target_estimand
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _modified_local_whittle_d(z, m=m)
+            return _as_target_estimand(_modified_local_whittle_d(z, m=m), estimand)
 
         return fit_with_block_bootstrap(
             record,

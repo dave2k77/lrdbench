@@ -34,6 +34,7 @@ PUBLIC_OUTPUT_CONTRACT: dict[str, Any] = {
     },
     "conditional_files": {
         "tables/stress_metrics.csv": "present for stress_test reports",
+        "tables/correction_metrics.csv": "present when correction/preprocessing metrics are requested",
         "raw/leaderboards.csv": "present when leaderboard rows are generated",
         "manifest/benchmark_manifest.yaml": "present when the manifest was loaded from YAML",
         "figures/*.png": "present when requested report.figure_set entries have data",
@@ -116,6 +117,19 @@ PUBLIC_OUTPUT_CONTRACT: dict[str, Any] = {
             "contamination_operator",
             "clean_record_id",
             "nominal",
+        ],
+        "tables/correction_metrics.csv": [
+            "record_id",
+            "estimator_name",
+            "metric_name",
+            "value",
+            "stratum_json",
+            "preprocessing_operator",
+            "preprocessing_kind",
+            "correction_target",
+            "raw_record_id",
+            "oracle_record_id",
+            "oracle_operator",
         ],
         "artefacts/artefact_index.csv": [
             "artefact_id",

@@ -34,16 +34,24 @@ def collect_fit_jobs(
     return jobs
 
 
-def estimate_cache_key(record: SeriesRecord, espec: EstimatorSpec) -> str:
+def estimate_cache_key(
+    record: SeriesRecord, espec: EstimatorSpec, *, impl_version: str = ""
+) -> str:
     vh = hashlib.sha256(np.asarray(record.values, dtype=float).tobytes()).hexdigest()
     ev = str(espec.version or "")
     ps = json.dumps(dict(espec.parameter_schema), sort_keys=True, default=str)
-    raw = f"{record.record_id}|{espec.name}|{ev}|{ps}|{vh}"
+    # ``target_estimand`` and ``impl_version`` are part of the key because the
+    # estimator's *output* depends on both: spectral estimators return d or
+    # H=d+0.5 depending on the declared estimand, and any change to estimator
+    # code (tracked by the class ``VERSION``) must invalidate stale estimates.
+    raw = f"{record.record_id}|{espec.name}|{espec.target_estimand}|{ev}|{impl_version}|{ps}|{vh}"
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
 
-def _cache_file(cache_root: Path, record: SeriesRecord, espec: EstimatorSpec) -> Path:
-    return cache_root / f"estimate_{estimate_cache_key(record, espec)}.pkl"
+def _cache_file(
+    cache_root: Path, record: SeriesRecord, espec: EstimatorSpec, *, impl_version: str = ""
+) -> Path:
+    return cache_root / f"estimate_{estimate_cache_key(record, espec, impl_version=impl_version)}.pkl"
 
 
 def _try_load_estimate_cache(
@@ -114,16 +122,21 @@ def _fit_one(
     cache_write: bool,
 ) -> tuple[int, EstimateResult]:
     idx, record, espec = job
-    cpath = _cache_file(cache_root, record, espec) if cache_root is not None else None
+    registry_name = str(dict(espec.parameter_schema).get("_base_estimator_name", espec.name))
+    builder = estimators.get(registry_name)
+    est_obj: BaseEstimator = builder(espec)
+    impl_version = str(getattr(est_obj, "VERSION", "") or "")
+    cpath = (
+        _cache_file(cache_root, record, espec, impl_version=impl_version)
+        if cache_root is not None
+        else None
+    )
     if cache_read and cpath is not None:
         hit = _try_load_estimate_cache(
             cpath, record_id=record.record_id, estimator_name=espec.name
         )
         if hit is not None:
             return idx, hit
-    registry_name = str(dict(espec.parameter_schema).get("_base_estimator_name", espec.name))
-    builder = estimators.get(registry_name)
-    est_obj: BaseEstimator = builder(espec)
     est = est_obj.fit(record)
     if cache_write and cpath is not None:
         _write_estimate_cache(cpath, est)

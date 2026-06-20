@@ -39,8 +39,21 @@ from lrdbench.generators.fbm import FBMGenerator
 from lrdbench.generators.fgn import FGNGenerator
 from lrdbench.generators.fou import FOUGenerator
 from lrdbench.generators.mrw import MRWGenerator
+from lrdbench.generators.nonstationary_lrd import NonstationaryLRDGenerator
 from lrdbench.interfaces import BaseEstimator
-from lrdbench.registries import ContaminationRegistry, EstimatorRegistry, GeneratorRegistry
+from lrdbench.preprocessing import (
+    OracleDriftPreprocessing,
+    OracleGainPreprocessing,
+    OracleStateZScorePreprocessing,
+    PolynomialDetrendPreprocessing,
+    RollingZScorePreprocessing,
+)
+from lrdbench.registries import (
+    ContaminationRegistry,
+    EstimatorRegistry,
+    GeneratorRegistry,
+    PreprocessingRegistry,
+)
 from lrdbench.schema import EstimatorSpec
 
 
@@ -51,6 +64,7 @@ def build_default_generator_registry() -> GeneratorRegistry:
     reg.register("ARFIMA", ARFIMAGenerator())
     reg.register("MRW", MRWGenerator())
     reg.register("fOU", FOUGenerator())
+    reg.register("NonstationaryLRD", NonstationaryLRDGenerator())
     return reg
 
 
@@ -60,6 +74,16 @@ def build_default_contamination_registry() -> ContaminationRegistry:
     reg.register("outliers", OutliersContamination())
     reg.register("level_shift", LevelShiftContamination())
     reg.register("heavy_tail_noise", HeavyTailNoiseContamination())
+    return reg
+
+
+def build_default_preprocessing_registry() -> PreprocessingRegistry:
+    reg = PreprocessingRegistry()
+    reg.register("rolling_zscore", RollingZScorePreprocessing())
+    reg.register("polynomial_detrend", PolynomialDetrendPreprocessing())
+    reg.register("oracle_gain", OracleGainPreprocessing())
+    reg.register("oracle_drift", OracleDriftPreprocessing())
+    reg.register("oracle_state_zscore", OracleStateZScorePreprocessing())
     return reg
 
 

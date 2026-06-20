@@ -1,0 +1,103 @@
+manifest_id: neural_nonstationary_lrd_pilot_v1
+name: neural_nonstationary_lrd_pilot
+description: Pilot benchmark for conditional-stationarity and variance-trap nonstationary LRD cases.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: NonstationaryLRD
+      params:
+        case:
+          - pure_short
+          - pure_lrd
+          - short_smooth_gain
+          - short_piecewise_gain
+          - short_randomwalk_gain
+          - short_bursty_t
+          - short_regime_switch
+          - short_qsoc
+          - lrd_smooth_gain
+          - lrd_piecewise_gain
+          - lrd_randomwalk_gain
+          - lrd_drift
+          - lrd_qsoc
+        H: [0.7]
+        n: [1024]
+        gain_amplitude: [0.8]
+        sigma: [1.0]
+      replicates: 10
+estimators:
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      detrend_order: 1
+    variants:
+      - name: short_scales
+        params:
+          min_scale: 8
+          max_scale: 96
+      - name: balanced_scales
+        params:
+          min_scale: 12
+          max_scale: 160
+      - name: long_scales
+        params:
+          min_scale: 16
+          max_scale: 256
+  - name: Periodogram
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    variants:
+      - name: narrow_low_band
+        params:
+          m: 16
+      - name: wider_low_band
+        params:
+          m: 32
+  - name: WaveletOLS
+    family: wavelet
+    target_estimand: hurst_scaling_proxy
+    supports_ci: false
+    supports_diagnostics: true
+    params:
+      wavelet: db2
+      j_drop_low: 1
+      j_drop_high: 1
+metrics:
+  - bias
+  - mae
+  - validity_rate
+  - runtime
+  - cross_estimator_dispersion
+  - pairwise_estimator_disagreement
+  - parameter_variant_sensitivity
+  - max_variant_drift
+leaderboards:
+  - name: neural_nonstationary_lrd_accuracy
+    mode: ground_truth
+    component_metrics: [mae, validity_rate, runtime]
+    weights:
+      mae: 0.65
+      validity_rate: 0.25
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports/neural_nonstationary_lrd_pilot
+  figure_set:
+    - disagreement_heatmap
+    - sensitivity_heatmap
+seeds:
+  global_seed: 20260616
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/neural_nonstationary_lrd_pilot
+  cache_read: true
+  cache_write: true
