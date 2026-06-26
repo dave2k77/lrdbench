@@ -1,12 +1,12 @@
 # Current Research Next Steps
 
-Last updated: 2026-05-29
+Last updated: 2026-06-26
 
 This page is the short, current-facing handoff for work after the stable public `lrdbench` release. It intentionally separates public-library maintenance from the neural-classical benchmark and future observational neural-data work.
 
 ## Current project state
 
-- Public package status: stable `1.0.2` release, with unchanged public output contract `1.0.0`.
+- Public package status: stable `1.2.1` release, with unchanged public output contract `1.0.0`.
 - Public library focus: maintain schema/API/output-contract stability, keep docs coherent, and avoid changing public CSV columns without a contract-version bump.
 - Current research focus: use the completed `neural_classical_workstation` benchmark campaign, clean observational-mode fixture, and OpenNeuro `ds002691` EEG pilot to prepare committee/manuscript figures and observational workflow text.
 - Completed synthetic campaign: `benchmark_experiment/neural_classical_workstation_analysis.md` summarises the ground-truth and stress-test runs.

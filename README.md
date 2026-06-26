@@ -4,8 +4,9 @@
 
 **Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs and Read the Docs).
 
-Current public release: `1.0.3`. No DOI is attached yet; cite the software using `CITATION.cff`
-and the GitHub release.
+Current public release: `1.2.1`. Releases are archived on Zenodo — cite the concept DOI
+[`10.5281/zenodo.20937726`](https://doi.org/10.5281/zenodo.20937726) (it always resolves to the
+latest archived version) or use `CITATION.cff`.
 
 `lrdbench` is a research-oriented benchmarking framework for studying the behaviour of long-range dependence (LRD) estimators across three distinct settings:
 

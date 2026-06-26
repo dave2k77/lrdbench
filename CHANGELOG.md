@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-## 1.1.0
+## 1.2.1
+
+> Note: versions 1.1.0, 1.1.1, and 1.2.0 were skipped. Their PyPI filenames are permanently
+> reserved from prior deleted uploads (PyPI does not allow filename reuse), so 1.2.1 is the first
+> published release of the changes below. This release is single-sourced, archived on Zenodo
+> (concept DOI `10.5281/zenodo.20937726`), and published to PyPI.
 
 ### Nonstationary LRD benchmarking
 - Generators: added `nonstationary_lrd` generator family producing LRD series with controlled

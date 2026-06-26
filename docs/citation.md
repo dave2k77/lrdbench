@@ -10,12 +10,14 @@ manual reference lists, include:
 
 - software name: `lrdbench`;
 - author: Davian Chin;
-- version: `1.0.3`;
+- version: `1.2.1`;
+- DOI (concept, resolves to latest): `10.5281/zenodo.20937726`;
 - repository: `https://github.com/dave2k77/lrdbench`;
 - license: MIT.
 
-No DOI is attached to `v1.0.3`. If a DOI or archived release bundle is added later, cite that
-archived artefact instead of a moving repository URL.
+Releases are archived on Zenodo. Prefer the concept DOI `10.5281/zenodo.20937726`, which always
+resolves to the latest archived version; to cite a specific version, use that version's DOI from
+the Zenodo record rather than a moving repository URL.
 
 ## Benchmark Metadata to Report
 
