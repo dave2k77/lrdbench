@@ -1,0 +1,33 @@
+# Standardize line endings across the repository.
+#
+# Text files are stored as LF in the repo and checked out as LF on all
+# platforms. These settings take precedence over the user's core.autocrlf,
+# so clones are consistent regardless of local Git configuration.
+
+* text=auto eol=lf
+
+# Windows-only scripts require CRLF to run correctly.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary types: never normalize line endings, never diff as text.
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.pdf     binary
+*.npy     binary
+*.npz     binary
+*.parquet binary
+*.xls     binary
+*.xlsx    binary
+*.zip     binary
+*.gz      binary
+*.whl     binary
+*.pkl     binary
+*.joblib  binary
+*.woff    binary
+*.woff2   binary
+*.ttf     binary
