@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+## 1.1.0
+
+### Nonstationary LRD benchmarking
+- Generators: added `nonstationary_lrd` generator family producing LRD series with controlled
+  nonstationarity mechanisms (e.g. trend, variance, and regime modulation).
+- Preprocessing: added `preprocessing` package with nonstationarity-correction utilities and shared
+  helpers for correction-aware benchmarking.
+- Suites: added nonstationary LRD benchmark suites, including correction-aware,
+  ML-vs-classical, and out-of-distribution (OOD) protocols.
+- Evaluation/reporting: extended the evaluator and reporter to support correction-aware
+  nonstationary benchmarking and the associated metrics.
+
+### Estimator correctness fixes
+- Wavelet: fixed inverted log-scale Hurst convention across the OLS and wavelet family estimators.
+- Spectral: fixed the spectral estimand convention and sped up ARFIMA convolution.
+- Execution: fixed estimate-cache invalidation so cached estimates are not reused across
+  incompatible configurations.
+- Data-driven: fixed data-driven estimator correctness bugs and hardened resampling.
+
+### Tooling & CI
+- Tests: skip torch-dependent tests when the `nn` extra is absent.
+- CI: install the `dev` extra so `ruff` is available in the tests workflow.
+
 ## 1.0.3
 
 ### Design & CLI
