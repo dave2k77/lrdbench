@@ -43,6 +43,23 @@ If you are working in a minimal environment without `pytest-cov`, use
 `python -m pytest -q -o addopts=''` for a no-coverage smoke check. Full submissions should still
 run the default `python -m pytest` after installing the `test` extra.
 
+## Windows notes
+
+- **Line endings** are governed by `.gitattributes` (text files are LF, `*.ps1`/`*.bat`/`*.cmd`
+  are CRLF). Leave Git's `core.autocrlf` unset or `false`; the attributes take precedence, so no
+  per-file configuration is needed.
+- **Long paths:** some bundled fixtures (e.g. under
+  `configs/suites/data/openneuro_ds002691_pilot/csv/`) have long filenames. Cloning into a deep
+  directory can hit Windows' 260-character `MAX_PATH` limit and fail checkout with
+  `Filename too long`. Enable long-path support once:
+
+  ```bash
+  git config --global core.longpaths true
+  ```
+
+  (You may also need to enable long paths in Windows itself via the `LongPathsEnabled` policy.)
+  Cloning into a short path such as `C:\src\lrdbench` also avoids this.
+
 ## Checklists and policies
 
 - [Contributor checklist](contributor_checklist.md): pre-submission checklist for estimators,
