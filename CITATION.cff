@@ -7,6 +7,7 @@ type: software
 authors:
   - family-names: "Chin"
     given-names: "Davian"
+    orcid: "https://orcid.org/0009-0003-9434-3919"
 repository-code: "https://github.com/dave2k77/lrdbench"
 url: "https://github.com/dave2k77/lrdbench"
 doi: "10.5281/zenodo.20937726"
@@ -32,6 +33,7 @@ preferred-citation:
   authors:
     - family-names: "Chin"
       given-names: "Davian"
+      orcid: "https://orcid.org/0009-0003-9434-3919"
   title: "lrdbench"
   version: "1.2.1"
   doi: "10.5281/zenodo.20937726"
