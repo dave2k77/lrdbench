@@ -1,5 +1,9 @@
 # lrdbench
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20937726.svg)](https://doi.org/10.5281/zenodo.20937726)
+[![PyPI](https://img.shields.io/pypi/v/lrdbench.svg)](https://pypi.org/project/lrdbench/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **A reproducible benchmark framework for evaluating long-range dependence estimators on canonical, contaminated, and observational time series.**
 
 **Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs and Read the Docs).
