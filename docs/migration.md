@@ -3,6 +3,20 @@
 This page records public-surface changes that matter when reproducing or comparing benchmark
 outputs across public releases.
 
+## 1.2.1
+
+Release `1.2.1` is the first published release of the nonstationary LRD benchmarking work
+(nonstationary generators, the preprocessing/correction stage, and the correction-aware,
+ML-vs-classical, and OOD suites) together with estimator correctness fixes (wavelet log-scale
+Hurst convention, spectral estimand convention, estimate-cache invalidation, and data-driven
+resampling). Versions 1.1.0–1.2.0 were skipped because their PyPI filenames are permanently
+reserved from prior deleted uploads.
+
+The public output contract version is unchanged at `1.0.0`. A new optional output table,
+`tables/correction_metrics.csv`, is emitted only for correction-aware runs; existing required
+files and columns are unchanged, so prior outputs remain valid. Releases are archived on Zenodo
+under the concept DOI `10.5281/zenodo.20937726`.
+
 ## 1.0.2
 
 Release `1.0.2` is the first PyPI-published stable package release. The public output contract

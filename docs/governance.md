@@ -55,4 +55,5 @@ Public releases should:
 - tag the release in Git;
 - archive or DOI-tag release artefacts when an archive is available.
 
-No DOI is attached to `v1.0.2`; citation currently uses the software version and GitHub release.
+Releases are archived on Zenodo; cite the concept DOI `10.5281/zenodo.20937726`, which resolves to
+the latest archived version.

@@ -155,8 +155,8 @@ produced them.
 
 ## Release Stability
 
-The project has a stable public research release. Package `1.0.2` is the first PyPI-published
-stable package release, and the public output contract remains `1.0.0`.
+The project has a stable public research release; the current version is `1.2.1`. Package `1.0.2`
+was the first PyPI-published stable package release, and the public output contract remains `1.0.0`.
 
 Manifest fields, metric names, output columns, and report artefacts documented here and in the
 output contract are stable public surfaces. Breaking changes require an explicit compatibility
