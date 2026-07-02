@@ -1,0 +1,490 @@
+manifest_id: openneuro_ds002691_pilot_v2
+name: openneuro_ds002691_pilot
+description: CC0 OpenNeuro ds002691 EEG observational-mode pilot for truth-free manuscript
+  benchmarking (v2 adds spectral family GPH, ModifiedLocalWhittle, WhittleMLE).
+mode: observational
+source:
+  type: csv_series_index
+  series:
+  - record_id: openneuro_ds002691_sub-001_task-internalattention_E1_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-001_task-internalattention_E1_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-001
+      session: n/a
+      task: internalattention
+      channel: E1
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-001_task-internalattention_E8_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-001_task-internalattention_E8_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-001
+      session: n/a
+      task: internalattention
+      channel: E8
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-001_task-internalattention_E16_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-001_task-internalattention_E16_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-001
+      session: n/a
+      task: internalattention
+      channel: E16
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-001_task-internalattention_E24_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-001_task-internalattention_E24_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-001
+      session: n/a
+      task: internalattention
+      channel: E24
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-002_task-internalattention_E1_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-002_task-internalattention_E1_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-002
+      session: n/a
+      task: internalattention
+      channel: E1
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-002_task-internalattention_E8_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-002_task-internalattention_E8_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-002
+      session: n/a
+      task: internalattention
+      channel: E8
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-002_task-internalattention_E16_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-002_task-internalattention_E16_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-002
+      session: n/a
+      task: internalattention
+      channel: E16
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-002_task-internalattention_E24_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-002_task-internalattention_E24_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-002
+      session: n/a
+      task: internalattention
+      channel: E24
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-003_task-internalattention_E1_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-003_task-internalattention_E1_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-003
+      session: n/a
+      task: internalattention
+      channel: E1
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-003_task-internalattention_E8_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-003_task-internalattention_E8_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-003
+      session: n/a
+      task: internalattention
+      channel: E8
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-003_task-internalattention_E16_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-003_task-internalattention_E16_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-003
+      session: n/a
+      task: internalattention
+      channel: E16
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-003_task-internalattention_E24_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-003_task-internalattention_E24_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-003
+      session: n/a
+      task: internalattention
+      channel: E24
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-004_task-internalattention_E1_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-004_task-internalattention_E1_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-004
+      session: n/a
+      task: internalattention
+      channel: E1
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-004_task-internalattention_E8_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-004_task-internalattention_E8_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-004
+      session: n/a
+      task: internalattention
+      channel: E8
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-004_task-internalattention_E16_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-004_task-internalattention_E16_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-004
+      session: n/a
+      task: internalattention
+      channel: E16
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+  - record_id: openneuro_ds002691_sub-004_task-internalattention_E24_seg-0001
+    path: data/openneuro_ds002691_pilot/csv/openneuro_ds002691_sub-004_task-internalattention_E24_seg-0001.csv
+    value_column: value
+    time_column: time_seconds
+    sampling_rate: 250.0
+    missing_policy: error
+    metadata:
+      dataset: openneuro_ds002691
+      dataset_version: 1.1.0
+      subject: sub-004
+      session: n/a
+      task: internalattention
+      channel: E24
+      condition: continuous_window
+      segment_id: seg-0001
+      window_start_seconds: 0.0
+      window_duration_seconds: 10.0
+      preprocessing: openneuro_raw_eeglab_export_demeaned_per_window
+      source_format: eeglab_set
+estimators:
+- name: RS
+  family: temporal
+  target_estimand: hurst_scaling_proxy
+  supports_ci: true
+  supports_diagnostics: true
+  params:
+    n_bootstrap: 32
+    bootstrap_block_len: 64
+    ci_levels:
+    - 0.95
+- name: DFA
+  family: temporal
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  params:
+    detrend_order: 1
+  variants:
+  - name: short_scales
+    params:
+      min_scale: 16
+      max_scale: 256
+  - name: balanced_scales
+    params:
+      min_scale: 32
+      max_scale: 512
+- name: DMA
+  family: temporal
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  variants:
+  - name: short_windows
+    params:
+      min_scale: 16
+      max_scale: 256
+  - name: balanced_windows
+    params:
+      min_scale: 32
+      max_scale: 512
+- name: AbsoluteMoment
+  family: temporal
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  params:
+    min_scale: 16
+    max_scale: 512
+- name: Variance
+  family: temporal
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  params:
+    min_scale: 16
+    max_scale: 512
+- name: VarianceResidual
+  family: temporal
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  params:
+    min_scale: 16
+    max_scale: 512
+    detrend_order: 1
+- name: GHE
+  family: geometric
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  params:
+    n_scales: 16
+- name: Higuchi
+  family: geometric
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  params:
+    k_max: 32
+- name: WaveletOLS
+  family: wavelet
+  target_estimand: hurst_scaling_proxy
+  supports_ci: false
+  supports_diagnostics: true
+  variants:
+  - name: broad_band
+    params:
+      wavelet: db2
+      j_drop_low: 1
+      j_drop_high: 1
+  - name: conservative_band
+    params:
+      wavelet: db4
+      j_drop_low: 1
+      j_drop_high: 2
+- name: GPH
+  family: spectral
+  target_estimand: hurst_scaling_proxy
+  supports_ci: true
+  supports_diagnostics: true
+  params:
+    n_bootstrap: 32
+    bootstrap_block_len: 64
+    ci_levels:
+    - 0.95
+    taper: none
+  variants:
+  - name: narrow_band
+    params:
+      m: 32
+  - name: wider_band
+    params:
+      m: 64
+- name: ModifiedLocalWhittle
+  family: spectral
+  target_estimand: hurst_scaling_proxy
+  supports_ci: true
+  supports_diagnostics: true
+  params:
+    n_bootstrap: 32
+    bootstrap_block_len: 64
+    ci_levels:
+    - 0.95
+    m: 64
+- name: WhittleMLE
+  family: spectral
+  target_estimand: hurst_scaling_proxy
+  supports_ci: true
+  supports_diagnostics: true
+  params:
+    n_bootstrap: 32
+    bootstrap_block_len: 64
+    ci_levels:
+    - 0.95
+    m: 64
+metrics:
+- validity_rate
+- runtime
+- cross_estimator_dispersion
+- pairwise_estimator_disagreement
+- family_level_disagreement
+- parameter_variant_sensitivity
+- max_variant_drift
+- name: ci_width
+  levels:
+  - 0.95
+- instability
+- preprocessing_sensitivity
+preprocessing:
+  sensitivity_eps: 0.0001
+leaderboards:
+- name: openneuro_ds002691_observational_stability
+  mode: observational
+  component_metrics:
+  - instability
+  - validity_rate
+  - runtime
+  - max_variant_drift
+  weights:
+    instability: 0.35
+    validity_rate: 0.3
+    runtime: 0.2
+    max_variant_drift: 0.15
+  ranking_rule: weighted_rank
+  tie_break_rule: best_primary_metric
+seeds:
+  global_seed: 20260530
+report:
+  formats:
+  - html
+  - csv
+  export_root: reports/openneuro_ds002691_pilot
+execution:
+  max_workers: 4
+  estimate_cache_dir: .lrdbench_cache/openneuro_ds002691_pilot
+  cache_read: true
+  cache_write: true
