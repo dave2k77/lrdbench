@@ -136,6 +136,11 @@ class MetricSpec:
     optimisation_direction: OptimisationDirection
     unit: str | None = None
     null_policy: str = "explicit_null"
+    # Metric family for estimand routing: "regression" metrics apply to scalar
+    # estimands (bias/MAE/coverage); "classification" metrics apply to decision
+    # estimands (lrd_class: roc_auc/balanced_accuracy); "neutral" applies to both
+    # (validity_rate/runtime). See evaluator estimand_kind routing.
+    kind: str = "regression"
     # Nominal levels (e.g. 0.95) for coverage / ci_width / coverage_error; empty () uses defaults in evaluator
     nominal_levels: tuple[float, ...] = ()
     parameters: Mapping[str, Any] = field(default_factory=dict)

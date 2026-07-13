@@ -85,6 +85,13 @@ class MultiTimescaleGenerator(BaseGenerator):
                 target_value=None,
                 notes="no single timescale (superposition of tau_min..tau_max)",
             ),
+            TruthSpec(
+                process_family=self.family,
+                generating_params=dict(params),
+                target_estimand="lrd_class",
+                target_value=0.0,
+                notes="short-memory null: not LRD (apparent LRD only)",
+            ),
         )
         prov = ProvenanceRecord(
             record_id=record_id,

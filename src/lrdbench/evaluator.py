@@ -91,6 +91,136 @@ def _default_false_positive_null_max(target_estimand: str) -> float:
     return 0.5
 
 
+CLASSIFICATION_ESTIMANDS = frozenset({"lrd_class"})
+CLASSIFICATION_METRICS = frozenset(
+    {"roc_auc", "balanced_accuracy", "true_positive_rate", "false_positive_rate"}
+)
+
+
+def estimand_kind(target_estimand: str) -> str:
+    """Classify an estimand as a decision ('classification') or scalar ('regression')."""
+    return "classification" if target_estimand in CLASSIFICATION_ESTIMANDS else "regression"
+
+
+def _metric_applies_per_series(ms: MetricSpec, target_estimand: str) -> bool:
+    """Route a metric to an estimator by kind.
+
+    Classification metrics are computed only in the aggregate pass
+    (``_classification_rows``), never per-series. Regression truth-metrics apply
+    only to scalar estimands; ``neutral`` metrics (validity_rate, runtime) apply
+    to any estimand.
+    """
+    kind = getattr(ms, "kind", "regression")
+    if kind == "classification":
+        return False
+    if kind == "neutral":
+        return True
+    return estimand_kind(target_estimand) == "regression"
+
+
+def _roc_auc(scores: Sequence[float], labels: Sequence[float]) -> float | None:
+    """Rank-based ROC-AUC (Mann-Whitney U), robust to ties. None if single-class."""
+    pos = [s for s, y in zip(scores, labels, strict=True) if y >= 0.5]
+    neg = [s for s, y in zip(scores, labels, strict=True) if y < 0.5]
+    if not pos or not neg:
+        return None
+    order = np.argsort(np.asarray(scores, dtype=float), kind="mergesort")
+    ranks = np.empty(len(scores), dtype=float)
+    sorted_scores = np.asarray(scores, dtype=float)[order]
+    i = 0
+    n = len(scores)
+    while i < n:
+        j = i
+        while j + 1 < n and sorted_scores[j + 1] == sorted_scores[i]:
+            j += 1
+        avg_rank = (i + j) / 2.0 + 1.0  # 1-based average rank for ties
+        ranks[order[i : j + 1]] = avg_rank
+        i = j + 1
+    labels_arr = np.asarray(labels, dtype=float)
+    rank_pos = float(ranks[labels_arr >= 0.5].sum())
+    n_pos = len(pos)
+    n_neg = len(neg)
+    auc = (rank_pos - n_pos * (n_pos + 1) / 2.0) / (n_pos * n_neg)
+    return float(auc)
+
+
+def _confusion_at_threshold(
+    scores: Sequence[float], labels: Sequence[float], threshold: float
+) -> tuple[float, float] | None:
+    """Return (TPR, FPR) at a decision threshold; None if a class is absent."""
+    pos = [(s, y) for s, y in zip(scores, labels, strict=True) if y >= 0.5]
+    neg = [(s, y) for s, y in zip(scores, labels, strict=True) if y < 0.5]
+    if not pos or not neg:
+        return None
+    tpr = float(np.mean([1.0 if s >= threshold else 0.0 for s, _ in pos]))
+    fpr = float(np.mean([1.0 if s >= threshold else 0.0 for s, _ in neg]))
+    return tpr, fpr
+
+
+def _classification_metric_rows(
+    run_id: str,
+    records: Sequence[SeriesRecord],
+    idx: dict[tuple[str, str], EstimateResult],
+    manifest: BenchmarkManifest,
+) -> list[MetricValue]:
+    """Population-level classification metrics for decision (``lrd_class``) estimators.
+
+    Threshold-free ``roc_auc`` and threshold-based balanced_accuracy / TPR / FPR are
+    computed once per estimator over the full (score, label) set, emitted as
+    ``balanced_global`` aggregate rows. Non-classification estimators and suites
+    without classification metrics yield nothing.
+    """
+    class_metrics = [ms for ms in manifest.metric_specs if ms.name in CLASSIFICATION_METRICS]
+    if not class_metrics:
+        return []
+    rows: list[MetricValue] = []
+    for es in manifest.estimator_specs:
+        if estimand_kind(es.target_estimand) != "classification":
+            continue
+        scores: list[float] = []
+        labels: list[float] = []
+        for rec in records:
+            truth = truth_for(rec, es.target_estimand)
+            if truth is None or truth.target_value is None:
+                continue
+            est = idx.get((rec.record_id, es.name))
+            if est is None or not est.valid or est.point is None:
+                continue
+            scores.append(float(est.point))
+            labels.append(float(truth.target_value))
+        n_pos = int(sum(1 for y in labels if y >= 0.5))
+        meta_base = {"n_scored": len(scores), "n_positive": n_pos}
+        for ms in class_metrics:
+            threshold = float(dict(ms.parameters).get("threshold", 0.5))
+            value: float | None
+            if ms.name == "roc_auc":
+                value = _roc_auc(scores, labels) if len(scores) >= 2 else None
+            else:
+                conf = _confusion_at_threshold(scores, labels, threshold)
+                if conf is None:
+                    value = None
+                elif ms.name == "balanced_accuracy":
+                    value = 0.5 * (conf[0] + (1.0 - conf[1]))
+                elif ms.name == "true_positive_rate":
+                    value = conf[0]
+                elif ms.name == "false_positive_rate":
+                    value = conf[1]
+                else:
+                    value = None
+            rows.append(
+                MetricValue(
+                    run_id=run_id,
+                    record_id=None,
+                    estimator_name=es.name,
+                    metric_name=ms.name,
+                    value=value,
+                    stratum={"level": "balanced_global"},
+                    metadata={**meta_base, "threshold": threshold},
+                )
+            )
+    return rows
+
+
 def _valid_point(est: EstimateResult | None) -> float | None:
     if est is None or not est.valid or est.point is None:
         return None
@@ -154,6 +284,11 @@ class GroundTruthEvaluator(BaseEvaluator):
 
                 for ms in manifest.metric_specs:
                     validate_metric_admissibility(ms, manifest.mode, rec)
+                    # Route by estimand kind: classification metrics (roc_auc, ...)
+                    # are aggregate-only (see _classification_rows); regression
+                    # truth-metrics do not apply to decision estimands like lrd_class.
+                    if not _metric_applies_per_series(ms, es.target_estimand):
+                        continue
                     if ms.name in STRESS_PAIR_METRICS:
                         if manifest.mode is not BenchmarkMode.STRESS_TEST:
                             continue
@@ -229,7 +364,8 @@ class GroundTruthEvaluator(BaseEvaluator):
                 )
             )
 
-        aggregate = self._aggregate(run_id, per_series, manifest)
+        aggregate = list(self._aggregate(run_id, per_series, manifest))
+        aggregate.extend(_classification_metric_rows(run_id, records, idx, manifest))
         uncertainty = self._benchmark_uncertainty(run_id, per_series, aggregate, manifest)
         return MetricBundle(
             per_series=tuple(per_series),
@@ -1320,7 +1456,8 @@ class ObservationalEvaluator(GroundTruthEvaluator):
                 )
             )
 
-        aggregate = self._aggregate(run_id, per_series, manifest)
+        aggregate = list(self._aggregate(run_id, per_series, manifest))
+        aggregate.extend(_classification_metric_rows(run_id, records, idx, manifest))
         uncertainty = self._benchmark_uncertainty(run_id, per_series, aggregate, manifest)
         return MetricBundle(
             per_series=tuple(per_series),

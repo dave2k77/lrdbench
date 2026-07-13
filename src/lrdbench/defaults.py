@@ -12,6 +12,7 @@ from lrdbench.estimators.data_driven import (
     MLRandomForestEstimator,
     MLSVREstimator,
 )
+from lrdbench.estimators.discrimination import ThresholdHurstDiscriminator
 from lrdbench.estimators.geometric import GHEEstimator, HiguchiEstimator
 from lrdbench.estimators.spectral import (
     GPHEstimator,
@@ -130,6 +131,9 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     def acf_decay_builder(spec: EstimatorSpec) -> BaseEstimator:
         return ACFDecayEstimator(spec)
 
+    def threshold_hurst_discriminator_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return ThresholdHurstDiscriminator(spec)
+
     def whittle_builder(spec: EstimatorSpec) -> BaseEstimator:
         return WhittleMLEEstimator(spec)
 
@@ -175,6 +179,7 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     reg.register("Periodogram", periodogram_builder)
     reg.register("PeriodogramBeta", periodogram_beta_builder)
     reg.register("ACFDecay", acf_decay_builder)
+    reg.register("ThresholdHurstDiscriminator", threshold_hurst_discriminator_builder)
     reg.register("WhittleMLE", whittle_builder)
     reg.register("ModifiedLocalWhittle", mlw_builder)
     reg.register("WaveletAbryVeitch", w_av_builder)
