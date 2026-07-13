@@ -4,7 +4,7 @@ The public benchmark output contract is tracked in
 `configs/contracts/public_output_contract.json`. The same contract is exposed from
 `lrdbench.output_contract.PUBLIC_OUTPUT_CONTRACT` for tests and downstream tooling.
 
-The current contract version is `1.0.0`.
+The current contract version is `1.1.0`.
 
 ## Run Root
 
@@ -42,9 +42,17 @@ Every raw result store should include:
 - `raw/metrics.csv`
 - `raw/artefacts.csv`
 
-`raw/leaderboards.csv` is present when leaderboard rows are generated. `tables/stress_metrics.csv`
-is present for stress-test reports. Figures and LaTeX tables are present only when requested and
-available for the run.
+`raw/leaderboards.csv` is present when leaderboard rows are generated.
+`raw/truths.csv` is present when any record declares ground truth (all synthetic modes):
+it is a long-format ledger of every declared truth — the primary estimand plus any companion
+truths (e.g. `spectral_exponent_beta`, `timescale_tau`, `lrd_class`) attached to the same
+realisation — with columns `record_id`, `target_estimand`, `target_value`, `process_family`,
+`is_primary`, `notes`. `raw/records.csv` continues to carry only the primary truth.
+`tables/stress_metrics.csv` is present for stress-test reports. Figures and LaTeX tables are present
+only when requested and available for the run.
+
+> **Contract 1.1.0** added `raw/truths.csv` (companion-truth ledger) as a conditional file. This is
+> an additive change: `raw/records.csv` and all other files keep their `1.0.0` columns.
 
 ## Required Columns
 
@@ -60,6 +68,7 @@ Core examples:
 | `tables/per_stratum_metrics.csv` | `estimator_name`, `metric_name`, `value`, `stratum_json`, `metadata_json` |
 | `tables/leaderboard.csv` | `estimator_name`, `rank`, `score` |
 | `raw/metrics.csv` | `scope`, `record_id`, `estimator_name`, `metric_name`, `value`, `stratum_json`, `metadata_json` |
+| `raw/truths.csv` | `record_id`, `target_estimand`, `target_value`, `process_family`, `is_primary`, `notes` |
 | `artefacts/artefact_index.csv` | `artefact_id`, `run_id`, `artefact_type`, `format`, `path`, `hash`, `created_at`, `depends_on_json` |
 
 Use the JSON contract as the authority when building automated output checks.

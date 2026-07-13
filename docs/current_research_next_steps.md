@@ -6,7 +6,12 @@ This page is the short, current-facing handoff for work after the stable public 
 
 ## Current project state
 
-- Public package status: stable `1.2.1` release, with unchanged public output contract `1.0.0`.
+- Public package status: last stable release is `1.2.1` (shipped public output contract `1.0.0`).
+- Unreleased on `main`: the estimand-triangle and LRD-discrimination work — `spectral_exponent_beta`
+  and `timescale_tau` estimands (with `PeriodogramBeta`/`ACFDecay` estimators), the `multi_timescale`
+  apparent-LRD generator, the `lrd_class` decision estimand with four discriminators and the
+  classification metric family (`roc_auc`, ...), and the output contract advanced to `1.1.0` (added
+  `raw/truths.csv`). See the `## Unreleased` section of the changelog.
 - Public library focus: maintain schema/API/output-contract stability, keep docs coherent, and avoid changing public CSV columns without a contract-version bump.
 - Current research focus: use the completed `neural_classical_workstation` benchmark campaign, clean observational-mode fixture, and OpenNeuro `ds002691` EEG pilot to prepare committee/manuscript figures and observational workflow text.
 - Completed synthetic campaign: `benchmark_experiment/neural_classical_workstation_analysis.md` summarises the ground-truth and stress-test runs.

@@ -78,6 +78,34 @@ The experimental supervised baselines target `hurst_scaling_proxy`:
 These require a manifest-declared `ml_training` block unless a model artefact path is supplied.
 See [Data-driven estimators](data_driven_estimators.md).
 
+## Spectral-Exponent and Timescale Estimators
+
+These target the two companion estimands of the temporal-correlation triangle (see the
+[parameter glossary](parameter_glossary.md) and `raw/truths.csv`). A single realisation can carry
+ground truth for `hurst_scaling_proxy`, `spectral_exponent_beta`, and `timescale_tau` at once (e.g.
+the `fOU` generator), so a suite may run Hurst, spectral-exponent, and timescale estimators side by
+side; each is scored only against the truth for its own estimand.
+
+| Name | Family | Target estimand | Method |
+| --- | --- | --- | --- |
+| `PeriodogramBeta` | `spectral` | `spectral_exponent_beta` | Low-frequency log-periodogram slope, reported as `β = 2d = 2H − 1` (`S(f) ~ f^(-β)`). |
+| `ACFDecay` | `timescale` | `timescale_tau` | Log-linear fit of the autocorrelation over its leading exponential band; reports the decay constant `τ₀` in samples. Correctly specified for AR(1)/OU-type single-timescale dynamics and deliberately misspecified (window-dependent) under true long-range dependence. |
+
+## LRD Discriminators
+
+These target the decision estimand `lrd_class`: each emits a score in `[0, 1]` (higher = stronger
+evidence of true long-range dependence) rather than a scalar, and is scored by the classification
+metrics (`roc_auc`, `balanced_accuracy`, `true_positive_rate`, `false_positive_rate`) against binary
+`is_lrd` labels. They distinguish genuine LRD from a short-memory `multi_timescale` process that
+merely mimics power-law scaling.
+
+| Name | Method |
+| --- | --- |
+| `ThresholdHurstDiscriminator` | Naive baseline: a Hurst estimate (`base` = `dfa`/`gph`/`rs`) squashed through a logistic centred at `h0`. |
+| `LowFreqSpectralDiscriminator` | Local-Whittle memory parameter at a shrinking low-frequency band (true LRD keeps `d>0` as `f→0`; a bounded spectrum collapses to `d≈0`). |
+| `ScaleCrossoverDiscriminator` | Large-scale DFA slope (true LRD stays above `0.5` at all scales; short memory crosses over to `0.5` beyond its largest timescale). |
+| `ICModelSelectDiscriminator` | Whittle-BIC model comparison of ARFIMA(0,d,0) against short-memory AR(1)/AR(2); favours LRD when the fractional model wins. |
+
 ## Interpretation Notes
 
 Do not mix `hurst_scaling_proxy` and `long_memory_parameter` results in a single accuracy ranking
