@@ -114,3 +114,43 @@ def test_classification_metric_rows_compute_auc_and_confusion() -> None:
     assert vals["true_positive_rate"] == 1.0
     assert vals["false_positive_rate"] == 0.0
     assert all(r.stratum.get("level") == "balanced_global" for r in rows)
+
+
+def test_principled_discriminators_separate_lrd_from_multitimescale() -> None:
+    from lrdbench.estimators.discrimination import (
+        _ic_model_select_score,
+        _lowfreq_spectral_score,
+        _scale_crossover_score,
+    )
+    from lrdbench.evaluator import _roc_auc
+    from lrdbench.generators._signal import simulate_fgn, simulate_multitimescale
+
+    n = 2048
+    scorers = {
+        "lowfreq": lambda z: _lowfreq_spectral_score(z, m_power=0.45, d0=0.075, width=0.05),
+        "crossover": lambda z: _scale_crossover_score(z, h0=0.55, width=0.06),
+        "ic": lambda z: _ic_model_select_score(z, ar_orders=(1, 2), scale=4.0),
+    }
+    results = {k: ([], []) for k in scorers}  # (scores, labels)
+    for h in (0.7, 0.9):
+        for r in range(4):
+            x = simulate_fgn(n, h, np.random.default_rng(10 + int(h * 10) + r))
+            for k, fn in scorers.items():
+                s = fn(x)
+                if s is not None:
+                    results[k][0].append(s)
+                    results[k][1].append(1.0)
+    for tm in (4.0, 16.0):
+        for r in range(4):
+            x = simulate_multitimescale(n, np.random.default_rng(50 + int(tm) + r), tau_max=tm)
+            for k, fn in scorers.items():
+                s = fn(x)
+                if s is not None:
+                    results[k][0].append(s)
+                    results[k][1].append(0.0)
+
+    # Every principled discriminator must beat the ~0.54 baseline floor on the
+    # hard true-LRD-vs-multi-timescale subset.
+    for k, (scores, labels) in results.items():
+        auc = _roc_auc(scores, labels)
+        assert auc is not None and auc > 0.6, f"{k} AUC {auc} did not beat the baseline floor"

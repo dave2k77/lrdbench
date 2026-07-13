@@ -12,7 +12,12 @@ from lrdbench.estimators.data_driven import (
     MLRandomForestEstimator,
     MLSVREstimator,
 )
-from lrdbench.estimators.discrimination import ThresholdHurstDiscriminator
+from lrdbench.estimators.discrimination import (
+    ICModelSelectDiscriminator,
+    LowFreqSpectralDiscriminator,
+    ScaleCrossoverDiscriminator,
+    ThresholdHurstDiscriminator,
+)
 from lrdbench.estimators.geometric import GHEEstimator, HiguchiEstimator
 from lrdbench.estimators.spectral import (
     GPHEstimator,
@@ -134,6 +139,15 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     def threshold_hurst_discriminator_builder(spec: EstimatorSpec) -> BaseEstimator:
         return ThresholdHurstDiscriminator(spec)
 
+    def lowfreq_spectral_discriminator_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return LowFreqSpectralDiscriminator(spec)
+
+    def scale_crossover_discriminator_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return ScaleCrossoverDiscriminator(spec)
+
+    def ic_model_select_discriminator_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return ICModelSelectDiscriminator(spec)
+
     def whittle_builder(spec: EstimatorSpec) -> BaseEstimator:
         return WhittleMLEEstimator(spec)
 
@@ -180,6 +194,9 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     reg.register("PeriodogramBeta", periodogram_beta_builder)
     reg.register("ACFDecay", acf_decay_builder)
     reg.register("ThresholdHurstDiscriminator", threshold_hurst_discriminator_builder)
+    reg.register("LowFreqSpectralDiscriminator", lowfreq_spectral_discriminator_builder)
+    reg.register("ScaleCrossoverDiscriminator", scale_crossover_discriminator_builder)
+    reg.register("ICModelSelectDiscriminator", ic_model_select_discriminator_builder)
     reg.register("WhittleMLE", whittle_builder)
     reg.register("ModifiedLocalWhittle", mlw_builder)
     reg.register("WaveletAbryVeitch", w_av_builder)
