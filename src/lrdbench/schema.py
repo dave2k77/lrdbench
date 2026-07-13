@@ -62,6 +62,10 @@ class SeriesRecord:
     source_type: SourceType
     source_name: str
     truth: TruthSpec | None = None
+    # Companion ground truths for other estimands (e.g. spectral_exponent_beta,
+    # timescale_tau) defined on the same realisation. ``truth`` remains the
+    # primary estimand (typically hurst_scaling_proxy); see ``truth_for``.
+    additional_truths: tuple[TruthSpec, ...] = ()
     contamination_history: tuple[TransformationRecord, ...] = ()
     preprocessing_history: tuple[TransformationRecord, ...] = ()
     annotations: Mapping[str, Any] = field(default_factory=dict)

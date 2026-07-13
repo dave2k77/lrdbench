@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.0.0",
+  "contract_version": "1.1.0",
   "run_root": "<report.export_root>/<run_id>",
   "required_files": {
     "summary": [
@@ -28,6 +28,7 @@
     "tables/stress_metrics.csv": "present for stress_test reports",
     "tables/correction_metrics.csv": "present when correction/preprocessing metrics are requested",
     "raw/leaderboards.csv": "present when leaderboard rows are generated",
+    "raw/truths.csv": "present when any record declares ground truth (all synthetic modes)",
     "manifest/benchmark_manifest.yaml": "present when the manifest was loaded from YAML",
     "figures/*.png": "present when requested report.figure_set entries have data",
     "latex/*.tex": "present when latex report output is requested"
@@ -50,6 +51,7 @@
     "raw/estimates.csv": ["record_id", "estimator_name", "point", "ci_low", "ci_high", "stderr", "valid", "runtime_seconds", "failure_reason", "warnings", "bootstrap_cis_json"],
     "raw/metrics.csv": ["scope", "record_id", "estimator_name", "metric_name", "value", "stratum_json", "metadata_json"],
     "raw/leaderboards.csv": ["estimator_name", "rank", "score", "components_json"],
+    "raw/truths.csv": ["record_id", "target_estimand", "target_value", "process_family", "is_primary", "notes"],
     "raw/artefacts.csv": ["artefact_id", "run_id", "artefact_type", "format", "path", "hash", "created_at", "depends_on_json"]
   },
   "dynamic_columns": {

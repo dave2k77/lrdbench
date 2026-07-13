@@ -16,6 +16,7 @@ from lrdbench.estimators.geometric import GHEEstimator, HiguchiEstimator
 from lrdbench.estimators.spectral import (
     GPHEstimator,
     ModifiedLocalWhittleEstimator,
+    PeriodogramBetaEstimator,
     PeriodogramRegressionEstimator,
     WhittleMLEEstimator,
 )
@@ -27,6 +28,7 @@ from lrdbench.estimators.temporal import (
     VarianceEstimator,
     VarianceResidualEstimator,
 )
+from lrdbench.estimators.timescale import ACFDecayEstimator
 from lrdbench.estimators.wavelet import (
     WaveletAbryVeitchEstimator,
     WaveletBardetEstimator,
@@ -120,6 +122,12 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     def periodogram_builder(spec: EstimatorSpec) -> BaseEstimator:
         return PeriodogramRegressionEstimator(spec)
 
+    def periodogram_beta_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return PeriodogramBetaEstimator(spec)
+
+    def acf_decay_builder(spec: EstimatorSpec) -> BaseEstimator:
+        return ACFDecayEstimator(spec)
+
     def whittle_builder(spec: EstimatorSpec) -> BaseEstimator:
         return WhittleMLEEstimator(spec)
 
@@ -163,6 +171,8 @@ def build_default_estimator_registry() -> EstimatorRegistry:
     reg.register("Higuchi", higuchi_builder)
     reg.register("GHE", ghe_builder)
     reg.register("Periodogram", periodogram_builder)
+    reg.register("PeriodogramBeta", periodogram_beta_builder)
+    reg.register("ACFDecay", acf_decay_builder)
     reg.register("WhittleMLE", whittle_builder)
     reg.register("ModifiedLocalWhittle", mlw_builder)
     reg.register("WaveletAbryVeitch", w_av_builder)

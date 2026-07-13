@@ -25,6 +25,7 @@ from lrdbench.schema import (
 from lrdbench.strata import stratum_from_record, stratum_key
 from lrdbench.validation import (
     ManifestValidationError,
+    truth_for,
     validate_metric_admissibility,
     validate_truth_compatibility,
 )
@@ -280,7 +281,7 @@ class GroundTruthEvaluator(BaseEvaluator):
             ]
 
         if ms.name == "relative_degradation_ratio":
-            truth = record.truth
+            truth = truth_for(record, estimator_spec.target_estimand)
             if truth is None or truth.target_value is None:
                 return []
             if not est.valid or est.point is None or not est0.valid or est0.point is None:
@@ -318,7 +319,7 @@ class GroundTruthEvaluator(BaseEvaluator):
             ]
 
         if ms.name == "coverage_collapse":
-            truth = record.truth
+            truth = truth_for(record, estimator_spec.target_estimand)
             if truth is None or truth.target_value is None:
                 return []
             y_star = float(truth.target_value)
@@ -404,7 +405,7 @@ class GroundTruthEvaluator(BaseEvaluator):
                 )
             ]
 
-        truth = record.truth
+        truth = truth_for(record, estimator_spec.target_estimand)
         if truth is None or truth.target_value is None:
             return []
         if not est.valid or est.point is None:
@@ -521,7 +522,7 @@ class GroundTruthEvaluator(BaseEvaluator):
         sk: tuple[tuple[str, Any], ...],
         compatible: bool,
     ) -> list[MetricValue]:
-        truth = record.truth
+        truth = truth_for(record, estimator_spec.target_estimand)
         rows: list[MetricValue] = []
         meta_base: dict[str, Any] = {"stratum_key": sk}
 
@@ -556,8 +557,6 @@ class GroundTruthEvaluator(BaseEvaluator):
             if truth is None or truth.target_value is None:
                 return rows
             if not est.valid or est.point is None:
-                return rows
-            if truth.target_estimand != estimator_spec.target_estimand:
                 return rows
             y = float(truth.target_value)
             yhat = float(est.point)

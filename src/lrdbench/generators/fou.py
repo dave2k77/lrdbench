@@ -60,6 +60,25 @@ class FOUGenerator(BaseGenerator):
                 "target is the driving Hurst scaling proxy; mean reversion affects large scales."
             ),
         )
+        # Companion truth: the mean-reversion timescale in samples. The discrete
+        # scheme uses rho = exp(-theta*dt) (see simulate_fou), so the ACF of the
+        # OU part decays as rho^k = exp(-k / tau) with tau = 1/(theta*dt). This is
+        # exact only for H = 0.5 (plain OU, single-exponential ACF); for H != 0.5
+        # the fGn-coloured innovations make the exponential fit approximate.
+        tau_samples = 1.0 / (theta * dt)
+        tau_note = "tau = 1/(theta*dt) samples (mean reversion)"
+        if abs(hurst - 0.5) > 1e-9:
+            tau_note += "; approximate for H != 0.5 (fGn-coloured innovations)"
+        additional_truths = (
+            TruthSpec(
+                process_family=self.family,
+                generating_params=dict(params),
+                target_estimand="timescale_tau",
+                target_value=tau_samples,
+                validity_domain={"theta": theta, "dt": dt, "H": hurst},
+                notes=tau_note,
+            ),
+        )
         prov = ProvenanceRecord(
             record_id=record_id,
             parent_id=None,
@@ -88,6 +107,7 @@ class FOUGenerator(BaseGenerator):
             source_type=SourceType.SYNTHETIC,
             source_name="fOU",
             truth=truth,
+            additional_truths=additional_truths,
             annotations=ann,
             provenance=prov,
         )

@@ -4,7 +4,7 @@ import csv
 from pathlib import Path
 from typing import Any
 
-PUBLIC_OUTPUT_CONTRACT_VERSION = "1.0.0"
+PUBLIC_OUTPUT_CONTRACT_VERSION = "1.1.0"
 
 PUBLIC_OUTPUT_CONTRACT: dict[str, Any] = {
     "contract_version": PUBLIC_OUTPUT_CONTRACT_VERSION,
@@ -36,6 +36,7 @@ PUBLIC_OUTPUT_CONTRACT: dict[str, Any] = {
         "tables/stress_metrics.csv": "present for stress_test reports",
         "tables/correction_metrics.csv": "present when correction/preprocessing metrics are requested",
         "raw/leaderboards.csv": "present when leaderboard rows are generated",
+        "raw/truths.csv": "present when any record declares ground truth (all synthetic modes)",
         "manifest/benchmark_manifest.yaml": "present when the manifest was loaded from YAML",
         "figures/*.png": "present when requested report.figure_set entries have data",
         "latex/*.tex": "present when latex report output is requested",
@@ -175,6 +176,14 @@ PUBLIC_OUTPUT_CONTRACT: dict[str, Any] = {
             "metadata_json",
         ],
         "raw/leaderboards.csv": ["estimator_name", "rank", "score", "components_json"],
+        "raw/truths.csv": [
+            "record_id",
+            "target_estimand",
+            "target_value",
+            "process_family",
+            "is_primary",
+            "notes",
+        ],
         "raw/artefacts.csv": [
             "artefact_id",
             "run_id",

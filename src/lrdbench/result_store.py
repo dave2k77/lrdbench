@@ -42,6 +42,7 @@ class CsvResultStore(BaseResultStore):
         self.raw.mkdir(parents=True, exist_ok=True)
         self.manifest_dir.mkdir(parents=True, exist_ok=True)
         self._records_rows: list[dict[str, Any]] = []
+        self._truths_rows: list[dict[str, Any]] = []
         self._estimates_rows: list[dict[str, Any]] = []
         self._metrics_rows: list[dict[str, Any]] = []
         self._leader_rows: list[dict[str, Any]] = []
@@ -81,6 +82,23 @@ class CsvResultStore(BaseResultStore):
                 "annotations_json": json.dumps(dict(rec.annotations), sort_keys=True),
             }
             self._records_rows.append(row)
+            # Long-format ledger of every declared truth (primary + companions)
+            # so estimand-specific scoring (Hurst, spectral exponent, timescale)
+            # is reproducible from disk. records.csv keeps only the primary truth.
+            truths = list(rec.additional_truths)
+            if rec.truth is not None:
+                truths.insert(0, rec.truth)
+            for role, t in enumerate(truths):
+                self._truths_rows.append(
+                    {
+                        "record_id": rec.record_id,
+                        "target_estimand": t.target_estimand,
+                        "target_value": t.target_value,
+                        "process_family": t.process_family,
+                        "is_primary": role == 0 and rec.truth is not None,
+                        "notes": t.notes,
+                    }
+                )
 
     def write_estimates(self, estimates: Sequence[EstimateResult]) -> None:
         for e in estimates:
@@ -182,6 +200,8 @@ class CsvResultStore(BaseResultStore):
     def finalise(self) -> str:
         if self._records_rows:
             pd.DataFrame(self._records_rows).to_csv(self.raw / "records.csv", index=False)
+        if self._truths_rows:
+            pd.DataFrame(self._truths_rows).to_csv(self.raw / "truths.csv", index=False)
         if self._estimates_rows:
             pd.DataFrame(self._estimates_rows).to_csv(self.raw / "estimates.csv", index=False)
         if self._metrics_rows:
