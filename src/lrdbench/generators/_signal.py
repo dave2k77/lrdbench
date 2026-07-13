@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from numpy.linalg import cholesky
-from scipy.signal import fftconvolve
+from scipy.signal import fftconvolve, lfilter
 
 
 def fgn_autocovariance(hurst: float, n: int) -> np.ndarray:
@@ -173,3 +173,66 @@ def simulate_fou(
         x[i] = rho * x[i - 1] + innovations[i]
     out = x[burn:]
     return out - float(np.mean(out))
+
+
+def simulate_multitimescale(
+    n: int,
+    rng: np.random.Generator,
+    *,
+    n_components: int = 8,
+    tau_min: float = 1.5,
+    tau_max: float = 16.0,
+    beta_target: float = 1.0,
+    sigma: float = 1.0,
+    burnin: int | None = None,
+) -> np.ndarray:
+    """Superposition of AR(1) processes with geometrically-spread timescales.
+
+    Builds ``x_t = sum_i sqrt(w_i) * u_i,t`` where each ``u_i`` is a unit-variance
+    AR(1) with decay ``rho_i = exp(-1/tau_i)`` driven by independent white noise,
+    and the timescales ``tau_i`` are geometrically spaced over ``[tau_min, tau_max]``.
+    The weights ``w_i ~ tau_i**beta_target`` shape the aggregate spectral density to
+    approximate ``S(f) ~ f^(-beta_target)`` across the band ``[1/tau_max, 1/tau_min]``.
+
+    A *finite* sum of exponentially-decaying components has a summable
+    autocovariance and a bounded, strictly positive spectral density at zero
+    frequency -- it is genuinely short-memory (Hurst 0.5, no long-range
+    dependence). Over finite samples, however, the spread of timescales mimics
+    power-law scaling and can fool LRD estimators. This makes it a controlled null
+    for true-vs-apparent-LRD discrimination.
+    """
+    if n < 2:
+        raise ValueError("n must be at least 2 for multi_timescale")
+    if n_components < 1:
+        raise ValueError("n_components must be >= 1")
+    if not (0.0 < tau_min <= tau_max):
+        raise ValueError("require 0 < tau_min <= tau_max")
+
+    if n_components == 1:
+        taus = np.asarray([float(tau_min)])
+    else:
+        ratios = np.arange(n_components, dtype=float) / (n_components - 1)
+        taus = float(tau_min) * (float(tau_max) / float(tau_min)) ** ratios
+    rhos = np.exp(-1.0 / taus)
+    weights = taus**float(beta_target)
+    weights = weights / float(np.sum(weights))
+
+    if burnin is None:
+        burnin = int(min(max(4.0 * float(tau_max), 64.0), 8192.0))
+    burn = max(0, int(burnin))
+    total = n + burn
+
+    x = np.zeros(total, dtype=float)
+    for rho, w in zip(rhos, weights, strict=True):
+        # Unit-variance AR(1): innovation std = sqrt(1 - rho**2).
+        innov = rng.standard_normal(total) * float(np.sqrt(1.0 - rho**2))
+        comp = lfilter([1.0], [1.0, -float(rho)], innov)
+        x += float(np.sqrt(w)) * comp
+
+    out = x[burn:]
+    out = out - float(np.mean(out))
+    std = float(np.std(out))
+    if std > 0.0:
+        out = out / std
+    scaled: np.ndarray = float(sigma) * out
+    return scaled

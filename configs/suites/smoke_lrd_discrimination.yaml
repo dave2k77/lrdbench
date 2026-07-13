@@ -1,0 +1,62 @@
+manifest_id: smoke_lrd_discrimination_v1
+name: smoke_lrd_discrimination
+description: >-
+  Tiny smoke benchmark for true-vs-apparent LRD discrimination: multi_timescale
+  (short-memory null that mimics LRD) and fGn H=0.5 (clean null) vs fGn H=0.8
+  (true LRD). Scores the false-positive LRD rate on the nulls.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    - family: multi_timescale
+      params:
+        n: [512]
+        tau_max: [8.0]
+        n_components: [8]
+        sigma: [1.0]
+      replicates: 2
+    - family: fGn
+      params:
+        H: [0.5, 0.8]
+        n: [512]
+        sigma: [1.0]
+      replicates: 2
+estimators:
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 48
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+  - name: GPH
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 48
+      bootstrap_block_len: 32
+      ci_levels: [0.95]
+metrics:
+  - bias
+  - mae
+  - false_positive_lrd_rate
+  - validity_rate
+  - runtime
+leaderboards:
+  - name: null_specificity
+    mode: ground_truth
+    component_metrics: [false_positive_lrd_rate, validity_rate, runtime]
+    weights:
+      false_positive_lrd_rate: 0.6
+      validity_rate: 0.3
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv]
+  include_provenance: true
+  export_root: reports
+seeds:
+  global_seed: 42

@@ -41,6 +41,7 @@ from lrdbench.generators.fbm import FBMGenerator
 from lrdbench.generators.fgn import FGNGenerator
 from lrdbench.generators.fou import FOUGenerator
 from lrdbench.generators.mrw import MRWGenerator
+from lrdbench.generators.multitimescale import MultiTimescaleGenerator
 from lrdbench.generators.nonstationary_lrd import NonstationaryLRDGenerator
 from lrdbench.interfaces import BaseEstimator
 from lrdbench.preprocessing import (
@@ -66,6 +67,7 @@ def build_default_generator_registry() -> GeneratorRegistry:
     reg.register("ARFIMA", ARFIMAGenerator())
     reg.register("MRW", MRWGenerator())
     reg.register("fOU", FOUGenerator())
+    reg.register("multi_timescale", MultiTimescaleGenerator())
     reg.register("NonstationaryLRD", NonstationaryLRDGenerator())
     return reg
 
