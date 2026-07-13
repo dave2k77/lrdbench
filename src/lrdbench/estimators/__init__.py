@@ -8,6 +8,7 @@ from lrdbench.estimators.geometric import GHEEstimator, HiguchiEstimator
 from lrdbench.estimators.spectral import (
     GPHEstimator,
     ModifiedLocalWhittleEstimator,
+    PeriodogramBetaEstimator,
     PeriodogramRegressionEstimator,
     WhittleMLEEstimator,
 )
@@ -19,6 +20,7 @@ from lrdbench.estimators.temporal import (
     VarianceEstimator,
     VarianceResidualEstimator,
 )
+from lrdbench.estimators.timescale import ACFDecayEstimator
 from lrdbench.estimators.wavelet import (
     WaveletAbryVeitchEstimator,
     WaveletBardetEstimator,
@@ -28,6 +30,7 @@ from lrdbench.estimators.wavelet import (
 )
 
 __all__ = [
+    "ACFDecayEstimator",
     "DFAEstimator",
     "DMAEstimator",
     "AbsoluteMomentEstimator",
@@ -39,6 +42,7 @@ __all__ = [
     "MLRandomForestEstimator",
     "MLSVREstimator",
     "ModifiedLocalWhittleEstimator",
+    "PeriodogramBetaEstimator",
     "PeriodogramRegressionEstimator",
     "RSEstimator",
     "VarianceEstimator",

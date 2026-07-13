@@ -19,12 +19,17 @@ def _as_target_estimand(value: float | None, target_estimand: str) -> float | No
     ``hurst_scaling_proxy`` (i.e. compares against a Hurst exponent ``H``),
     convert via the fractional-noise identity ``H = d + 1/2`` so the estimate
     is on the same scale as the ground truth. For ``long_memory_parameter``
-    targets the raw ``d`` is returned unchanged.
+    targets the raw ``d`` is returned unchanged. For ``spectral_exponent_beta``
+    the low-frequency spectral slope ``S(f) ~ f^(-beta)`` is returned via
+    ``beta = 2d`` (equivalently ``H = (beta + 1) / 2``); see
+    ``tests/unit/test_estimand_triangle.py::test_beta_estimand_mapping_is_exact``.
     """
     if value is None:
         return None
     if target_estimand == "hurst_scaling_proxy":
         return float(value) + 0.5
+    if target_estimand == "spectral_exponent_beta":
+        return 2.0 * float(value)
     return float(value)
 
 
@@ -307,6 +312,47 @@ class PeriodogramRegressionEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_periodogram",
             seed_offset=101,
+        )
+
+
+class PeriodogramBetaEstimator(BaseEstimator):
+    """Low-frequency spectral-exponent (beta) estimator, ``S(f) ~ f^(-beta)``.
+
+    Shares the log-periodogram regression core with GPH/Periodogram but declares
+    the ``spectral_exponent_beta`` estimand, reporting ``beta = 2d`` so a suite
+    can benchmark the spectral slope directly against a beta ground truth on the
+    same realisation used for Hurst estimation. The default frequency count is
+    the shared ``m = sqrt(n)``; suites may widen ``m`` to reduce the known
+    low-``m`` attenuation bias.
+    """
+
+    VERSION = "0.1.0"
+
+    def __init__(self, spec: EstimatorSpec) -> None:
+        self._spec = spec
+
+    @property
+    def spec(self) -> EstimatorSpec:
+        return self._spec
+
+    def fit(self, record: SeriesRecord) -> EstimateResult:
+        params = dict(self._spec.parameter_schema)
+        taper = str(params.get("taper", "none")) or "none"
+        estimand = self._spec.target_estimand
+
+        def stat(z: np.ndarray) -> float | None:
+            m = int(params["m"]) if params.get("m") is not None else None
+            return _as_target_estimand(
+                _log_periodogram_regression_d(z, m=m, taper=taper), estimand
+            )
+
+        return fit_with_block_bootstrap(
+            record,
+            self._spec,
+            statistic=stat,
+            estimator_version=self.VERSION,
+            failure_reason="insufficient_signal_for_periodogram",
+            seed_offset=103,
         )
 
 

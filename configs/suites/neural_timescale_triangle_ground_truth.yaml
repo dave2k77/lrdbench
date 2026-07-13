@@ -1,0 +1,99 @@
+manifest_id: neural_timescale_triangle_gt_v1
+name: neural_timescale_triangle_ground_truth
+description: >-
+  Ground-truth benchmark for the Hurst / spectral-exponent / timescale triangle
+  motivated by the neural-timescales & long-range-dependence literature. fGn
+  carries the stationary (H, beta = 2H - 1) pair; fOU carries the (H, tau =
+  1/(theta*dt)) pair where tau is the mean-reversion timescale in samples (exact
+  at H = 0.5, approximate for H != 0.5). Estimators are scored only against the
+  truth for their own estimand; cross-estimand consistency (e.g. beta = 2H - 1)
+  is a downstream join on record_id via raw/truths.csv.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    # Stationary carrier of the (Hurst, spectral-exponent) pair.
+    - family: fGn
+      params:
+        H: [0.6, 0.7, 0.8, 0.9]
+        n: [2048]
+        sigma: [1.0]
+      replicates: 5
+    # Mean-reverting carrier of the (Hurst, timescale) pair. H = 0.5 rows are the
+    # clean single-exponential anchor; H != 0.5 rows probe tau under LRD-coloured
+    # innovations (truth flagged approximate in raw/truths.csv notes).
+    - family: fOU
+      params:
+        H: [0.5, 0.7, 0.9]
+        theta: [0.05, 0.2]
+        dt: [1.0]
+        n: [2048]
+        sigma: [1.0]
+      replicates: 5
+estimators:
+  # Hurst estimators (scored against the primary hurst_scaling_proxy truth).
+  - name: DFA
+    family: temporal
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 200
+      ci_levels: [0.95]
+  - name: GPH
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 200
+      ci_levels: [0.95]
+  - name: WhittleMLE
+    family: spectral
+    target_estimand: hurst_scaling_proxy
+    supports_ci: true
+    params:
+      n_bootstrap: 200
+      ci_levels: [0.95]
+  # Spectral exponent beta (scored against the fGn companion truth beta = 2H - 1).
+  - name: PeriodogramBeta
+    family: spectral
+    target_estimand: spectral_exponent_beta
+    supports_ci: true
+    params:
+      n_bootstrap: 200
+      ci_levels: [0.95]
+  # Timescale tau (scored against the fOU companion truth tau = 1/(theta*dt)).
+  - name: ACFDecay
+    family: timescale
+    target_estimand: timescale_tau
+    supports_ci: true
+    params:
+      n_bootstrap: 200
+      ci_levels: [0.95]
+metrics:
+  - bias
+  - mae
+  - rmse
+  - validity_rate
+  - runtime
+  - name: coverage
+    levels: [0.95]
+  - name: ci_width
+    levels: [0.95]
+leaderboards:
+  # Estimand-agnostic ranking only: MAE lives on incompatible scales across
+  # H (0-1), beta (-1..1) and tau (samples), so accuracy is compared per estimand
+  # in per_stratum_metrics rather than in a single mixed leaderboard.
+  - name: reliability
+    mode: ground_truth
+    component_metrics: [validity_rate, runtime]
+    weights:
+      validity_rate: 0.7
+      runtime: 0.3
+    ranking_rule: weighted_rank
+    tie_break_rule: runtime
+report:
+  formats: [html, csv, latex]
+  include_provenance: true
+  export_root: reports
+seeds:
+  global_seed: 20260713

@@ -10,6 +10,7 @@ from lrdbench.schema import (
     LeaderboardSpec,
     MetricSpec,
     SeriesRecord,
+    TruthSpec,
 )
 
 
@@ -237,13 +238,31 @@ def _validate_ml_training_block(
             raise ManifestValidationError("ml_training.validation_fraction must be in [0,1)")
 
 
+def truth_for(record: SeriesRecord, estimand: str) -> TruthSpec | None:
+    """Return the truth on ``record`` matching ``estimand``.
+
+    The primary ``record.truth`` is checked first, then ``additional_truths``.
+    A record may carry ground truth for several estimands (e.g. Hurst, spectral
+    exponent, timescale) defined on the same realisation; each estimator is
+    scored against the truth for its own ``target_estimand``.
+    """
+    if record.truth is not None and record.truth.target_estimand == estimand:
+        return record.truth
+    for extra in record.additional_truths:
+        if extra.target_estimand == estimand:
+            return extra
+    return None
+
+
 def validate_truth_compatibility(estimator_spec: EstimatorSpec, record: SeriesRecord) -> None:
-    if record.truth is None:
+    if record.truth is None and not record.additional_truths:
         return
-    if estimator_spec.target_estimand != record.truth.target_estimand:
+    if truth_for(record, estimator_spec.target_estimand) is None:
+        declared = [record.truth.target_estimand] if record.truth is not None else []
+        declared += [t.target_estimand for t in record.additional_truths]
         raise ManifestValidationError(
             f"estimator {estimator_spec.name!r} targets {estimator_spec.target_estimand!r} "
-            f"but record truth targets {record.truth.target_estimand!r}"
+            f"but record truth targets {declared!r}"
         )
 
 

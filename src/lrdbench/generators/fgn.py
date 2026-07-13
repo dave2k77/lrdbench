@@ -41,6 +41,25 @@ class FGNGenerator(BaseGenerator):
             target_value=hurst,
             notes=None,
         )
+        # Companion truths on the same realisation. For fGn the low-frequency
+        # spectral slope satisfies beta = 2H - 1 (S(f) ~ f^(-beta)); the ACF
+        # decays as a power law, so there is no finite exponential timescale.
+        additional_truths = (
+            TruthSpec(
+                process_family=self.family,
+                generating_params=dict(params),
+                target_estimand="spectral_exponent_beta",
+                target_value=2.0 * hurst - 1.0,
+                notes="beta = 2H - 1 for fGn",
+            ),
+            TruthSpec(
+                process_family=self.family,
+                generating_params=dict(params),
+                target_estimand="timescale_tau",
+                target_value=None,
+                notes="no finite timescale (power-law ACF)",
+            ),
+        )
         prov = ProvenanceRecord(
             record_id=record_id,
             parent_id=None,
@@ -65,6 +84,7 @@ class FGNGenerator(BaseGenerator):
             source_type=SourceType.SYNTHETIC,
             source_name="fGn",
             truth=truth,
+            additional_truths=additional_truths,
             annotations=ann,
             provenance=prov,
         )
