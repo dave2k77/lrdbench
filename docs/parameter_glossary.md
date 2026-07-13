@@ -2,6 +2,19 @@
 
 This page explains the most common parameters you will see in manifest `estimators` blocks.
 
+## Target estimands
+
+Every estimator declares a `target_estimand`. Truth-based metrics are only computed for an estimator
+against a record that carries a matching truth (`raw/truths.csv`).
+
+| Estimand | Kind | Range | Meaning |
+|----------|------|-------|---------|
+| `hurst_scaling_proxy` | regression | `(0, 1)` | Hurst-like scaling exponent `H`. |
+| `long_memory_parameter` | regression | `(-0.5, 0.5)` | ARFIMA fractional-integration parameter `d = H − 0.5`. |
+| `spectral_exponent_beta` | regression | `~(-1, 1)` | Low-frequency spectral slope `β`, where `S(f) ~ f^(-β)`; `β = 2H − 1`. |
+| `timescale_tau` | regression | `> 0` | Autocorrelation-decay time constant `τ₀` in samples. Undefined (`None`) for power-law LRD. |
+| `lrd_class` | classification | `[0, 1]` | Decision score: probability/evidence that the series is long-range dependent (`is_lrd` truth is `0` or `1`). |
+
 ## Temporal estimators (RS, DFA, DMA, AbsoluteMoment, Variance, VarianceResidual)
 
 | Parameter | Type | Default | Description |
@@ -66,6 +79,30 @@ This page explains the most common parameters you will see in manifest `estimato
 | `weight_decay` | float | 1e-4 | *(MLCNN, MLLSTM)* Adam weight-decay (L2 regularization). |
 | `batch_size` | int | 16 | *(MLCNN, MLLSTM)* Training mini-batch size. |
 | `epochs` | int | 8 | *(MLCNN, MLLSTM)* Number of training epochs. |
+
+## Spectral-exponent and timescale estimators (PeriodogramBeta, ACFDecay)
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `m` | int | `n^0.5` | *(PeriodogramBeta)* Number of low-frequency Fourier frequencies for the slope fit. |
+| `taper` | str | `"none"` | *(PeriodogramBeta)* Spectral taper (`"none"` or `"cosine"`). |
+| `max_lag` | int | first zero-crossing | *(ACFDecay)* Maximum lag included in the ACF fit. |
+| `rho_floor` | float | 0.1 | *(ACFDecay)* Only lags with autocorrelation above this floor are fit, excluding the noisy small-`ρ` tail that otherwise inflates `τ`. |
+| `n_bootstrap`, `bootstrap_block_len`, `ci_levels` | | | Shared block-bootstrap CI parameters (see temporal estimators). |
+
+## LRD discriminators (ThresholdHurst / LowFreqSpectral / ScaleCrossover / ICModelSelect)
+
+All target `lrd_class` and emit a `[0, 1]` score.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `base` | str | `"dfa"` | *(ThresholdHurst)* Underlying Hurst estimator: `"dfa"`, `"gph"`, or `"rs"`. |
+| `h0` | float | 0.55 | *(ThresholdHurst, ScaleCrossover)* Logistic decision centre on the Hurst / large-scale-slope axis. |
+| `width` | float | 0.05 | Logistic scale. |
+| `m_power` | float | 0.45 | *(LowFreqSpectral)* Low-frequency bandwidth as `m = n^m_power`. |
+| `d0` | float | 0.075 | *(LowFreqSpectral)* Logistic centre on the memory-parameter axis. |
+| `ar_orders` | list[int] | `[1, 2]` | *(ICModelSelect)* Short-memory AR orders compared against ARFIMA(0,d,0). |
+| `scale` | float | 4.0 | *(ICModelSelect)* Logistic scale on the ΔBIC axis. |
 
 ## Execution block
 

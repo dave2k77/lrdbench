@@ -55,6 +55,7 @@ nav:
       - Quickstart: tutorials/quickstart.md
       - Ground-truth benchmark: tutorials/ground_truth_benchmark.md
       - Stress testing: tutorials/stress_testing.md
+      - Estimand triangle and LRD discrimination: tutorials/estimand_triangle_and_discrimination.md
       - Observational data: tutorials/observational_data.md
       - Custom estimator: tutorials/custom_estimator.md
       - Reading outputs: tutorials/reading_outputs.md

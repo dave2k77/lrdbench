@@ -99,6 +99,8 @@ See [`RESEARCH_USAGE.md`](RESEARCH_USAGE.md) for the full policy.
   - ARFIMA(0,d,0)
   - MRW
   - fOU
+  - `nonstationary_lrd` (LRD under controlled nonstationarity)
+  - `multi_timescale` (short-memory superposition of AR(1) timescales; an apparent-LRD null)
 - contaminated synthetic pipelines
 - custom CSV datasets
 - future observational/API-based datasets
@@ -124,6 +126,9 @@ See [`RESEARCH_USAGE.md`](RESEARCH_USAGE.md) for the full policy.
 - spectral long-memory methods: `GPH`, `Periodogram`, `WhittleMLE`,
   `ModifiedLocalWhittle`
 - geometric and wavelet Hurst-proxy comparators
+- spectral-exponent and timescale methods: `PeriodogramBeta` (`β`), `ACFDecay` (`τ`)
+- LRD discriminators (decision estimand `lrd_class`): `ThresholdHurstDiscriminator`,
+  `LowFreqSpectralDiscriminator`, `ScaleCrossoverDiscriminator`, `ICModelSelectDiscriminator`
 - experimental data-driven baselines: `MLRandomForest`, `MLSVR`, `MLCNN`, `MLLSTM`
 
 See [`docs/bundled_estimators.md`](docs/bundled_estimators.md) and

@@ -48,8 +48,13 @@ Install the package and docs extras: `pip install -e ".[docs]"`.
 
 ::: lrdbench.estimators.spectral.GPHEstimator
 ::: lrdbench.estimators.spectral.PeriodogramRegressionEstimator
+::: lrdbench.estimators.spectral.PeriodogramBetaEstimator
 ::: lrdbench.estimators.spectral.WhittleMLEEstimator
 ::: lrdbench.estimators.spectral.ModifiedLocalWhittleEstimator
+
+## Bundled timescale estimators
+
+::: lrdbench.estimators.timescale.ACFDecayEstimator
 
 ## Bundled geometric estimators
 
@@ -70,6 +75,17 @@ Install the package and docs extras: `pip install -e ".[docs]"`.
 ::: lrdbench.estimators.data_driven.MLSVREstimator
 ::: lrdbench.estimators.data_driven.MLCNNEstimator
 ::: lrdbench.estimators.data_driven.MLLSTMEstimator
+
+## LRD discriminators
+
+These target the decision estimand `lrd_class` and emit a `[0, 1]` score scored by the
+classification metric family (`roc_auc`, `balanced_accuracy`, `true_positive_rate`,
+`false_positive_rate`).
+
+::: lrdbench.estimators.discrimination.ThresholdHurstDiscriminator
+::: lrdbench.estimators.discrimination.LowFreqSpectralDiscriminator
+::: lrdbench.estimators.discrimination.ScaleCrossoverDiscriminator
+::: lrdbench.estimators.discrimination.ICModelSelectDiscriminator
 
 ## Registries
 
@@ -104,6 +120,7 @@ Install the package and docs extras: `pip install -e ".[docs]"`.
 ::: lrdbench.validation.validate_manifest
 ::: lrdbench.validation.validate_metric_admissibility
 ::: lrdbench.validation.validate_truth_compatibility
+::: lrdbench.validation.truth_for
 ::: lrdbench.output_contract.public_output_contract
 ::: lrdbench.output_contract.required_output_files
 ::: lrdbench.output_contract.validate_output_contract

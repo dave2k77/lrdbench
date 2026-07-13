@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+### Estimand triangle: spectral exponent and timescale
+- Estimands: added `spectral_exponent_beta` (`β = 2H − 1`, `H = (β + 1) / 2`) and `timescale_tau`
+  (autocorrelation-decay time constant, in samples).
+- Estimators: added `PeriodogramBeta` (low-frequency spectral slope, targets
+  `spectral_exponent_beta`) and `ACFDecay` (new `timescale` family, exponential ACF-decay fit,
+  targets `timescale_tau`).
+- Records: added `SeriesRecord.additional_truths` so one realisation can carry ground truth for
+  several estimands. fGn declares `(H, β = 2H − 1, τ = None)`; fOU declares `(H, τ = 1/(θ·dt))`.
+- Evaluator: each estimator is scored only against the truth for its own `target_estimand` via the
+  new `truth_for` resolver.
+- Suites: `neural_timescale_triangle_ground_truth` and `smoke_neural_timescale`.
+
+### True-vs-apparent LRD discrimination
+- Generators: added the `multi_timescale` generator — a finite superposition of AR(1) timescales
+  that is genuinely short-memory (truth `H = 0.5`) but mimics power-law scaling over finite samples,
+  a controlled null for the LRD illusion. Severity is graded by `tau_max`.
+- Suites: `neural_lrd_discrimination_ground_truth` and `smoke_lrd_discrimination` score
+  `false_positive_lrd_rate` on the apparent-LRD nulls.
+
+### Per-series LRD model selection
+- Estimand: added the decision estimand `lrd_class` (binary `is_lrd` labels on fGn, ARFIMA and
+  `multi_timescale`).
+- Metrics: added the classification family `roc_auc`, `balanced_accuracy`, `true_positive_rate`,
+  `false_positive_rate`, computed over the score/label population. `MetricSpec.kind`
+  (`regression` | `classification` | `neutral`) routes metrics by estimand so error metrics never
+  apply to a decision estimand.
+- Estimators: added four discriminators targeting `lrd_class` — `ThresholdHurstDiscriminator`
+  (baseline), `LowFreqSpectralDiscriminator`, `ScaleCrossoverDiscriminator`, and
+  `ICModelSelectDiscriminator` (Whittle-BIC ARFIMA vs AR).
+- Suites: `neural_lrd_model_selection_ground_truth` and `smoke_lrd_model_selection`
+  (`discrimination_power` leaderboard ranked by ROC-AUC).
+
+### Output contract
+- Contract version `1.0.0` → `1.1.0`: added the conditional `raw/truths.csv` long-format ledger of
+  all declared truths (primary + companion). Additive — existing files keep their columns.
+
 ## 1.2.1
 
 > Note: versions 1.1.0, 1.1.1, and 1.2.0 were skipped. Their PyPI filenames are permanently
