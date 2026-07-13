@@ -45,6 +45,7 @@ source:
         sigma: [1.0]
       replicates: 8
 estimators:
+  # Naive baseline: threshold on a point Hurst estimate.
   - name: ThresholdHurstDiscriminator
     family: discrimination
     target_estimand: lrd_class
@@ -53,6 +54,35 @@ estimators:
       base: dfa
       h0: 0.55
       width: 0.05
+      n_bootstrap: 100
+      ci_levels: [0.95]
+  # Principled discriminators (Phase 3b).
+  - name: LowFreqSpectralDiscriminator
+    family: discrimination
+    target_estimand: lrd_class
+    supports_ci: true
+    params:
+      m_power: 0.45
+      d0: 0.075
+      width: 0.05
+      n_bootstrap: 100
+      ci_levels: [0.95]
+  - name: ScaleCrossoverDiscriminator
+    family: discrimination
+    target_estimand: lrd_class
+    supports_ci: true
+    params:
+      h0: 0.55
+      width: 0.06
+      n_bootstrap: 100
+      ci_levels: [0.95]
+  - name: ICModelSelectDiscriminator
+    family: discrimination
+    target_estimand: lrd_class
+    supports_ci: true
+    params:
+      ar_orders: [1, 2]
+      scale: 4.0
       n_bootstrap: 100
       ci_levels: [0.95]
 metrics:
