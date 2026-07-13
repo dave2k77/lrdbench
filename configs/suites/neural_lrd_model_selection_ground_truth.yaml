@@ -1,0 +1,80 @@
+manifest_id: neural_lrd_model_selection_gt_v1
+name: neural_lrd_model_selection_ground_truth
+description: >-
+  Per-series LRD model selection (Phase 3a machinery). The ThresholdHurstDiscriminator
+  emits a [0,1] score for the lrd_class estimand; ROC-AUC and threshold metrics score
+  how well that decision separates true LRD (fGn H>0.5, ARFIMA d>0) from short-memory
+  nulls (fGn H=0.5, ARFIMA d=0, and multi_timescale apparent-LRD at graded severity).
+  This is the naive threshold-on-Hurst baseline; principled discriminators (IC model
+  comparison, scale-crossover, low-frequency spectral) follow in Phase 3b.
+mode: ground_truth
+source:
+  type: generator_grid
+  generators:
+    # True-LRD positives.
+    - family: fGn
+      params:
+        H: [0.6, 0.7, 0.8, 0.9]
+        n: [2048]
+        sigma: [1.0]
+      replicates: 8
+    - family: ARFIMA
+      params:
+        d: [0.2, 0.4]
+        n: [2048]
+        sigma: [1.0]
+      replicates: 8
+    # Honest short-memory nulls.
+    - family: fGn
+      params:
+        H: [0.5]
+        n: [2048]
+        sigma: [1.0]
+      replicates: 8
+    - family: ARFIMA
+      params:
+        d: [0.0]
+        n: [2048]
+        sigma: [1.0]
+      replicates: 8
+    # Apparent-LRD short-memory nulls at graded severity.
+    - family: multi_timescale
+      params:
+        n: [2048]
+        tau_max: [4.0, 8.0, 16.0]
+        sigma: [1.0]
+      replicates: 8
+estimators:
+  - name: ThresholdHurstDiscriminator
+    family: discrimination
+    target_estimand: lrd_class
+    supports_ci: true
+    params:
+      base: dfa
+      h0: 0.55
+      width: 0.05
+      n_bootstrap: 100
+      ci_levels: [0.95]
+metrics:
+  - roc_auc
+  - balanced_accuracy
+  - true_positive_rate
+  - false_positive_rate
+  - validity_rate
+  - runtime
+leaderboards:
+  - name: discrimination_power
+    mode: ground_truth
+    component_metrics: [roc_auc, validity_rate, runtime]
+    weights:
+      roc_auc: 0.8
+      validity_rate: 0.1
+      runtime: 0.1
+    ranking_rule: weighted_rank
+    tie_break_rule: best_primary_metric
+report:
+  formats: [html, csv, latex]
+  include_provenance: true
+  export_root: reports
+seeds:
+  global_seed: 20260713

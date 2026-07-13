@@ -4,6 +4,7 @@ from lrdbench.estimators.data_driven import (
     MLRandomForestEstimator,
     MLSVREstimator,
 )
+from lrdbench.estimators.discrimination import ThresholdHurstDiscriminator
 from lrdbench.estimators.geometric import GHEEstimator, HiguchiEstimator
 from lrdbench.estimators.spectral import (
     GPHEstimator,
@@ -45,6 +46,7 @@ __all__ = [
     "PeriodogramBetaEstimator",
     "PeriodogramRegressionEstimator",
     "RSEstimator",
+    "ThresholdHurstDiscriminator",
     "VarianceEstimator",
     "VarianceResidualEstimator",
     "WaveletAbryVeitchEstimator",

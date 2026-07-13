@@ -41,6 +41,15 @@ class ARFIMAGenerator(BaseGenerator):
             target_value=d,
             notes=None,
         )
+        additional_truths = (
+            TruthSpec(
+                process_family="ARFIMA(0,d,0)",
+                generating_params=dict(params),
+                target_estimand="lrd_class",
+                target_value=1.0 if d > 0.0 else 0.0,
+                notes="LRD iff d > 0 (d = 0 is the short-memory null)",
+            ),
+        )
         prov = ProvenanceRecord(
             record_id=record_id,
             parent_id=None,
@@ -65,6 +74,7 @@ class ARFIMAGenerator(BaseGenerator):
             source_type=SourceType.SYNTHETIC,
             source_name="ARFIMA(0,d,0)",
             truth=truth,
+            additional_truths=additional_truths,
             annotations=ann,
             provenance=prov,
         )

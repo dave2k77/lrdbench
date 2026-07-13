@@ -59,6 +59,13 @@ class FGNGenerator(BaseGenerator):
                 target_value=None,
                 notes="no finite timescale (power-law ACF)",
             ),
+            TruthSpec(
+                process_family=self.family,
+                generating_params=dict(params),
+                target_estimand="lrd_class",
+                target_value=1.0 if hurst > 0.5 else 0.0,
+                notes="LRD iff H > 0.5 (H = 0.5 is the short-memory null)",
+            ),
         )
         prov = ProvenanceRecord(
             record_id=record_id,
