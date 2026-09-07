@@ -102,7 +102,9 @@ development script already stores such records and hashes. New stress conditions
 must derive from these immutable clean parents. Pair method and clean/stressed
 comparisons on the same parents, preserving that pairing when resampling summaries.
 Repeated windows, channels and subjects require their actual clustering hierarchy.
-The current scalar summary bootstrap is insufficient for paired MAE ratios.
+The public scalar summary bootstrap remains insufficient for paired MAE ratios.
+The [research shared-parent workflow](shared-stress.md) now recomputes those
+ratios inside joint parent resamples and has a complete audited stress screen.
 
 At 36 cells, 256 records and 19 configurations, the point screen contains 175,104
 fits on 9,216 independent inputs. If three methods each retain three block settings,
@@ -117,3 +119,14 @@ parameters, actual scale bands, all failure counts, raw outputs and derived-tabl
 hashes. Verify repeated small ground-truth/stress/observational workflows first.
 The paper's figures and tables are regenerated only from the eventual frozen
 confirmatory exports.
+
+
+## Seventh-package progress
+
+The [shared-parent stress screen](shared-stress.md) has completed 448 parents,
+seven verified descendants per parent and 21 point pipelines at n=512. It
+establishes the research point-stress and paired-summary path; it does not freeze
+the final severity/position grid or validate within-record intervals under stress.
+The next decision is a scoped final protocol and precision budget, followed by
+fresh confirmation rather than treating these reused development inputs as new
+evaluation data. No general-purpose H interval is accepted by this screen.

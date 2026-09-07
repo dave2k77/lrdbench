@@ -1,0 +1,15 @@
+{
+  "cells": 7,
+  "independent_parents": 448,
+  "contamination_conditions": 7,
+  "descendants": 3136,
+  "methods": 21,
+  "point_fits": 75264,
+  "within_record_interval_fits": 0,
+  "completed_parents": 448,
+  "new_parents": 0,
+  "completed_point_fits": 75264,
+  "valid_point_fits": 75264,
+  "complete": true,
+  "fit_seconds": 97.9433523001644
+}

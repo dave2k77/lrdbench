@@ -120,7 +120,15 @@ centering block-percentile intervals can sharply worsen coverage; the centered
 fitted-fGn basic candidate improves that example but still fails on AR controls.
 The [joint parent-summary helper](paired-summary.md) now recomputes error ratios
 on paired resamples, with explicit common support, fixed weights and missing
-parent counts. Integration with verified stress descendants remains next.
+parent counts. The seventh package below completes integration with verified stress descendants.
+
+The [seventh package](shared-stress.md) verifies 3,136 contamination descendants
+from 448 stored clean parents and completes 75,264 point fits across 21 pipelines.
+It connects these results to fixed-weight joint parent summaries and independently
+recomputes all 881,118 summary-draw rows. Centered Higuchi/GHE are offset invariant
+but retain substantial step/trend sensitivity. The package includes exact seed
+exports, resumable provenance, three checked figures and 435 passing tests with
+eight skips. Final protocol/precision choices and fresh confirmation remain next.
 
 Continue validating every retained generator/estimator against mathematical references
 and appropriate inputs, and calibrate uncertainty procedures. Then freeze shared
