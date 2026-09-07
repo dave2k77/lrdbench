@@ -1,0 +1,64 @@
+"""Production-sized chunk boundary fixtures; uses only rehearsal input seeds."""
+from pathlib import Path
+import json
+import sys
+import time
+
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1] / "lrdbench"
+sys.path.insert(0, str(ROOT))
+from benchmark_experiment.remediation import run_confirmation as engine
+from benchmark_experiment.remediation import verify_confirmation_execution as audit
+
+output = Path(sys.argv[1]).resolve()
+frozen = engine.load_lock()
+identity = engine.run_identity(frozen, rehearsal=True)
+identity["mode"] = "executor_boundary_fixture_never_confirmation"
+identity_sha = engine.shared.digest(identity)
+engine.disk_check(output, initial=True)
+output.mkdir(parents=True, exist_ok=True)
+reports = []
+with engine.shared.exclusive_run(output):
+    engine.initialize(output, identity)
+    full = engine.chunk_plan(frozen)
+    specs = [s for s in full if s["cell"]["cell"] == "fGn_0.5_n1024" and s["start"] in {480, 1984}]
+    assert len(specs) == 2
+    registries = (engine.build_default_estimator_registry(), engine.build_default_contamination_registry())
+    factor = engine.shared.covariance_factor(specs[0]["cell"])
+    for spec in specs:
+        folder = output / "chunks" / spec["id"]
+        started = time.perf_counter()
+        if folder.exists():
+            receipt = engine.store.verify(folder, identity_sha, spec["id"])
+        else:
+            receipt = engine.produce_chunk(output, spec, frozen, identity, registries, factor)
+        expected_parents = spec["stop"] - spec["start"]
+        selected = max(0, min(spec["stop"], 500) - spec["start"])
+        assert receipt["counts"]["parents"] == expected_parents
+        assert receipt["counts"]["descendants"] == selected * 23
+        assert receipt["counts"]["point_fits"] == (expected_parents + selected * 23) * 21
+        assert receipt["counts"]["interval_rows"] == selected * 16
+        metadata = engine.store.read_json_gz(folder / "metadata.json.gz")
+        with np.load(folder / "signals.npz", allow_pickle=False) as bundle:
+            signals = bundle["values"]
+        with np.load(folder / "draws.npz", allow_pickle=False) as bundle:
+            draws = bundle["values"]
+        assert signals.shape == (expected_parents + selected * 23, 1024)
+        assert draws.shape == (selected, 9, 1999)
+        assert [entry["repetition"] for entry in metadata["interval_records"]] == list(range(spec["start"], min(spec["stop"], 500)))
+        parents = {m["parent_id"]: values for values, m in zip(signals, metadata["signals"], strict=True) if m["condition"] == "clean"}
+        rows = list(engine.store.read_points(folder))
+        for r in range(spec["start"], spec["stop"]):
+            fits = [p for p in rows if p["repetition"] == r]
+            assert len(fits) == (24 if r < 500 else 1) * 21
+            assert len({(p["condition"], p["method"]) for p in fits}) == len(fits)
+        replay = 0
+        for entry, values in zip(metadata["interval_records"], draws, strict=True):
+            compared, _ = audit.verify_intervals(entry, values, parents[entry["parent_id"]], identity["config"], {k: spec["cell"][k] for k in ("family", "parameter", "n")}, rehearsal=True)
+            replay += compared
+        engine.store.verify(folder, identity_sha, spec["id"])
+        reports.append({"chunk": spec["id"], "seconds_including_audit": time.perf_counter() - started, "counts": receipt["counts"], "signal_shape": list(signals.shape), "draw_shape": list(draws.shape), "scalar_draws_replayed": replay, "receipt_sha256": engine.shared.digest(receipt)})
+        print(json.dumps(reports[-1]), flush=True)
+result = {"status": "production_chunk_boundaries_verified_on_rehearsal_seeds", "confirmation_parents": 0, "fixture_parents": 48, "runtime_sha256": identity["runtime_sha256"], "fixture_identity_sha256": identity_sha, "fixture_source_sha256": engine.shared.file_hash(Path(__file__)), "checks": reports}
+engine.store.atomic_json(output / "boundary_verification.json", result)

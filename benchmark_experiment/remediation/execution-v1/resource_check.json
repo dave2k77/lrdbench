@@ -1,0 +1,20 @@
+{
+  "summary_resource_profile": {
+    "status": "resource_test_artificial_estimator_values_not_confirmation",
+    "parents": 500,
+    "conditions": 24,
+    "methods": 21,
+    "summary_rows": 6541,
+    "summary_draw_values": 13075459,
+    "seconds": 6.48802909999722,
+    "peak_tracked_python_numpy_bytes": 231908025,
+    "memory_limit": "Tracked allocations exclude some native library buffers and are not process RSS."
+  },
+  "projected_primary_bytes": 4062341520.0704226,
+  "conservative_uncompressed_summary_bytes": 1983286804,
+  "planning_bytes_2x_plus_10GiB_reserve": 22828674888.140846,
+  "initial_required_free_bytes": 32212254720,
+  "observed_free_bytes": 43899334656,
+  "within_planned_capacity": true,
+  "limit": "A projection including summary arrays; actual free space is rechecked during execution. Abandoned chunks and other applications can consume capacity."
+}
