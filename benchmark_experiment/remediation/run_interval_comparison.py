@@ -7,6 +7,7 @@ import contextlib
 import json
 import math
 import sqlite3
+import sys
 import time
 from pathlib import Path
 
@@ -372,14 +373,16 @@ def export(output, connection, config, index):
     )
 
 
-def run(config, output, *, max_new_records=None):
-    validate(config)
+def run(config, output, *, max_new_records=None, experiment=None):
+    """Checkpoint engine shared by explicitly versioned development experiments."""
+    experiment = experiment or sys.modules[__name__]
+    experiment.validate(config)
     if max_new_records is not None and max_new_records < 1:
         raise ValueError("max-new-records must be positive")
     output.mkdir(parents=True, exist_ok=True)
     identity = shared.run_identity(config, [], config["repetitions"], False)
-    identity["status"] = "development_interval_comparison"
-    for path in (Path(__file__), Path(candidates.__file__)):
+    identity["status"] = config["stage"]
+    for path in (Path(__file__), Path(candidates.__file__), Path(experiment.__file__)):
         identity["source_sha256"][str(path.relative_to(shared.ROOT))] = shared.file_hash(path)
     with shared.exclusive_run(output):
         shared.initialize(output, identity)
@@ -409,9 +412,9 @@ def run(config, output, *, max_new_records=None):
                     if metadata["record_id"] in done:
                         continue
                     if max_new_records is not None and new >= max_new_records:
-                        export(output, connection, config, index)
+                        experiment.export(output, connection, config, index)
                         return {"new_records": new, "completed_records": len(done) + new}
-                    record = fit_record(x, metadata, cell, config)
+                    record = experiment.fit_record(x, metadata, cell, config)
                     with connection:
                         connection.execute(
                             "INSERT INTO records VALUES (?, ?, ?)",
@@ -424,10 +427,10 @@ def run(config, output, *, max_new_records=None):
                     new += 1
                     if (new + len(done)) % 16 == 0:
                         print(
-                            f"Saved {len(done) + new}/{workload(config)['independent_records']} records",
+                            f"Saved {len(done) + new}/{experiment.workload(config)['independent_records']} records",
                             flush=True,
                         )
-            export(output, connection, config, index)
+            experiment.export(output, connection, config, index)
             return {"new_records": new, "completed_records": len(done) + new}
 
 
