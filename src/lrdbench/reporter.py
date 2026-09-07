@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import math
 import os
 import platform
 import sys
@@ -405,7 +406,10 @@ class SimpleHtmlCsvReporter(BaseReporter):
             for r in leaderboards
         ]
         lb_path = tables / "leaderboard.csv"
-        leaderboard_columns = (*_LEADERBOARD_COLUMNS, *(f"metric__{k}" for k in _leaderboard_keys(leaderboards)))
+        leaderboard_columns = (
+            *_LEADERBOARD_COLUMNS,
+            *(f"metric__{k}" for k in _leaderboard_keys(leaderboards)),
+        )
         _write_csv_rows(lb_path, lb_rows, leaderboard_columns)
         _record_artifact(
             artefact_id=f"{run_id}_leaderboard_csv",
@@ -438,7 +442,9 @@ class SimpleHtmlCsvReporter(BaseReporter):
 
         failure_map_path = tables / "failure_map.csv"
         failure_rows = _failure_map_rows(metrics)
-        _write_csv_rows(failure_map_path, failure_rows, _columns_for_rows(failure_rows, _FAILURE_MAP_COLUMNS))
+        _write_csv_rows(
+            failure_map_path, failure_rows, _columns_for_rows(failure_rows, _FAILURE_MAP_COLUMNS)
+        )
         _record_artifact(
             artefact_id=f"{run_id}_failure_map_csv",
             artefact_type="metric_export",
@@ -616,6 +622,7 @@ class SimpleHtmlCsvReporter(BaseReporter):
                     "metric_name": m.metric_name,
                     "value": m.value,
                     "contamination_operator": m.metadata.get("contamination_operator"),
+                    "estimator_name": m.estimator_name,
                 }
                 for m in metrics.per_series
                 if m.record_id is not None
@@ -628,13 +635,27 @@ class SimpleHtmlCsvReporter(BaseReporter):
                 fig_dir = run_dir / "figures"
                 fig_dir.mkdir(parents=True, exist_ok=True)
                 dfp = pd.DataFrame(rows)
-                pivot = dfp.groupby("contamination_operator", as_index=True)["value"].mean()
                 fig_path = fig_dir / "degradation_curve.png"
-                _fig, ax = plt.subplots(figsize=(6, 3.5))
-                pivot.plot(kind="bar", ax=ax, legend=False, color="steelblue")
-                ax.set_xlabel("contamination operator")
-                ax.set_ylabel("mean metric value")
-                ax.set_title("Stress degradation (paired series)")
+                groups = list(dfp.groupby("metric_name", sort=True))
+                _fig, axes = plt.subplots(
+                    len(groups), 1, figsize=(9, 4.5 * len(groups)), squeeze=False
+                )
+                labels = {
+                    "estimate_drift": "Mean absolute paired drift",
+                    "relative_degradation_ratio": "Mean per-record error ratio",
+                }
+                for ax, (metric_name, frame) in zip(axes.flat, groups, strict=True):
+                    pivot = frame.pivot_table(
+                        index="contamination_operator",
+                        columns="estimator_name",
+                        values="value",
+                        aggfunc="mean",
+                    )
+                    pivot.plot(kind="bar", ax=ax)
+                    ax.set_xlabel("Operator (record-weighted; all severities)")
+                    ax.set_ylabel(labels[str(metric_name)])
+                    ax.set_title(f"Stress: {metric_name}")
+                    ax.legend(title="Estimator", fontsize="small")
                 plt.tight_layout()
                 plt.savefig(fig_path, dpi=120)
                 plt.close()
@@ -722,30 +743,55 @@ class SimpleHtmlCsvReporter(BaseReporter):
             rows = [
                 r
                 for r in benchmark_uncertainty_rows
-                if r["value"] is not None and r["ci_low"] is not None and r["ci_high"] is not None
+                if r["value"] is not None
+                and r["ci_low"] is not None
+                and r["ci_high"] is not None
+                and r["uncertainty_type"] == "aggregate_bootstrap"
+                and json.loads(str(r["stratum_json"])).get("level") == "balanced_global"
+                and all(
+                    math.isfinite(float(cast(float | str, r[k])))
+                    for k in ("value", "ci_low", "ci_high")
+                )
+                and float(cast(float | str, r["ci_low"])) <= float(cast(float | str, r["ci_high"]))
             ]
             if rows:
                 plt, _sns = _load_plotting()
                 fig_dir = run_dir / "figures"
                 fig_dir.mkdir(parents=True, exist_ok=True)
-                rows = rows[:30]
-                labels = [f"{r['estimator_name']}:{r['metric_name']}" for r in rows]
-                values = [float(cast(float | str, r["value"])) for r in rows]
-                low = [float(cast(float | str, r["ci_low"])) for r in rows]
-                high = [float(cast(float | str, r["ci_high"])) for r in rows]
-                xerr = [
-                    [max(0.0, v - lo) for v, lo in zip(values, low, strict=True)],
-                    [max(0.0, hi - v) for v, hi in zip(values, high, strict=True)],
-                ]
+                groups_by_key: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+                for row in rows:
+                    meta = json.loads(str(row["metadata_json"]))
+                    key = (
+                        str(row["metric_name"]),
+                        str(meta.get("metric_nominal", "")),
+                        str(row["nominal"]),
+                    )
+                    groups_by_key.setdefault(key, []).append(row)
+                groups = sorted(groups_by_key.items())
                 fig_path = fig_dir / "benchmark_uncertainty_intervals.png"
-                _fig, ax = plt.subplots(figsize=(8, max(3.0, 0.32 * len(rows))))
-                y = list(range(len(rows)))
-                ax.errorbar(values, y, xerr=xerr, fmt="o", color="black", ecolor="steelblue")
-                ax.set_yticks(y)
-                ax.set_yticklabels(labels)
-                ax.invert_yaxis()
-                ax.set_xlabel("Metric value")
-                ax.set_title("Benchmark uncertainty intervals")
+                heights = [max(3.0, 0.32 * len(group)) for _, group in groups]
+                _fig, axes = plt.subplots(
+                    len(groups),
+                    1,
+                    figsize=(9, sum(heights)),
+                    squeeze=False,
+                    gridspec_kw={"height_ratios": heights},
+                )
+                for ax, (key, group) in zip(axes.flat, groups, strict=True):
+                    group.sort(key=lambda r: str(r["estimator_name"]))
+                    values = [float(r["value"]) for r in group]
+                    low = [float(r["ci_low"]) for r in group]
+                    high = [float(r["ci_high"]) for r in group]
+                    y = list(range(len(group)))
+                    # Draw the reported interval exactly, even if it excludes the point.
+                    ax.hlines(y, low, high, color="steelblue")
+                    ax.plot(values, y, "o", color="black")
+                    ax.set_yticks(y)
+                    ax.set_yticklabels([str(r["estimator_name"]) for r in group])
+                    ax.invert_yaxis()
+                    ax.set_xlabel(key[0])
+                    metric_level = f" (metric nominal {key[1]})" if key[1] else ""
+                    ax.set_title(f"{key[0]}{metric_level}: balanced global, CI level {key[2]}")
                 plt.tight_layout()
                 plt.savefig(fig_path, dpi=140)
                 plt.close()

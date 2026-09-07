@@ -133,7 +133,7 @@ class GPHEstimator(BaseEstimator):
                 _log_periodogram_regression_d(record.values, m=m, taper=taper), estimand
             )
             dt = time.perf_counter() - t0
-            if d is None:
+            if d is None or not np.isfinite(d):
                 return EstimateResult(
                     record_id=record.record_id,
                     estimator_name=self._spec.name,
@@ -149,12 +149,14 @@ class GPHEstimator(BaseEstimator):
                     _log_periodogram_regression_d(z, m=m, taper=taper), estimand
                 )
 
+            bootstrap_diagnostics: dict[str, object] = {}
             samples = bootstrap_statistic_distribution(
                 record.values,
                 rng,
                 _gph_stat,
                 n_boot=n_boot,
                 block_len=block_len,
+                diagnostics=bootstrap_diagnostics,
             )
             cis = symmetric_percentile_cis(samples, ci_levels) if samples.size >= 5 else ()
             bstd = float(np.std(samples)) if samples.size >= 2 else None
@@ -163,8 +165,6 @@ class GPHEstimator(BaseEstimator):
                 if abs(a - 0.95) < 1e-9:
                     ci_low, ci_high = lo, hi
                     break
-            if cis and ci_low is None:
-                ci_low, ci_high = cis[-1][1], cis[-1][2]
 
             diag: dict[str, object] = {
                 "ci_method": "circular_block_bootstrap",
@@ -172,6 +172,17 @@ class GPHEstimator(BaseEstimator):
                 "bootstrap_block_len": block_len,
                 "bootstrap_replicates_used": int(samples.size),
                 "bootstrap_point_std": bstd,
+                **bootstrap_diagnostics,
+                "ci_available_levels": tuple(a for a, _, _ in cis),
+                "ci_unavailable_reason": (
+                    "disabled"
+                    if n_boot == 0
+                    else "insufficient_replicates"
+                    if samples.size < 5
+                    else "no_valid_levels"
+                )
+                if not cis
+                else None,
                 "m": m,
                 "taper": taper,
             }
@@ -185,6 +196,7 @@ class GPHEstimator(BaseEstimator):
                 valid=True,
                 estimator_version=self.VERSION,
                 diagnostics=diag,
+                warnings=("bootstrap_draws_discarded",) if samples.size < n_boot else (),
                 bootstrap_cis=cis,
             )
         except Exception as exc:  # noqa: BLE001
@@ -301,9 +313,7 @@ class PeriodogramRegressionEstimator(BaseEstimator):
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _as_target_estimand(
-                _log_periodogram_regression_d(z, m=m, taper=taper), estimand
-            )
+            return _as_target_estimand(_log_periodogram_regression_d(z, m=m, taper=taper), estimand)
 
         return fit_with_block_bootstrap(
             record,
@@ -342,9 +352,7 @@ class PeriodogramBetaEstimator(BaseEstimator):
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _as_target_estimand(
-                _log_periodogram_regression_d(z, m=m, taper=taper), estimand
-            )
+            return _as_target_estimand(_log_periodogram_regression_d(z, m=m, taper=taper), estimand)
 
         return fit_with_block_bootstrap(
             record,

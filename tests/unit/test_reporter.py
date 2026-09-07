@@ -4,10 +4,120 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from lrdbench.enums import BenchmarkMode
 from lrdbench.reporter import SimpleHtmlCsvReporter
 from lrdbench.schema import BenchmarkManifest, EstimatorSpec, MetricBundle, MetricValue, ReportSpec
+
+
+def test_degradation_figure_keeps_metric_units_and_estimators_separate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import matplotlib.pyplot as plt
+
+    manifest = BenchmarkManifest(
+        manifest_id="stress_fig",
+        name="stress",
+        mode=BenchmarkMode.STRESS_TEST,
+        source_spec={"type": "test"},
+    )
+    rows = tuple(
+        MetricValue(
+            run_id="stress_fig",
+            record_id="r",
+            estimator_name=name,
+            metric_name=metric,
+            value=value,
+            metadata={"contamination_operator": "step_change"},
+        )
+        for name, drift, ratio in (("A", 0.1, 10.0), ("Z", 0.3, 30.0))
+        for metric, value in (("estimate_drift", drift), ("relative_degradation_ratio", ratio))
+    )
+    captured: dict[str, list[float]] = {}
+    savefig = plt.savefig
+
+    def capture(*args: object, **kwargs: object) -> None:
+        for ax in plt.gcf().axes:
+            captured[ax.get_ylabel()] = [patch.get_height() for patch in ax.patches]
+        savefig(*args, **kwargs)
+
+    monkeypatch.setattr(plt, "savefig", capture)
+    SimpleHtmlCsvReporter().build(
+        manifest,
+        MetricBundle(per_series=rows, aggregate=()),
+        (),
+        report_spec=ReportSpec(
+            formats=("html", "csv"),
+            leaderboards=(),
+            figure_set=("degradation_curve",),
+            export_root=str(tmp_path),
+        ),
+        run_id="figure",
+    )
+    assert captured == {
+        "Mean absolute paired drift": [0.1, 0.3],
+        "Mean per-record error ratio": [10.0, 30.0],
+    }
+
+
+def test_uncertainty_figure_includes_all_methods_on_separate_metric_axes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import matplotlib.pyplot as plt
+
+    manifest = BenchmarkManifest(
+        manifest_id="uq_fig",
+        name="uq",
+        mode=BenchmarkMode.GROUND_TRUTH,
+        source_spec={"type": "test"},
+    )
+    rows = tuple(
+        MetricValue(
+            run_id="uq_fig",
+            record_id=None,
+            estimator_name=f"method_{i:02d}",
+            metric_name=metric,
+            value=point,
+            stratum={"level": "balanced_global"},
+            metadata={
+                "uncertainty_type": "aggregate_bootstrap",
+                "nominal": 0.95,
+                "ci_low": lo,
+                "ci_high": hi,
+            },
+        )
+        for i in range(35)
+        for metric, point, lo, hi in (("mae", 0.1, 0.2, 0.3), ("coverage", 0.9, 0.8, 1.0))
+    )
+    captured: dict[str, tuple[list[str], list[float]]] = {}
+    savefig = plt.savefig
+
+    def capture(*args: object, **kwargs: object) -> None:
+        for ax in plt.gcf().axes:
+            first_segment = ax.collections[0].get_segments()[0]
+            captured[ax.get_xlabel()] = (
+                [t.get_text() for t in ax.get_yticklabels()],
+                list(first_segment[:, 0]),
+            )
+        savefig(*args, **kwargs)
+
+    monkeypatch.setattr(plt, "savefig", capture)
+    SimpleHtmlCsvReporter().build(
+        manifest,
+        MetricBundle(per_series=(), aggregate=(), uncertainty=rows),
+        (),
+        report_spec=ReportSpec(
+            formats=("html", "csv"),
+            leaderboards=(),
+            figure_set=("benchmark_uncertainty_intervals",),
+            export_root=str(tmp_path),
+        ),
+        run_id="figure",
+    )
+    assert set(captured) == {"mae", "coverage"}
+    assert captured["mae"][0] == captured["coverage"][0] == [f"method_{i:02d}" for i in range(35)]
+    assert captured["mae"][1] == [0.2, 0.3]  # Interval must not expand to contain point 0.1.
 
 
 def test_reporter_per_stratum_metrics_includes_all_aggregate_rows(tmp_path: Path) -> None:
@@ -347,7 +457,12 @@ def test_reporter_writes_publication_latex_tables(tmp_path: Path) -> None:
                 metric_name="mae",
                 value=0.2,
                 stratum={"level": "balanced_global"},
-                metadata={"ci_low": 0.1, "ci_high": 0.3},
+                metadata={
+                    "uncertainty_type": "aggregate_bootstrap",
+                    "nominal": 0.95,
+                    "ci_low": 0.1,
+                    "ci_high": 0.3,
+                },
             ),
         ),
     )
@@ -374,9 +489,7 @@ def test_reporter_writes_publication_latex_tables(tmp_path: Path) -> None:
     }
     assert expected.issubset({Path(p).name for p in bundle.latex_table_paths})
     disagreement = (
-        Path(bundle.summary_table_path or "").parent.parent
-        / "latex"
-        / "disagreement_summary.tex"
+        Path(bundle.summary_table_path or "").parent.parent / "latex" / "disagreement_summary.tex"
     )
     assert "pairwise\\_estimator\\_disagreement" in disagreement.read_text(encoding="utf-8")
 
@@ -427,7 +540,12 @@ def test_reporter_writes_opt_in_publication_figures(tmp_path: Path) -> None:
                 metric_name="mae",
                 value=0.2,
                 stratum={"level": "balanced_global"},
-                metadata={"ci_low": 0.1, "ci_high": 0.3},
+                metadata={
+                    "uncertainty_type": "aggregate_bootstrap",
+                    "nominal": 0.95,
+                    "ci_low": 0.1,
+                    "ci_high": 0.3,
+                },
             ),
         ),
     )

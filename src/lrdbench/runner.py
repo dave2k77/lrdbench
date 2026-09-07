@@ -41,7 +41,8 @@ from lrdbench.schema import (
 
 
 def _stable_seed(global_seed: int, *parts: object) -> int:
-    h = hashlib.sha256(repr(parts).encode("utf-8")).digest()
+    # Version 2 includes the user-specified seed; v1 accidentally ignored it.
+    h = hashlib.sha256(repr((global_seed, *parts)).encode("utf-8")).digest()
     return int.from_bytes(h[:4], "big") % (2**31 - 1)
 
 
@@ -50,12 +51,16 @@ def _record_id(manifest_id: str, family: str, params: dict[str, Any], rep: int) 
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
 
 
-def _contam_record_id(manifest_id: str, clean_id: str, op_name: str, op_params: dict[str, Any]) -> str:
+def _contam_record_id(
+    manifest_id: str, clean_id: str, op_name: str, op_params: dict[str, Any]
+) -> str:
     key = f"{manifest_id}|{clean_id}|{op_name}|{sorted(op_params.items())}"
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
 
 
-def _preproc_record_id(manifest_id: str, raw_id: str, op_name: str, op_params: dict[str, Any]) -> str:
+def _preproc_record_id(
+    manifest_id: str, raw_id: str, op_name: str, op_params: dict[str, Any]
+) -> str:
     key = f"{manifest_id}|{raw_id}|preproc|{op_name}|{sorted(op_params.items())}"
     return hashlib.sha1(key.encode("utf-8")).hexdigest()[:20]
 
@@ -114,7 +119,9 @@ def _expand_generator_grid(source: dict[str, Any]) -> list[tuple[str, dict[str, 
     return out
 
 
-def _expand_contamination_grid(contamination: Mapping[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+def _expand_contamination_grid(
+    contamination: Mapping[str, Any],
+) -> list[tuple[str, dict[str, Any]]]:
     out: list[tuple[str, dict[str, Any]]] = []
     for block in contamination.get("operators", []):
         name = str(block["name"])
@@ -129,7 +136,9 @@ def _expand_contamination_grid(contamination: Mapping[str, Any]) -> list[tuple[s
     return out
 
 
-def _expand_preprocessing_grid(preprocessing: Mapping[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+def _expand_preprocessing_grid(
+    preprocessing: Mapping[str, Any],
+) -> list[tuple[str, dict[str, Any]]]:
     out: list[tuple[str, dict[str, Any]]] = []
     for block in preprocessing.get("operators", []):
         name = str(block["name"])

@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### Benchmark foundation repairs
+- Equal component values receive average ranks; missing and nonfinite values rank
+  last in both directions. Composite ties apply the declared primary/named metric,
+  and unresolved ties share competition ranks. Estimator names affect display only.
+- Preserve legacy `level_shift` as a constant offset; add explicit `constant_offset`
+  and `step_change` operators. Zero outlier rate now leaves the signal unchanged.
+- Bootstrap diagnostics record attempted, retained, invalid and failed draws, with
+  failure categories. Replicate failures preserve valid point estimates; zero
+  replicates disables resampling. Add `ci_availability` at each requested level.
+- Default CI endpoints now represent 95% only; other levels remain explicitly
+  labelled. Evaluation rejects unavailable, invalid, reversed and nonfinite CIs.
+- Seed derivation now includes `global_seed`, previously ignored. Estimate cache
+  keys include the record seed and a shared-fitting version to avoid stale results.
+- Stress figures separate drift and error-ratio panels and estimator values.
+  Global benchmark uncertainty figures separate metrics and levels, retain the full
+  method roster and draw the actual interval endpoints.
+- These changes require new research outputs. Historical exports are preserved;
+  mathematical estimator validation and uncertainty calibration remain pending.
+
 ### Estimand triangle: spectral exponent and timescale
 - Estimands: added `spectral_exponent_beta` (`β = 2H − 1`, `H = (β + 1) / 2`) and `timescale_tau`
   (autocorrelation-decay time constant, in samples).
