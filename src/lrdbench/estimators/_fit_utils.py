@@ -19,6 +19,7 @@ def fit_with_block_bootstrap(
     seed_offset: int = 0,
     bootstrap_values: np.ndarray | None = None,
     bootstrap_statistic: Callable[[np.ndarray], float | None] | None = None,
+    unbounded_hurst: bool = False,
 ) -> EstimateResult:
     """Run point estimate plus optional circular block-bootstrap CIs (RS/GPH pattern)."""
     t0 = time.perf_counter()
@@ -83,6 +84,20 @@ def fit_with_block_bootstrap(
             if not cis
             else None,
         }
+        warnings: tuple[str, ...] = ("bootstrap_draws_discarded",) if samples.size < n_boot else ()
+        if unbounded_hurst:
+            outside = not 0.0 < point < 1.0
+            diag.update(
+                point_clipped=False,
+                outside_nominal_hurst_range=outside,
+                bootstrap_points_outside_nominal_hurst_range=int(
+                    np.count_nonzero((samples <= 0.0) | (samples >= 1.0))
+                ),
+                input_interpretation="stationary_increment_scaling_proxy",
+                method_parameters=params,
+            )
+            if outside:
+                warnings += ("estimate_outside_nominal_hurst_range",)
         return EstimateResult(
             record_id=record.record_id,
             estimator_name=spec.name,
@@ -93,7 +108,7 @@ def fit_with_block_bootstrap(
             valid=True,
             estimator_version=estimator_version,
             diagnostics=diag,
-            warnings=("bootstrap_draws_discarded",) if samples.size < n_boot else (),
+            warnings=warnings,
             bootstrap_cis=cis,
         )
     except Exception as exc:  # noqa: BLE001

@@ -26,9 +26,11 @@ def _collect_detail_scales(
     slope of log2-variance against level corresponds to long-range dependence.
     """
     x = np.asarray(x, dtype=float)
-    if x.size < 128:
+    if x.ndim != 1 or x.size < 128 or not np.isfinite(x).all():
         return None
     x = x - np.mean(x)
+    if not np.any(x):
+        return None
     max_level = pywt.dwt_max_level(x.size, pywt.Wavelet(wavelet).dec_len)
     if max_level < 3:
         return None
@@ -93,7 +95,7 @@ def _hurst_from_log2_slope(slope: float | None) -> float | None:
     # the slope of log2-variance versus DWT level equals (2H-1), so
     # H = (slope + 1) / 2.
     h = 0.5 * (slope + 1.0)
-    return float(np.clip(h, 1e-4, 1.0 - 1e-4))
+    return float(h)
 
 
 def _wavelet_whittle_h(
@@ -116,10 +118,11 @@ def _wavelet_whittle_h(
         # Detail variance scales as 2^{level (2H-1)} for fGn-type signals.
         beta = 2.0 * h - 1.0
         mu = 2.0 ** (beta * j_arr)
-        den = float(np.sum(n_arr * mu))
+        den = float(np.sum(n_arr))
         if den <= 0.0 or not np.isfinite(den):
             return 1e12
-        c_scale = float(np.sum(n_arr * v_arr) / den)
+        # Profile the stated likelihood: c = sum(n_j * v_j / mu_j) / sum(n_j).
+        c_scale = float(np.sum(n_arr * v_arr / mu) / den)
         if c_scale <= 0.0 or not np.isfinite(c_scale):
             return 1e12
         pred = c_scale * mu
@@ -166,7 +169,7 @@ def _wavelet_jensen_h(
 class WaveletAbryVeitchEstimator(BaseEstimator):
     """Abry–Veitch-type log-scale regression on wavelet detail variances (Hurst proxy)."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -195,13 +198,14 @@ class WaveletAbryVeitchEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_wavelet_av",
             seed_offset=401,
+            unbounded_hurst=True,
         )
 
 
 class WaveletBardetEstimator(BaseEstimator):
     """Weighted log-scale regression (Bardet-type wavelet Hurst proxy)."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -230,13 +234,14 @@ class WaveletBardetEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_wavelet_bardet",
             seed_offset=503,
+            unbounded_hurst=True,
         )
 
 
 class WaveletOLSEstimator(BaseEstimator):
     """Plain OLS on log2 wavelet detail variances vs scale index (log-scale regression)."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -265,13 +270,14 @@ class WaveletOLSEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_wavelet_ols",
             seed_offset=607,
+            unbounded_hurst=True,
         )
 
 
 class WaveletJensenEstimator(BaseEstimator):
     """Two-band wavelet slope extrapolation (Jensen-style bias reduction)."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -306,7 +312,7 @@ class WaveletJensenEstimator(BaseEstimator):
 class WaveletWhittleEstimator(BaseEstimator):
     """Wavelet-domain Gaussian Whittle-type fit to detail variances across scales."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec

@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Remaining classical-method and generator audit
+- Remove silent H clipping from temporal estimators and wavelet slope conversion.
+  Temporal and primary wavelet regressions expose out-of-range points and resamples.
+  Undefined constant/nonfinite inputs no longer produce valid Whittle/wavelet fits.
+- Record bounded spectral optimizer hits and identify the legacy
+  ModifiedLocalWhittle implementation as ordinary local Whittle. Make Whittle's
+  scale normalization internally consistent (the old discrepancy was constant in d).
+- Correct the profiled scale of the experimental WaveletWhittle likelihood;
+  verify against joint numerical optimization of H and scale. This method is
+  outside the paper's retained roster and remains an experimental approximation.
+- Add `ARFIMA` parameter `method: cholesky` for its exact stationary Gaussian
+  covariance; preserve the default `truncated_ma` for historical reproduction.
+  Record algorithm, truncation and scale interpretation; declare existing fGn/fBm
+  covariance jitter and reject invalid H/sigma inputs. Separate simulation methods
+  in metric strata.
+- Add independent projection, moving-window, spectral-integral and covariance-map
+  checks, plus a shared-input development pilot across all 19 paper configurations.
+- Resolve the four baseline typing findings and the new diagnostics annotation;
+  type checking passes with the installed Python 3.14 target.
+
 ### Estimator equations and explicit stress metrics
 - Correct the GPH slope-to-d conversion for the squared-sine regressor. This also
   changes Periodogram, PeriodogramBeta and the GPH-based threshold discriminator.

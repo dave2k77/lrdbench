@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, SupportsFloat, cast
 
 from lrdbench.enums import BenchmarkMode
 from lrdbench.schema import (
@@ -318,7 +318,7 @@ def _validate_optional_positive_float(value: object, *, field: str, index: int) 
             f"observational source.series[{index}].{field} must be positive"
         )
     try:
-        numeric = float(value)
+        numeric = float(cast("str | SupportsFloat", value))
     except (TypeError, ValueError) as exc:
         raise ManifestValidationError(
             f"observational source.series[{index}].{field} must be positive"

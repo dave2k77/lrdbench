@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 
@@ -27,7 +27,7 @@ def _rolling_mean_std(
     else:
         pad_left = window - 1
         pad_right = 0
-    mode = "reflect" if x.size > 1 else "edge"
+    mode: Literal["reflect", "edge"] = "reflect" if x.size > 1 else "edge"
     xp = np.pad(np.asarray(x, dtype=float), (pad_left, pad_right), mode=mode)
     c1 = np.concatenate(([0.0], np.cumsum(xp)))
     c2 = np.concatenate(([0.0], np.cumsum(xp * xp)))
