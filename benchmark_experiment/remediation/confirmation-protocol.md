@@ -267,3 +267,5 @@ ZIP, and the focused/regression JUnit files. The compact repository archive is
 not the full raw rehearsal bundle. Use its source hashes and snapshots when
 reproducing the historical comparison; ordinary Git checkout normalization can
 change inherited CRLF source bytes even when Python behaviour is unchanged.
+
+Subsequent execution release: [package nine](confirmation-execution.md) now supplies and validates the executor, declared analyses, recovery and runtime lock described above. The scientific design hash is unchanged.

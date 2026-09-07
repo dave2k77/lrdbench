@@ -39,3 +39,4 @@ benchmark_experiment/remediation/interval-pilot/*.json -text whitespace=blank-at
 benchmark_experiment/remediation/mean-pilot/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 benchmark_experiment/remediation/stress-pilot/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 benchmark_experiment/remediation/protocol-v1/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+benchmark_experiment/remediation/execution-v1/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

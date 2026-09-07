@@ -137,13 +137,18 @@ design lock, verifies numerical endpoint stability and introduces equation-match
 batched bootstrap calculations. The projected compute cost is 7.35 hours, with
 a 14.70-hour planning allowance; storage round trips also pass. Verification totals
 465 tests passing and eight skips. No confirmation signals have been generated.
-Release of the resumable confirmation executor and final runtime lock is next.
+The ninth package below completes the executor and runtime lock.
 
-Continue validating every retained generator/estimator against mathematical references
-and appropriate inputs, and calibrate uncertainty procedures. Then freeze shared
-clean parents, null/alternative populations, scales, repetitions and paired or
-clustered summary resampling. Run the revised benchmark only after these gates,
-and regenerate every paper table, figure and claim from its canonical exports.
+
+The [ninth package](confirmation-execution.md) validates bounded production
+chunks, interruption recovery, paired mean-removal/drift/coverage contrasts and
+canonical summaries. The representative rehearsal retains 14,910 point fits and
+320 interval rows; independent reconstruction checks about 196.5 million aligned
+summary entries. Full-sized subset-boundary fixtures also pass. Verification
+totals 490 passing tests and eight skips. The fixed scientific design is unchanged.
+The fresh run uses this execution release, followed by a full results audit and
+paper rebuilding; the linked local job record tracks computation separately.
+
 
 Correctly implemented methods may perform poorly. Scientific eligibility depends
 on implementing the declared procedure, not on obtaining a favourable ranking.

@@ -1,0 +1,19 @@
+{
+  "mode": "executor_rehearsal_never_confirmation",
+  "run_identity_sha256": "ae1facf94938fbf2bc89558916e44c7e6e0105e98a69dc1570ddc4bde6bfb744",
+  "complete": true,
+  "planned_chunks": 33,
+  "completed_chunks": 33,
+  "counts": {
+    "parents": 66,
+    "descendants": 644,
+    "point_fits": 14910,
+    "valid_point_fits": 14910,
+    "interval_parents": 20,
+    "interval_rows": 320,
+    "physical_bootstrap_records": 79960,
+    "statistic_attempts": 359820
+  },
+  "scientific_design_sha256": "b5b9399d284e3fae8135050aeac5c8bc0a02ab36b4f0a6d15041f55a497681bb",
+  "confirmation_parents": 0
+}
