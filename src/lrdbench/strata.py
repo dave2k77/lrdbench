@@ -9,6 +9,7 @@ from lrdbench.schema import SeriesRecord
 def stratum_from_record(record: SeriesRecord) -> Mapping[str, Any]:
     keys = (
         "process_family",
+        "simulation_method",
         "n",
         "H",
         "d",

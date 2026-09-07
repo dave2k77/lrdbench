@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 
 import numpy as np
 from scipy.optimize import minimize_scalar
@@ -233,7 +234,7 @@ def _whittle_profile_negloglik(d: float, lam: np.ndarray, i_per: np.ndarray) -> 
     sig2 = float(np.mean(i_per / h))
     if sig2 <= 0.0 or not np.isfinite(sig2):
         return 1e12
-    f = (sig2 / (2.0 * np.pi)) * h
+    f = sig2 * h  # i_per uses |FFT|²/n, so its profiled scale has no 2*pi divisor.
     return float(np.mean(np.log(f) + i_per / f))
 
 
@@ -243,7 +244,13 @@ def _whittle_arfima_d(x: np.ndarray, *, m: int | None = None) -> float | None:
     n = x.size
     if n < 128:
         return None
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     x = x - np.mean(x)
+    amplitude = float(np.max(np.abs(x)))
+    if amplitude == 0.0:
+        return None
+    x = x / amplitude
     if m is None:
         m = max(8, n // 8)
     m = min(m, n // 2 - 1)
@@ -281,7 +288,13 @@ def _modified_local_whittle_d(x: np.ndarray, *, m: int | None = None) -> float |
     n = x.size
     if n < 256:
         return None
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     x = x - np.mean(x)
+    amplitude = float(np.max(np.abs(x)))
+    if amplitude == 0.0:
+        return None
+    x = x / amplitude
     if m is None:
         m = max(8, int(n**0.55))
     m = min(m, n // 3)
@@ -376,7 +389,7 @@ class PeriodogramBetaEstimator(BaseEstimator):
 class WhittleMLEEstimator(BaseEstimator):
     """Gaussian Whittle likelihood for ARFIMA(0,d,0) spectral density."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -393,7 +406,7 @@ class WhittleMLEEstimator(BaseEstimator):
             m = int(params["m"]) if params.get("m") is not None else None
             return _as_target_estimand(_whittle_arfima_d(z, m=m), estimand)
 
-        return fit_with_block_bootstrap(
+        result = fit_with_block_bootstrap(
             record,
             self._spec,
             statistic=stat,
@@ -401,12 +414,16 @@ class WhittleMLEEstimator(BaseEstimator):
             failure_reason="insufficient_signal_for_whittle",
             seed_offset=203,
         )
+        return _bounded_memory_diagnostics(result, estimand, "arfima_0_d_0_whittle")
 
 
 class ModifiedLocalWhittleEstimator(BaseEstimator):
-    """Modified (Gaussian) local Whittle estimator of long-memory parameter d."""
+    """Ordinary Gaussian local Whittle, retaining the legacy registry name.
 
-    VERSION = "0.2.0"
+    No taper, differencing or nonstationary correction is implemented.
+    """
+
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -423,7 +440,7 @@ class ModifiedLocalWhittleEstimator(BaseEstimator):
             m = int(params["m"]) if params.get("m") is not None else None
             return _as_target_estimand(_modified_local_whittle_d(z, m=m), estimand)
 
-        return fit_with_block_bootstrap(
+        result = fit_with_block_bootstrap(
             record,
             self._spec,
             statistic=stat,
@@ -431,3 +448,28 @@ class ModifiedLocalWhittleEstimator(BaseEstimator):
             failure_reason="insufficient_signal_for_mlw",
             seed_offset=307,
         )
+        return _bounded_memory_diagnostics(result, estimand, "ordinary_local_whittle")
+
+
+def _bounded_memory_diagnostics(
+    result: EstimateResult, estimand: str, algorithm: str
+) -> EstimateResult:
+    native = result.point
+    if native is not None:
+        if estimand == "hurst_scaling_proxy":
+            native -= 0.5
+        elif estimand == "spectral_exponent_beta":
+            native /= 2.0
+    boundary = native is not None and min(abs(native + 0.49), abs(native - 0.49)) <= 1e-4
+    return replace(
+        result,
+        diagnostics={
+            **result.diagnostics,
+            "algorithm": algorithm,
+            "native_d": native,
+            "optimization_bounds_d": (-0.49, 0.49),
+            "optimization_boundary_hit": boundary,
+            "point_clipped": False,
+        },
+        warnings=result.warnings + (("optimization_boundary_hit",) if boundary else ()),
+    )

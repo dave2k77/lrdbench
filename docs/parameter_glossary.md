@@ -30,6 +30,12 @@ against a record that carries a matching truth (`raw/truths.csv`).
 
 ## Spectral estimators (GPH, Periodogram, WhittleMLE, ModifiedLocalWhittle)
 
+`ModifiedLocalWhittle` is the historical registry name for an ordinary Gaussian
+local Whittle objective. It has no implemented nonstationary correction. Both it
+and `WhittleMLE` optimize d within [-0.49, 0.49]; boundary hits are diagnostic
+warnings. WhittleMLE fits an ARFIMA(0,d,0) spectral shape on the selected frequency
+band, not an exact time-domain likelihood or the exact fGn spectrum.
+
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `n_bootstrap` | int | 200 | Number of bootstrap replicates for CIs. |
@@ -64,6 +70,17 @@ Higuchi and GHE report unclipped slopes, with out-of-range diagnostics. GPH,
 Periodogram and PeriodogramBeta also retain unconstrained regression estimates.
 The ranges in the estimand table describe model parameters, not enforced estimator
 bounds. These changes intentionally alter results and require new output bundles.
+
+RS, DFA, DMA, AbsoluteMoment, Variance, VarianceResidual and the WaveletOLS,
+AbryVeitch and Bardet regressions also retain unconstrained estimates. Their
+stationary-increment H interpretation requires appropriate inputs. In particular,
+DFA integrates its input internally; its raw fluctuation slope on an fBm path is
+not the same target as H on fGn increments. Out-of-range points and bootstrap draws
+are counted, not silently capped or relabelled as successful memory recovery.
+
+The RS `use_anis_lloyd_correction` option divides by the Gaussian white-noise
+expectation before regression and adds 0.5. This is an implementation-specific
+normalization using that expectation, not a general unbiased estimator.
 
 ## Wavelet estimators (WaveletOLS, WaveletAbryVeitch, WaveletBardet, WaveletJensen, WaveletWhittle)
 

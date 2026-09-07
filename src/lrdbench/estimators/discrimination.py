@@ -138,7 +138,7 @@ class ThresholdHurstDiscriminator(BaseEstimator):
     scale (default 0.05). Score = ``sigmoid((H - h0) / width)`` in ``[0, 1]``.
     """
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -189,7 +189,7 @@ def _lowfreq_spectral_score(
 class LowFreqSpectralDiscriminator(BaseEstimator):
     """LRD discriminator from the low-frequency memory parameter (local Whittle)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -317,7 +317,7 @@ def _ic_model_select_score(
 class ICModelSelectDiscriminator(BaseEstimator):
     """LRD discriminator from BIC model comparison (ARFIMA(0,d,0) vs AR(p))."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec

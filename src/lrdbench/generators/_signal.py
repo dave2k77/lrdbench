@@ -3,9 +3,21 @@ from __future__ import annotations
 import numpy as np
 from numpy.linalg import cholesky
 from scipy.signal import fftconvolve, lfilter
+from scipy.special import gammaln
+
+GAUSSIAN_COVARIANCE_JITTER = 1e-10
+
+
+def _validate_gaussian_parameters(n: int, sigma: float) -> None:
+    if n < 2:
+        raise ValueError("n must be at least 2")
+    if not np.isfinite(sigma) or sigma <= 0.0:
+        raise ValueError("sigma must be finite and positive")
 
 
 def fgn_autocovariance(hurst: float, n: int) -> np.ndarray:
+    if not 0.0 < hurst < 1.0:
+        raise ValueError("H must lie in (0, 1)")
     k = np.arange(n, dtype=np.float64)
     out: np.ndarray = 0.5 * (
         np.abs(k + 1.0) ** (2.0 * hurst)
@@ -22,7 +34,8 @@ def simulate_fgn(
     *,
     sigma: float = 1.0,
 ) -> np.ndarray:
-    """Exact Gaussian fGn via Cholesky of Toeplitz covariance (Phase 1; moderate n)."""
+    """Gaussian fGn via Toeplitz Cholesky, with declared 1e-10 diagonal jitter."""
+    _validate_gaussian_parameters(n, sigma)
     if n < 2:
         raise ValueError("n must be at least 2 for fGn")
     g = fgn_autocovariance(hurst, n)
@@ -31,7 +44,7 @@ def simulate_fgn(
     j = np.arange(n)
     cov = g[np.abs(i[:, None] - j[None, :])]
     # numerical PD guard
-    cov = cov + np.eye(n) * 1e-10
+    cov = cov + np.eye(n) * GAUSSIAN_COVARIANCE_JITTER
     chol = cholesky(cov)
     z = rng.standard_normal(n)
     x = chol @ z
@@ -46,13 +59,16 @@ def simulate_fbm(
     sigma: float = 1.0,
 ) -> np.ndarray:
     """fBm samples B(0),...,B(n-1) with B(0)=0 via covariance of fBm on integer times."""
+    _validate_gaussian_parameters(n, sigma)
+    if not 0.0 < hurst < 1.0:
+        raise ValueError("H must lie in (0, 1)")
     if n < 2:
         raise ValueError("n must be at least 2 for fBm")
     idx = np.arange(1, n, dtype=float)
     m = idx.size
     ii, jj = np.meshgrid(idx, idx, indexing="ij")
     cov = 0.5 * (ii ** (2 * hurst) + jj ** (2 * hurst) - np.abs(ii - jj) ** (2 * hurst))
-    cov = cov + np.eye(m) * 1e-10
+    cov = cov + np.eye(m) * GAUSSIAN_COVARIANCE_JITTER
     chol = cholesky(cov)
     z = rng.standard_normal(m)
     path_tail = float(sigma) * (chol @ z)
@@ -78,10 +94,23 @@ def simulate_arfima_zero_d_zero(
     rng: np.random.Generator,
     *,
     sigma: float = 1.0,
+    method: str = "truncated_ma",
 ) -> np.ndarray:
-    """ARFIMA(0,d,0) via truncated fractional integration of Gaussian noise."""
+    """ARFIMA(0,d,0), with legacy finite-MA or exact Gaussian covariance sampling.
+
+    ``sigma`` is the innovation standard deviation. ``truncated_ma`` preserves
+    the historical filter; ``cholesky`` samples the stationary finite-dimensional
+    distribution without truncating the infinite filter. The latter costs O(n³).
+    """
+    _validate_gaussian_parameters(n, sigma)
     if not (-0.5 < d < 0.5):
         raise ValueError("d must lie in (-0.5, 0.5) for stationary ARFIMA(0,d,0)")
+    if method == "cholesky":
+        g = arfima_autocovariance(d, n)
+        lags = np.abs(np.arange(n)[:, None] - np.arange(n)[None, :])
+        return np.asarray(float(sigma) * (cholesky(g[lags]) @ rng.standard_normal(n)))
+    if method != "truncated_ma":
+        raise ValueError("ARFIMA method must be truncated_ma or cholesky")
     trunc = min(10 * n, 50000)
     psi = arfima_ma_coefficients(d, trunc)
     eps = rng.standard_normal(n + trunc)
@@ -89,7 +118,22 @@ def simulate_arfima_zero_d_zero(
     # method. The truncated MA filter can have ~50k taps, so the direct
     # ``np.convolve`` dominates generation cost for the larger benchmark suites.
     x = fftconvolve(eps, psi, mode="valid")[:n]
-    return float(sigma) * x
+    return np.asarray(float(sigma) * x)
+
+
+def arfima_autocovariance(d: float, n: int) -> np.ndarray:
+    """Stationary ARFIMA(0,d,0) covariance for unit innovation variance.
+
+    gamma(0) = Gamma(1-2d)/Gamma(1-d)² and
+    gamma(k)/gamma(k-1) = (k-1+d)/(k-d), including negative d and d=0.
+    """
+    if not -0.5 < d < 0.5 or n < 1:
+        raise ValueError("require -0.5 < d < 0.5 and n >= 1")
+    covariance = np.empty(n, dtype=float)
+    covariance[0] = np.exp(gammaln(1 - 2 * d) - 2 * gammaln(1 - d))
+    for k in range(1, n):
+        covariance[k] = covariance[k - 1] * (k - 1 + d) / (k - d)
+    return covariance
 
 
 def simulate_mrw(
@@ -214,7 +258,7 @@ def simulate_multitimescale(
         ratios = np.arange(n_components, dtype=float) / (n_components - 1)
         taus = float(tau_min) * (float(tau_max) / float(tau_min)) ** ratios
     rhos = np.exp(-1.0 / taus)
-    weights = taus**float(beta_target)
+    weights = taus ** float(beta_target)
     weights = weights / float(np.sum(weights))
 
     if burnin is None:

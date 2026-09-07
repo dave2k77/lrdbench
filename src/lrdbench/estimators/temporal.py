@@ -27,13 +27,15 @@ def _anis_lloyd_expected_rs(n: int) -> float:
 
 def _rs_value(x: np.ndarray) -> float | None:
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     if x.size < 2:
         return None
     x = x - np.mean(x)
     y = np.cumsum(x)
     r = float(np.max(y) - np.min(y))
     s = float(np.std(x, ddof=0))
-    if s < 1e-12 or r < 1e-12:
+    if s <= 0.0 or r <= 0.0:
         return None
     return r / s
 
@@ -82,6 +84,8 @@ def _rs_hurst_proxy(
         scale_ratio: Geometric spacing factor between candidate subseries lengths.
     """
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     n = x.size
     if n < 64:
         return None
@@ -113,7 +117,7 @@ def _rs_hurst_proxy(
         return None
     if use_correction:
         slope += 0.5
-    return float(np.clip(slope, 1e-4, 1.0 - 1e-4))
+    return float(slope)
 
 
 class RSEstimator(BaseEstimator):
@@ -133,7 +137,7 @@ class RSEstimator(BaseEstimator):
       baseline back to the fitted slope.
     """
 
-    VERSION = "0.3.0"
+    VERSION = "0.4.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -225,6 +229,12 @@ class RSEstimator(BaseEstimator):
                 "max_scale": max_scale,
                 "scale_ratio": scale_ratio,
                 "use_anis_lloyd_correction": use_corr,
+                "point_clipped": False,
+                "outside_nominal_hurst_range": not 0.0 < h < 1.0,
+                "bootstrap_points_outside_nominal_hurst_range": int(
+                    np.count_nonzero((samples <= 0.0) | (samples >= 1.0))
+                ),
+                "input_interpretation": "stationary_increment_scaling_proxy",
             }
             return EstimateResult(
                 record_id=record.record_id,
@@ -236,7 +246,8 @@ class RSEstimator(BaseEstimator):
                 valid=True,
                 estimator_version=self.VERSION,
                 diagnostics=diag,
-                warnings=("bootstrap_draws_discarded",) if samples.size < n_boot else (),
+                warnings=(("bootstrap_draws_discarded",) if samples.size < n_boot else ())
+                + (("estimate_outside_nominal_hurst_range",) if not 0.0 < h < 1.0 else ()),
                 bootstrap_cis=cis,
             )
         except Exception as exc:  # noqa: BLE001
@@ -261,6 +272,8 @@ def _dfa_hurst(
 ) -> float | None:
     """DFA scaling exponent as Hurst proxy (profile DFA on mean-centred series)."""
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     n = x.size
     if n < 64:
         return None
@@ -319,13 +332,13 @@ def _dfa_hurst(
     alpha = float(np.sum((xs - xm) * (ys - ym)) / denom)
     if not np.isfinite(alpha):
         return None
-    return float(np.clip(alpha, 1e-4, 1.0 - 1e-4))
+    return float(alpha)
 
 
 class DFAEstimator(BaseEstimator):
     """Detrended fluctuation analysis (DFA) scaling exponent as a Hurst proxy."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -352,6 +365,7 @@ class DFAEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_dfa",
             seed_offset=0,
+            unbounded_hurst=True,
         )
 
 
@@ -363,6 +377,8 @@ def _dma_hurst(
 ) -> float | None:
     """Detrended moving average (DMA) scaling exponent as Hurst proxy."""
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     n = x.size
     if n < 64:
         return None
@@ -404,13 +420,13 @@ def _dma_hurst(
     alpha = float(np.sum((xs - xm) * (ys - ym)) / denom)
     if not np.isfinite(alpha):
         return None
-    return float(np.clip(alpha, 1e-4, 1.0 - 1e-4))
+    return float(alpha)
 
 
 class DMAEstimator(BaseEstimator):
     """Detrended moving-average fluctuation scaling (Hurst proxy)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -436,6 +452,7 @@ class DMAEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_dma",
             seed_offset=17,
+            unbounded_hurst=True,
         )
 
 
@@ -495,6 +512,8 @@ def _absolute_moment_hurst(
 ) -> float | None:
     """Aggregated absolute first moment slope mapped to a Hurst proxy."""
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     x = x - np.mean(x)
     log_m: list[float] = []
     log_moment: list[float] = []
@@ -512,7 +531,7 @@ def _absolute_moment_hurst(
     slope = _ols_slope(log_m, log_moment)
     if slope is None:
         return None
-    return float(np.clip(slope + 1.0, 1e-4, 1.0 - 1e-4))
+    return float(slope + 1.0)
 
 
 def _variance_aggregation_hurst(
@@ -524,6 +543,8 @@ def _variance_aggregation_hurst(
 ) -> float | None:
     """Aggregated-series variance slope mapped to a Hurst proxy."""
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     x = x - np.mean(x)
     log_m: list[float] = []
     log_var: list[float] = []
@@ -541,7 +562,7 @@ def _variance_aggregation_hurst(
     slope = _ols_slope(log_m, log_var)
     if slope is None:
         return None
-    return float(np.clip(0.5 * slope + 1.0, 1e-4, 1.0 - 1e-4))
+    return float(0.5 * slope + 1.0)
 
 
 def _variance_residual_hurst(
@@ -554,6 +575,8 @@ def _variance_residual_hurst(
 ) -> float | None:
     """Mean block residual variance slope mapped to a Hurst proxy."""
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     n = x.size
     if n < 64:
         return None
@@ -592,13 +615,13 @@ def _variance_residual_hurst(
     slope = _ols_slope(log_m, log_var)
     if slope is None:
         return None
-    return float(np.clip(0.5 * slope, 1e-4, 1.0 - 1e-4))
+    return float(0.5 * slope)
 
 
 class AbsoluteMomentEstimator(BaseEstimator):
     """Absolute first moment of aggregated series as a Hurst proxy."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -625,13 +648,14 @@ class AbsoluteMomentEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_absolute_moment",
             seed_offset=29,
+            unbounded_hurst=True,
         )
 
 
 class VarianceEstimator(BaseEstimator):
     """Variance of aggregated series as a Hurst proxy."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -658,13 +682,14 @@ class VarianceEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_variance",
             seed_offset=31,
+            unbounded_hurst=True,
         )
 
 
 class VarianceResidualEstimator(BaseEstimator):
     """Variance of block residuals as a Hurst proxy."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -692,4 +717,5 @@ class VarianceResidualEstimator(BaseEstimator):
             estimator_version=self.VERSION,
             failure_reason="insufficient_signal_for_variance_residual",
             seed_offset=37,
+            unbounded_hurst=True,
         )
