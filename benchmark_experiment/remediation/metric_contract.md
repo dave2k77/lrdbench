@@ -1,15 +1,14 @@
-# Remediation metric contract, version 1
+# Remediation metric contract, version 2
 
 This contract records the interpretation of the existing outputs and the explicit
-metrics proposed for the repairs. Historical result files are kept
+metrics implemented in the repairs. Historical result files are kept
 unchanged. Existing ambiguous names remain legacy aliases with their historical
 meaning; new names do not silently change old calculations.
 
-First-package implementation status: `ci_availability`, ranking rules, bootstrap
-failure accounting, and the new contamination names are implemented. All other
-new metric identifiers below remain planned and are not yet available in manifests.
-Existing legacy metrics keep their original calculations. The paired-ratio bootstrap
-rule below is a requirement for that metric's future implementation.
+All identifiers below are implemented and accepted in appropriate manifests.
+Independent hand calculations verify the additive metrics and their denominators.
+Existing legacy metrics keep their original calculations. Aggregate paired-ratio
+uncertainty is explicitly rejected until joint component resampling is implemented.
 
 | Metric | Meaning and denominator |
 | --- | --- |
@@ -30,10 +29,24 @@ record carries other companion truths. Missing pairs and intervals are counted i
 metadata rather than treated as zero errors. Coverage is conditional on interval
 availability and must be read alongside `ci_availability` and validity.
 
+Each aggregate includes `n_attempted`, `n_included` and `n_missing` for eligible
+metric rows. Balanced aggregates also report attempted and included strata. These
+are metric-specific denominators, not total generator counts. Incompatible truths
+and non-null records in the exceedance metric are ineligible. Exceedance remains
+conditional on valid points; null-fit failures must be inspected separately using
+validity. All-missing eligible strata remain visible. Other balanced summaries use
+equal weights over strata with available values; compare their counts before
+comparing methods with different failure patterns. The paired ratio instead weights
+available numerator/denominator components, retaining zero-clean-error strata.
+
 The new paired MAE ratio is an aggregate statistic; its per-series rows carry
 numerator and denominator components, not individual ratios. Bootstrap intervals
 for this new ratio are not provided by the existing scalar bootstrap engine.
 Requesting them must fail explicitly until paired ratio resampling is implemented.
+Its default denominator threshold is `1e-12`, configurable through
+`denominator_epsilon` in the metric's YAML entry (finite and nonnegative). Components are available
+in `raw/metrics.csv` metadata; ratio values are in aggregate exports. Intentionally
+empty component-row scalars do not count as missing values in the failure summary.
 
 Ranking uses equal average component ranks for exactly equal finite values.
 Missing/nonfinite values have worst rank N+1 in either optimisation direction.

@@ -14,8 +14,9 @@ from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
 def _as_target_estimand(value: float | None, target_estimand: str) -> float | None:
     """Map the native ARFIMA memory parameter ``d`` to the declared estimand.
 
-    Spectral long-memory estimators natively produce the fractional-integration
-    parameter ``d`` in ``(-1/2, 1/2)``. When a suite declares
+    Spectral long-memory estimators natively estimate the fractional-integration
+    parameter ``d``. Its stationary fractional-noise model range is ``(-1/2, 1/2)``;
+    unconstrained regression estimates may fall outside that range. When a suite declares
     ``hurst_scaling_proxy`` (i.e. compares against a Hurst exponent ``H``),
     convert via the fractional-noise identity ``H = d + 1/2`` so the estimate
     is on the same scale as the ground truth. For ``long_memory_parameter``
@@ -56,14 +57,20 @@ def _log_periodogram_regression_d(
 ) -> float | None:
     """Log-periodogram regression slope as a long-memory parameter proxy.
 
-    This is the shared core used by both GPH and Periodogram estimators.
+    With regressor log(4 sin²(lambda/2)), the fitted slope is -d, not -2d.
+    The unconstrained OLS estimate is returned, including values outside the
+    stationary parameter range. This core is shared by GPH and Periodogram.
     An optional ``taper`` can reduce periodogram bias from spectral leakage.
     """
     x = np.asarray(x, dtype=float)
     n = x.size
-    if n < 64:
+    if x.ndim != 1 or n < 64 or not np.isfinite(x).all():
         return None
     x = x - np.mean(x)
+    scale = float(np.max(np.abs(x)))
+    if scale == 0.0:
+        return None
+    x = x / scale
     x = _apply_taper(x, taper)
     x = x - np.mean(x)
     if m is None:
@@ -84,10 +91,10 @@ def _log_periodogram_regression_d(
     if denom < 1e-20:
         return None
     beta = float(np.sum((log_freq - x_mean) * (log_per - y_mean)) / denom)
-    d = float(-0.5 * beta)
+    d = float(-beta)
     if not np.isfinite(d):
         return None
-    return float(np.clip(d, -0.499, 0.499))
+    return d
 
 
 # Backward-compatible aliases for internal callers
@@ -97,14 +104,14 @@ def _gph_long_memory(x: np.ndarray, *, m: int | None = None) -> float | None:
 
 
 def _log_periodogram_slope_d(x: np.ndarray, *, m: int | None = None) -> float | None:
-    """Log-periodogram regression memory parameter (GPH-type) in (-0.5, 0.5)."""
+    """Unclipped log-periodogram regression memory estimate (GPH-type)."""
     return _log_periodogram_regression_d(x, m=m, taper=None)
 
 
 class GPHEstimator(BaseEstimator):
     """Geweke–Porter–Hudak log-periodogram regression for long-memory parameter d."""
 
-    VERSION = "0.4.0"
+    VERSION = "0.5.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -185,6 +192,8 @@ class GPHEstimator(BaseEstimator):
                 else None,
                 "m": m,
                 "taper": taper,
+                "regression_slope_multiplier": -1.0,
+                "point_clipped": False,
             }
             return EstimateResult(
                 record_id=record.record_id,
@@ -297,7 +306,7 @@ def _modified_local_whittle_d(x: np.ndarray, *, m: int | None = None) -> float |
 class PeriodogramRegressionEstimator(BaseEstimator):
     """Log-periodogram regression (memory parameter d, GPH-type)."""
 
-    VERSION = "0.3.0"
+    VERSION = "0.4.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -332,11 +341,11 @@ class PeriodogramBetaEstimator(BaseEstimator):
     the ``spectral_exponent_beta`` estimand, reporting ``beta = 2d`` so a suite
     can benchmark the spectral slope directly against a beta ground truth on the
     same realisation used for Hurst estimation. The default frequency count is
-    the shared ``m = sqrt(n)``; suites may widen ``m`` to reduce the known
-    low-``m`` attenuation bias.
+    the shared ``m = sqrt(n)``. Bandwidth controls the bias-variance tradeoff;
+    the former factor-of-two error was an implementation defect, not bandwidth bias.
     """
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec

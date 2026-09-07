@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Estimator equations and explicit stress metrics
+- Correct the GPH slope-to-d conversion for the squared-sine regressor. This also
+  changes Periodogram, PeriodogramBeta and the GPH-based threshold discriminator.
+  Regression outputs are unclipped; constant/nonfinite spectral inputs are invalid.
+- Restore Higuchi's missing lag normalization. GHE now fits absolute q-th moments
+  (default q = 2, q = 1 available); remove the forced H = 0.5 fallback and clipping.
+  Both geometric estimators expose path/increment input choice and resample
+  increments for candidate bootstrap intervals. Nonzero `flat_slope_tol` is rejected.
+- Add explicit absolute/signed drift, absolute-error inflation, paired aggregate
+  MAE ratio, coverage-loss rate, net coverage loss and persistence-exceedance names.
+  Preserve legacy calculations; count available/missing pairs and strata. Reject
+  scalar-bootstrap uncertainty requests for the paired ratio and signed-drift rankings.
+- Add analytical equation checks and a reproducible diagnostic pilot. These repairs
+  do not certify interval calibration or validate all methods. Research reruns and
+  manuscript reconciliation remain pending; historical outputs are unchanged.
+
 ### Benchmark foundation repairs
 - Equal component values receive average ranks; missing and nonfinite values rank
   last in both directions. Composite ties apply the declared primary/named metric,

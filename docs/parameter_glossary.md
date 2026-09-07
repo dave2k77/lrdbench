@@ -40,12 +40,30 @@ against a record that carries a matching truth (`raw/truths.csv`).
 
 ## Geometric estimators (Higuchi, GHE)
 
+Both methods analyse a path. Declare `input_representation: increments` for fGn
+records: the adapter constructs a path by prepending zero to their cumulative sum,
+without demeaning the increments. Declare `path` for an already integrated path.
+Omission defaults to `path` and records a warning. This choice is never inferred
+from the record's truth. Path-based H proxies are not automatically LRD parameters.
+
+Their candidate circular block bootstrap resamples increments and reconstructs the
+path for each draw. It does not resample path levels. This procedure still requires
+method-specific coverage calibration under long memory.
+
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `input_representation` | str | `"path"` | `"path"` or `"increments"`; declare explicitly in research manifests. |
 | `k_max` | int | `max(8, min(64, n//8))` | Maximum lag / block size for Higuchi curve-length calculation. |
 | `n_scales` | int | 16 | Number of geometrically spaced lags for GHE. |
 | `h_min` | int | 1 | Minimum lag for GHE. |
-| `flat_slope_tol` | float | 0.08 | *(GHE only)* Threshold below which the log-log slope is treated as flat and the estimate is clamped to `0.5`. Set to `0.0` to disable. |
+| `h_max` | int | `n//8` | Maximum GHE lag on the analysed path; must exceed `h_min` and remain below `n/2`. |
+| `q` | float | 2.0 | Positive finite moment order for GHE: mean absolute lagged differences raised to `q`; report log-log slope divided by `q`. Use 1.0 for the first absolute moment. |
+| `flat_slope_tol` | float | 0.0 | Deprecated; nonzero values are rejected. The former forced H = 0.5 fallback was removed. |
+
+Higuchi and GHE report unclipped slopes, with out-of-range diagnostics. GPH,
+Periodogram and PeriodogramBeta also retain unconstrained regression estimates.
+The ranges in the estimand table describe model parameters, not enforced estimator
+bounds. These changes intentionally alter results and require new output bundles.
 
 ## Wavelet estimators (WaveletOLS, WaveletAbryVeitch, WaveletBardet, WaveletJensen, WaveletWhittle)
 

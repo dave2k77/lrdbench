@@ -17,12 +17,16 @@ def fit_with_block_bootstrap(
     estimator_version: str,
     failure_reason: str,
     seed_offset: int = 0,
+    bootstrap_values: np.ndarray | None = None,
+    bootstrap_statistic: Callable[[np.ndarray], float | None] | None = None,
 ) -> EstimateResult:
     """Run point estimate plus optional circular block-bootstrap CIs (RS/GPH pattern)."""
     t0 = time.perf_counter()
     params = dict(spec.parameter_schema)
     n_boot = int(params.get("n_bootstrap", 200))
-    block_len = int(params.get("bootstrap_block_len", 0)) or max(4, record.values.size // 10)
+    resample_values = record.values if bootstrap_values is None else bootstrap_values
+    resample_statistic = statistic if bootstrap_statistic is None else bootstrap_statistic
+    block_len = int(params.get("bootstrap_block_len", 0)) or max(4, resample_values.size // 10)
     levels_raw = params.get("ci_levels")
     ci_levels = tuple(float(x) for x in levels_raw) if levels_raw is not None else (0.95,)
     seed = seed_offset
@@ -46,9 +50,9 @@ def fit_with_block_bootstrap(
 
         bootstrap_diagnostics: dict[str, object] = {}
         samples = bootstrap_statistic_distribution(
-            record.values,
+            resample_values,
             rng,
-            statistic,
+            resample_statistic,
             n_boot=n_boot,
             block_len=block_len,
             diagnostics=bootstrap_diagnostics,
