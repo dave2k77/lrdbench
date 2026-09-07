@@ -22,18 +22,13 @@ def _higuchi_fractal_dimension(x: np.ndarray, *, k_max: int | None = None) -> fl
     log_inv_k: list[float] = []
     log_l: list[float] = []
     for k in range(1, k_max + 1):
-        lm: list[float] = []
-        for m in range(k):
-            n_terms = int(np.floor((n - m - 1) / k))
-            if n_terms <= 0:
-                continue
-            ll = float(np.sum(np.abs(np.diff(x[m::k]))))
-            # Higuchi (1988), p. 278: the normalization includes a final /k.
-            ll = ll * (n - 1) / (n_terms * k * k)
-            lm.append(ll)
-        if not lm:
-            continue
-        lk = float(np.mean(lm))
+        # Every lag-k difference belongs to exactly one offset class t % k.
+        # Group the sums at once; retain each offset's original term count and
+        # Higuchi (1988), p. 278 normalization, including the final /k.
+        differences = np.abs(x[k:] - x[:-k])
+        sums = np.bincount(np.arange(n - k) % k, weights=differences, minlength=k)
+        n_terms = (n - np.arange(k) - 1) // k
+        lk = float(np.mean(sums * (n - 1) / (n_terms * k * k)))
         if lk <= 0.0 or not np.isfinite(lk):
             continue
         log_inv_k.append(float(np.log(1.0 / k)))
@@ -188,7 +183,7 @@ def _fit_geometric(
 class HiguchiEstimator(BaseEstimator):
     """Higuchi fractal length curve; Hurst proxy H ≈ 2 − D for the time-series graph."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
