@@ -114,6 +114,14 @@ on short-memory AR controls; all candidates remain unvalidated for general use.
 Higuchi's repeated calculation is faster, with independent equation equivalence
 checks. The earlier timing projection is specific to its earlier implementation.
 
+The [sixth package](mean-comparison.md) completes 1,344 records across three
+lengths and separates mean removal from unknown-mean model fitting. Simply
+centering block-percentile intervals can sharply worsen coverage; the centered
+fitted-fGn basic candidate improves that example but still fails on AR controls.
+The [joint parent-summary helper](paired-summary.md) now recomputes error ratios
+on paired resamples, with explicit common support, fixed weights and missing
+parent counts. Integration with verified stress descendants remains next.
+
 Continue validating every retained generator/estimator against mathematical references
 and appropriate inputs, and calibrate uncertainty procedures. Then freeze shared
 clean parents, null/alternative populations, scales, repetitions and paired or

@@ -20,6 +20,14 @@ short-memory controls. The full grid remains prospective; no acceptance rule or
 general-purpose default has been frozen. The Higuchi implementation is now faster,
 so the earlier cost projection is historical.
 
+The [mean/length comparison](mean-comparison.md) subsequently completes 21
+development cells at n=256/512/1024. It makes the mean-treatment choice explicit,
+retains model-mismatch failures and does not select a general-purpose interval.
+The [paired-summary helper](paired-summary.md) now supplies a tested research
+implementation for joint error-inflation/MAE-ratio summaries. Shared-parent stress
+materialization and final integration remain pending; the 36-cell grid below is
+still prospective rather than a claim about this smaller candidate comparison.
+
 ## Scientific targets and inputs
 
 - Primary synthetic target: the stationary-increment scaling/memory parameter.
