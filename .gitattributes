@@ -31,3 +31,6 @@
 *.woff    binary
 *.woff2   binary
 *.ttf     binary
+
+# Preserve the exact bytes covered by the calibration profile's artifact hashes.
+benchmark_experiment/remediation/calibration-profile/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

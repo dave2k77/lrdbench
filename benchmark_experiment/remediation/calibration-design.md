@@ -5,6 +5,14 @@ any interval procedure is calibrated. The completed block-length pilot is descri
 in [remaining-audit.md](remaining-audit.md). Its data may guide development but must
 not become confirmatory results after settings are selected.
 
+Execution update: the [calibration runner and cost profile](calibration-runner.md)
+now implement this development grid with shared inputs, per-fit checkpoints,
+failure-transparent summaries and a Windows/Python dependency lock. A two-record
+profile across all 36 cells projects about 13 hours of interval fitting in a single
+process. The full development and confirmation screens have not been launched;
+independently justified interval alternatives remain to be added before the larger
+interval workload is committed.
+
 ## Scientific targets and inputs
 
 - Primary synthetic target: the stationary-increment scaling/memory parameter.

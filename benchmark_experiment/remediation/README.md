@@ -100,6 +100,13 @@ larger development pilot. Its coverage failures remain after changing block leng
 The [next calibration design](calibration-design.md) separates tuning from fresh
 confirmation, quantifies Monte Carlo precision and records the projected workload.
 
+The [fourth package](calibration-runner.md) implements a resumable development
+runner with immutable shared inputs, exact fit accounting and dependency pins with
+distribution hashes. Its complete cost profile uses 72 inputs, 2,016 fits and
+258,552 within-record draws; it projects about 13 hours for the full interval
+screen. This profile measures cost and recovery, not coverage. The full scientific
+screen and confirmation runs remain pending.
+
 Continue validating every retained generator/estimator against mathematical references
 and appropriate inputs, and calibrate uncertainty procedures. Then freeze shared
 clean parents, null/alternative populations, scales, repetitions and paired or
