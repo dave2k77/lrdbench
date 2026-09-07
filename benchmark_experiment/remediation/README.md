@@ -1,5 +1,12 @@
 # Benchmark foundation repair — 7 September 2026
 
+**Current status:** the [tenth package](confirmation-results.md) audits the complete
+fresh confirmation: 66,000 parents, 4,767,000 point fits, 248,000 intervals and
+118,917 canonical summary rows. All checks pass; no producer results were changed.
+The package includes complete result tables, two verified figures and a 13-item
+draft-claim replacement ledger. Manuscript rebuilding is the remaining phase.
+The sections below retain the history and evidence of the earlier packages.
+
 The first repair package is implemented on `fix/benchmark-foundations`, based on
 `59a6b65069fca80b89447921ed20afaa5246e60f`. It addresses shared framework defects
 before mathematical validation and a revised research run. It does not establish

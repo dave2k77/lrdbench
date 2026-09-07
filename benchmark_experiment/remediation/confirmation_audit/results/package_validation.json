@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "derived_rows_reconciled": 124931,
+  "narrative_rows_reconciled": 105,
+  "historical_files_unchanged": 20,
+  "frozen_runtime_sources_unchanged": 90,
+  "audit_source_hash_matches_executed_version": true,
+  "artifact_files_verified": 17,
+  "figures": [
+    "clean_accuracy.png/svg",
+    "interval_coverage.png/svg"
+  ]
+}
