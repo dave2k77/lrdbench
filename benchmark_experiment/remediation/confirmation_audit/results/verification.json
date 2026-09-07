@@ -1,0 +1,10 @@
+{
+  "tests_passed": 14,
+  "tests_failed": 0,
+  "tests_errors": 0,
+  "global_ruff_check": "passed",
+  "audit_package_format_check": "passed",
+  "visual_review": "Both complete-cell PNG figures inspected; labels, all matrix values and two-decimal coverage annotations checked. SVGs built from the same figures.",
+  "test_source_sha256": "91d89ac23ee087684537980baf45f1f9a5cf21de032c7822d2e1175b01d78d35",
+  "test_xml_sha256": "3e3520f7995c68fe964514c1aa713c34959e094060df9c812394380182a80fa4"
+}
