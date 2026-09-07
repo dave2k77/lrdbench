@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "stage": "development_shared_parent_stress",
+  "clean_pool_identity_sha256": "27e41c6b4b10f17f3c809f7c0deea3fa818cde318d500eb22aeef3fa30f192c4",
+  "seed_namespace": "lrdbench-shared-stress-v1",
+  "global_seed": 20260913,
+  "lengths": [512],
+  "processes": {"fGn": [0.25, 0.5, 0.75, 0.85], "ARFIMA": [0.25], "AR1": [0.8, 0.95]},
+  "repetitions": 64,
+  "conditions": [
+    {"id": "constant_offset_1sd", "operator": "constant_offset", "params": {"shift": 1.0}},
+    {"id": "midpoint_step_1sd", "operator": "step_change", "params": {"shift": 1.0, "position": 0.5}},
+    {"id": "additive_outliers_1pct_8sd", "operator": "outliers", "params": {"rate": 0.01, "amplitude": 8.0}},
+    {"id": "linear_trend_0p5sd", "operator": "polynomial_trend", "params": {"order": 1, "strength": 0.5}},
+    {"id": "linear_plus_quadratic_0p5sd", "operator": "polynomial_trend", "params": {"order": 2, "strength": 0.5}},
+    {"id": "t3_realized_sd_0p5", "operator": "heavy_tail_noise", "params": {"df": 3.0, "scale": 0.5}},
+    {"id": "t5_realized_sd_0p5", "operator": "heavy_tail_noise", "params": {"df": 5.0, "scale": 0.5}}
+  ],
+  "summary": {"draws": 999, "seed": 20260914, "nominal": 0.95, "denominator_floor": 1e-12}
+}

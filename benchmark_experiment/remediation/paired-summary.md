@@ -3,8 +3,8 @@
 The sixth package adds a research summary helper for R06/R07/R12. It resamples
 independent clean parents jointly across methods and contamination descendants,
 and recomputes ratios of aggregate MAEs inside each draw. It is implemented in
-[paired_summary.py](paired_summary.py), with 13 focused tests. Integration into
-the eventual shared-parent stress workflow remains pending. The public evaluator
+[paired_summary.py](paired_summary.py), with 13 focused tests. The [seventh package](shared-stress.md) integrates it with verified stored
+stress descendants across the complete classical point roster. The public evaluator
 and output contract are unchanged.
 
 ## Statistical target and declared support
@@ -81,8 +81,8 @@ offset invariance implies zero error inflation and a ratio of one whenever its
 clean MAE is nonzero; narrow intervals here reflect that identity. This does not
 establish robustness to steps, drift, trends or other nonstationarity.
 
-The next integration step is to materialize verified contamination descendants
-from immutable clean inputs and feed their canonical point results into this
+The seventh package now materializes verified contamination descendants
+from immutable clean inputs and feeds their canonical point results into this
 helper. Coverage gains/losses and signed H drift need their own joint summaries;
 they are not implemented by this absolute-error helper. The original historical
 stress records must not be retroactively described as paired clean parents.
@@ -104,3 +104,13 @@ The full joint draws are retained in the complete local verification bundle.
 This is an end-to-end exercise of the summary helper using actual paired
 simulation outputs, not only a hand-constructed test. No constant-offset result
 is reinterpreted as robustness to a step change.
+
+
+## Shared-parent stress integration
+
+The [completed stress screen](shared-stress.md) uses 448 imported n=512 parents,
+seven contamination conditions and 21 point pipelines. All 64 parents per cell
+remain in common support. The 882 summary rows and all 881,118 draw rows are
+independently recomputed; each condition retains its own error inflation and
+ratio. Cell-level drift is descriptive only. Pooled drift uncertainty and
+coverage gains/losses remain outside this helper's implemented scope.

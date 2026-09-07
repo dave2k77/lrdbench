@@ -37,3 +37,4 @@ benchmark_experiment/remediation/calibration-profile/* -text whitespace=blank-at
 benchmark_experiment/remediation/interval-pilot/*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 benchmark_experiment/remediation/interval-pilot/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 benchmark_experiment/remediation/mean-pilot/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+benchmark_experiment/remediation/stress-pilot/* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
