@@ -13,6 +13,13 @@ process. The full development and confirmation screens have not been launched;
 independently justified interval alternatives remain to be added before the larger
 interval workload is committed.
 
+Subsequent update: the [first interval comparison](interval-comparison.md) now tests
+block basic, fitted-zero-mean-fGn basic/percentile and GPH normal candidates. It
+finds improved geometric coverage in persistent fGn and continuing failure under
+short-memory controls. The full grid remains prospective; no acceptance rule or
+general-purpose default has been frozen. The Higuchi implementation is now faster,
+so the earlier cost projection is historical.
+
 ## Scientific targets and inputs
 
 - Primary synthetic target: the stationary-increment scaling/memory parameter.

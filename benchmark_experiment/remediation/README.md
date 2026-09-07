@@ -107,6 +107,13 @@ distribution hashes. Its complete cost profile uses 72 inputs, 2,016 fits and
 screen. This profile measures cost and recovery, not coverage. The full scientific
 screen and confirmation runs remain pending.
 
+The [fifth package](interval-comparison.md) implements and compares interval
+alternatives on 448 shared records. Model-based basic intervals improve persistent
+fGn coverage for Higuchi/GHE to about 91–92%, with wider intervals. They still fail
+on short-memory AR controls; all candidates remain unvalidated for general use.
+Higuchi's repeated calculation is faster, with independent equation equivalence
+checks. The earlier timing projection is specific to its earlier implementation.
+
 Continue validating every retained generator/estimator against mathematical references
 and appropriate inputs, and calibrate uncertainty procedures. Then freeze shared
 clean parents, null/alternative populations, scales, repetitions and paired or

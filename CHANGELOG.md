@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Interval candidate development comparison
+- Speed up Higuchi's lag/offset sums while preserving the original equation;
+  bump its version to 0.3.0 for the changed floating-point summation order.
+- Add research-only block-basic, fitted-zero-mean-fGn percentile/basic and
+  untapered GPH normal interval candidates, with independent equation checks.
+- Compare candidates on 448 shared records, retaining model-boundary diagnostics,
+  all bootstrap-statistic draws, failures and paired coverage/width differences.
+  Persistent fGn coverage improves with model-based basic intervals, but the
+  short-memory controls still fail. No package default interval is changed.
+
 ### Resumable calibration development
 - Add a dedicated research runner with stable shared inputs, separate input and
   resampling streams, per-fit checkpoints, single-writer locking and strict resume
