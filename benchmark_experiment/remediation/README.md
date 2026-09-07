@@ -16,9 +16,9 @@ that the estimators or their intervals are scientifically valid.
 | R15 — global seed, newly found | Include the previously ignored global seed in generator, contamination and preprocessing seed derivation. Cache keys include record seed and shared fitting revision. | Seed-change and seed-repeat tests; repeated three-mode checks. |
 | R16 — nominal interval level, newly found | Default endpoint fields represent 95% only; other intervals stay explicitly labelled. Evaluation requires valid finite points and finite ordered intervals at the requested level. | 80%-only intervals never score as 95%; invalid/nonfinite/reversed intervals rejected. |
 
-The [issue register](issue_register.csv) contains 16 findings with separate
+The [issue register](issue_register.csv) contains 17 findings with separate
 implementation status, evidence and remaining work. The [metric contract](metric_contract.md)
-distinguishes implemented names from proposed additions. The
+defines implemented metrics and unsupported ratio resampling. The
 [eligibility table](estimator_eligibility.csv) contains the 19 expanded v2
 configurations, their actual parameters and outstanding validation requirements.
 
@@ -88,10 +88,14 @@ not recommendations for a research protocol. The observational input is a fixtur
 
 ## Next work package
 
-Finish the additive metric implementations and missing-pair/count accounting;
-validate every retained generator/estimator against mathematical references and
-appropriate inputs; resolve Higuchi, GHE and wavelet conventions; audit spectral
-slope-to-d conversions; and calibrate uncertainty procedures. Then freeze shared
+The [second repair report](method-audit.md) records the completed additive metrics,
+missing-pair accounting, GPH/Higuchi/GHE equation corrections and an independent
+WaveletOLS scale-convention check. Its small diagnostic pilot exposes persistent-H
+interval undercoverage and false persistence on a short-memory null. The verification
+counts above describe the first package; the second report records subsequent checks.
+
+Continue validating every retained generator/estimator against mathematical references
+and appropriate inputs, and calibrate uncertainty procedures. Then freeze shared
 clean parents, null/alternative populations, scales, repetitions and paired or
 clustered summary resampling. Run the revised benchmark only after these gates,
 and regenerate every paper table, figure and claim from its canonical exports.

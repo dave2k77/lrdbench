@@ -16,6 +16,7 @@ import pandas as pd
 
 from lrdbench.enums import BenchmarkMode
 from lrdbench.interfaces import BaseReporter
+from lrdbench.paired_metrics import STRESS_PAIR_METRICS
 from lrdbench.schema import (
     ArtefactRecord,
     BenchmarkManifest,
@@ -36,14 +37,7 @@ def _package_version(name: str) -> str | None:
         return None
 
 
-_STRESS_METRIC_NAMES = frozenset(
-    {
-        "estimate_drift",
-        "relative_degradation_ratio",
-        "validity_collapse",
-        "coverage_collapse",
-    }
-)
+_STRESS_METRIC_NAMES = STRESS_PAIR_METRICS
 
 _DISAGREEMENT_METRIC_NAMES = frozenset(
     {
@@ -264,7 +258,7 @@ def _failure_rows(metrics: MetricBundle) -> list[dict[str, Any]]:
             },
         )
         row["n_metric_rows"] += 1
-        if m.value is None:
+        if m.value is None and not m.metadata.get("aggregation_components"):
             row["n_missing_values"] += 1
         if m.metadata.get("missing_ci"):
             row["n_missing_uncertainty"] += 1

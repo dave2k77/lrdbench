@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from lrdbench.defaults import build_default_estimator_registry
 from lrdbench.enums import SourceType
@@ -212,7 +213,11 @@ def test_higuchi_and_ghe_fit_valid() -> None:
             assumptions=(),
             supports_ci=True,
             supports_diagnostics=True,
-            parameter_schema={"n_bootstrap": 12, "bootstrap_block_len": 64},
+            parameter_schema={
+                "n_bootstrap": 12,
+                "bootstrap_block_len": 64,
+                "input_representation": "increments",
+            },
         )
         out = reg.get(est_name)(spec).fit(rec)
         assert out.valid, (est_name, out.failure_reason)
@@ -220,11 +225,11 @@ def test_higuchi_and_ghe_fit_valid() -> None:
         assert 0.0 < float(out.point) < 1.0
 
 
-def test_ghe_flat_slope_guard_can_be_disabled() -> None:
+def test_ghe_flat_slope_guard_is_removed() -> None:
     x = np.sin(np.linspace(0.0, 40.0, 2048))
-    guarded = _ghe_hurst(x, flat_slope_tol=10.0)
+    with pytest.raises(ValueError, match="removed"):
+        _ghe_hurst(x, flat_slope_tol=10.0)
     unguarded = _ghe_hurst(x, flat_slope_tol=0.0)
-    assert guarded == 0.5
     assert unguarded is not None
     assert unguarded != 0.5
 
@@ -362,8 +367,7 @@ def test_wavelet_log_scale_estimators_recover_and_track_hurst_on_fgn() -> None:
         means = {}
         for h_true in (0.6, 0.9):
             vals = [
-                est(simulate_fgn(4096, h_true, np.random.default_rng(900 + s)))
-                for s in range(12)
+                est(simulate_fgn(4096, h_true, np.random.default_rng(900 + s))) for s in range(12)
             ]
             kept = [float(v) for v in vals if v is not None]
             means[h_true] = float(np.mean(kept))

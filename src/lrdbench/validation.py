@@ -53,6 +53,23 @@ def _validate_execution_block(spec: Mapping[str, Any] | None) -> None:
             raise ManifestValidationError(f"execution.{key} must be a boolean")
 
 
+def validate_ratio_uncertainty(metric_names: set[str], spec: Mapping[str, Any]) -> None:
+    """Reject ratio resampling by the existing scalar-mean bootstrap engine."""
+    if "paired_mae_ratio" not in metric_names or not spec or spec.get("enabled") is False:
+        return
+    metrics = set(spec.get("metrics", ()))
+    paired_metrics = set(spec.get("paired_metrics", ())) or metrics
+    if (
+        not metrics
+        or "paired_mae_ratio" in metrics
+        or (spec.get("paired") and (not paired_metrics or "paired_mae_ratio" in paired_metrics))
+    ):
+        raise ManifestValidationError(
+            "paired_mae_ratio uncertainty requires joint resampling of paired error components; "
+            "the scalar bootstrap is unsupported. Exclude it explicitly from uncertainty metrics."
+        )
+
+
 def _validate_uncertainty_block(spec: Mapping[str, Any] | None) -> None:
     uq = dict(spec or {})
     allowed = frozenset(
@@ -456,6 +473,7 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
 
     # MV6
     metric_names = {x.name for x in manifest.metric_specs}
+    validate_ratio_uncertainty(metric_names, manifest.uncertainty_spec)
     if "coverage_error" in metric_names and "coverage" not in metric_names:
         raise ManifestValidationError(
             "coverage_error requires a coverage metric in the metrics block"
@@ -469,6 +487,12 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
             "relative_degradation_ratio requires an mae metric in the metrics block"
         )
     for m in manifest.metric_specs:
+        if m.name == "paired_mae_ratio":
+            epsilon = float(m.parameters.get("denominator_epsilon", 1e-12))
+            if not 0.0 <= epsilon < float("inf"):
+                raise ManifestValidationError(
+                    "paired_mae_ratio denominator_epsilon must be finite and nonnegative"
+                )
         validate_metric_admissibility(m, manifest.mode)
         for a in m.nominal_levels:
             if not (0.0 < float(a) < 1.0):
@@ -478,6 +502,10 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
 
     # MV7 / MV8 leaderboards
     for lb in manifest.leaderboard_specs:
+        if "signed_estimate_drift" in lb.component_metrics:
+            raise ManifestValidationError(
+                "signed_estimate_drift is descriptive; use absolute_estimate_drift for ranking"
+            )
         if lb.mode is not manifest.mode:
             raise ManifestValidationError(
                 f"leaderboard {lb.component_metrics!r} mode {lb.mode.value!r} "

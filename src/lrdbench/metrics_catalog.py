@@ -302,8 +302,34 @@ METRIC_SPECS: dict[str, MetricSpec] = {
     ),
 }
 
+for _name, _base, _symbol in (
+    ("absolute_estimate_drift", "estimate_drift", "AbsDrift"),
+    ("signed_estimate_drift", "estimate_drift", "SignedDrift"),
+    ("absolute_error_inflation", "relative_degradation_ratio", "ErrorInflation"),
+    ("paired_mae_ratio", "relative_degradation_ratio", "PairedMAERatio"),
+    ("coverage_loss_rate", "coverage_collapse", "CoverageLoss"),
+    ("net_coverage_loss", "coverage_collapse", "NetCoverageLoss"),
+    ("persistence_exceedance_rate", "false_positive_lrd_rate", "PersistenceExceedance"),
+):
+    METRIC_SPECS[_name] = replace(METRIC_SPECS[_base], name=_name, symbol=_symbol)
+
+METRIC_SPECS["absolute_error_inflation"] = replace(
+    METRIC_SPECS["absolute_error_inflation"], unit=None
+)
+METRIC_SPECS["paired_mae_ratio"] = replace(
+    METRIC_SPECS["paired_mae_ratio"], aggregation_rule="ratio_of_paired_stratum_maes"
+)
+
 _LEVEL_METRICS = frozenset(
-    {"coverage", "ci_width", "coverage_error", "coverage_collapse", "ci_availability"}
+    {
+        "coverage",
+        "ci_width",
+        "coverage_error",
+        "coverage_collapse",
+        "ci_availability",
+        "coverage_loss_rate",
+        "net_coverage_loss",
+    }
 )
 
 
