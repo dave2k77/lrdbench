@@ -66,6 +66,16 @@ METRIC_SPECS: dict[str, MetricSpec] = {
         optimisation_direction=OptimisationDirection.MINIMISE,
         unit="1",
     ),
+    "ci_availability": MetricSpec(
+        name="ci_availability",
+        symbol="CIAvail",
+        requires_truth=False,
+        admissible_modes=tuple(BenchmarkMode),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MAXIMISE,
+        unit="1",
+        kind="neutral",
+    ),
     "validity_rate": MetricSpec(
         name="validity_rate",
         symbol="VR",
@@ -292,7 +302,9 @@ METRIC_SPECS: dict[str, MetricSpec] = {
     ),
 }
 
-_LEVEL_METRICS = frozenset({"coverage", "ci_width", "coverage_error", "coverage_collapse"})
+_LEVEL_METRICS = frozenset(
+    {"coverage", "ci_width", "coverage_error", "coverage_collapse", "ci_availability"}
+)
 
 
 def _default_nominal_levels(spec: MetricSpec) -> MetricSpec:
@@ -315,11 +327,7 @@ def metric_specs_from_manifest_entries(entries: list[Any]) -> tuple[MetricSpec, 
                 raise ValueError(f"unknown metric: {key!r}")
             base = METRIC_SPECS[key]
             levels_raw = raw.get("levels")
-            params = {
-                str(k): v
-                for k, v in raw.items()
-                if k not in {"name", "levels"}
-            }
+            params = {str(k): v for k, v in raw.items() if k not in {"name", "levels"}}
             if params:
                 base = replace(base, parameters=params)
             if levels_raw is not None:

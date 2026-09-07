@@ -20,6 +20,10 @@ from lrdbench.interfaces import BaseEstimator
 from lrdbench.registries import EstimatorRegistry
 from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
 
+# Shared fitting/uncertainty behaviour changes invalidate estimates even when
+# the estimator's point-statistic implementation version has not changed.
+ESTIMATE_CACHE_VERSION = "2"
+
 
 def collect_fit_jobs(
     records: Sequence[SeriesRecord],
@@ -44,14 +48,17 @@ def estimate_cache_key(
     # estimator's *output* depends on both: spectral estimators return d or
     # H=d+0.5 depending on the declared estimand, and any change to estimator
     # code (tracked by the class ``VERSION``) must invalidate stale estimates.
-    raw = f"{record.record_id}|{espec.name}|{espec.target_estimand}|{ev}|{impl_version}|{ps}|{vh}"
+    seed = record.provenance.seed if record.provenance is not None else None
+    raw = f"{ESTIMATE_CACHE_VERSION}|{record.record_id}|{espec.name}|{espec.target_estimand}|{ev}|{impl_version}|{ps}|{vh}|{seed}"
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
 
 def _cache_file(
     cache_root: Path, record: SeriesRecord, espec: EstimatorSpec, *, impl_version: str = ""
 ) -> Path:
-    return cache_root / f"estimate_{estimate_cache_key(record, espec, impl_version=impl_version)}.pkl"
+    return (
+        cache_root / f"estimate_{estimate_cache_key(record, espec, impl_version=impl_version)}.pkl"
+    )
 
 
 def _try_load_estimate_cache(
@@ -132,9 +139,7 @@ def _fit_one(
         else None
     )
     if cache_read and cpath is not None:
-        hit = _try_load_estimate_cache(
-            cpath, record_id=record.record_id, estimator_name=espec.name
-        )
+        hit = _try_load_estimate_cache(cpath, record_id=record.record_id, estimator_name=espec.name)
         if hit is not None:
             return idx, hit
     est = est_obj.fit(record)

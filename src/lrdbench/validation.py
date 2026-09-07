@@ -375,7 +375,9 @@ def _validate_observational_source(manifest: BenchmarkManifest) -> None:
                 f"observational source.series[{i}].values is required for inline_table"
             )
 
-        _validate_optional_positive_float(block.get("sampling_rate"), field="sampling_rate", index=i)
+        _validate_optional_positive_float(
+            block.get("sampling_rate"), field="sampling_rate", index=i
+        )
         if "metadata" in block and not isinstance(block["metadata"], Mapping):
             raise ManifestValidationError(
                 f"observational source.series[{i}].metadata must be a mapping"
@@ -481,6 +483,16 @@ def validate_manifest(manifest: BenchmarkManifest, *, strict_unknown_keys: bool 
                 f"leaderboard {lb.component_metrics!r} mode {lb.mode.value!r} "
                 f"does not match manifest mode {manifest.mode.value!r}"
             )
+        if lb.ranking_rule != "weighted_rank":
+            raise ManifestValidationError(f"unsupported ranking rule: {lb.ranking_rule!r}")
+        if not lb.component_metrics or len(set(lb.component_metrics)) != len(lb.component_metrics):
+            raise ManifestValidationError("leaderboard components must be nonempty and unique")
+        if set(lb.weights) != set(lb.component_metrics):
+            raise ManifestValidationError("leaderboard weights must match the component metrics")
+        if any(not (0.0 <= w <= 1.0) for w in lb.weights.values()):
+            raise ManifestValidationError("leaderboard weights must be finite and nonnegative")
+        if lb.tie_break_rule not in {"best_primary_metric", "none", *lb.component_metrics}:
+            raise ManifestValidationError(f"unsupported tie-break rule: {lb.tie_break_rule!r}")
         wsum = sum(lb.weights.values())
         if abs(wsum - 1.0) > 1e-6:
             raise ManifestValidationError(f"leaderboard weights must sum to 1, got {wsum}")

@@ -71,10 +71,20 @@ def _index_estimates(estimates: Sequence[EstimateResult]) -> dict[tuple[str, str
 
 
 def _ci_interval(est: EstimateResult, alpha: float) -> tuple[float, float] | None:
+    if not est.valid or est.point is None or not np.isfinite(est.point):
+        return None
     for a, lo, hi in est.bootstrap_cis:
-        if abs(float(a) - float(alpha)) < 1e-9:
+        if abs(float(a) - float(alpha)) < 1e-9 and np.isfinite(lo) and np.isfinite(hi) and lo <= hi:
             return (float(lo), float(hi))
-    if est.ci_low is not None and est.ci_high is not None and abs(float(alpha) - 0.95) < 1e-9:
+    if (
+        not est.bootstrap_cis
+        and est.ci_low is not None
+        and est.ci_high is not None
+        and np.isfinite(est.ci_low)
+        and np.isfinite(est.ci_high)
+        and est.ci_low <= est.ci_high
+        and abs(float(alpha) - 0.95) < 1e-9
+    ):
         return (float(est.ci_low), float(est.ci_high))
     return None
 
@@ -744,6 +754,21 @@ class GroundTruthEvaluator(BaseEvaluator):
                         estimator_name=estimator_spec.name,
                         metric_name=ms.name,
                         value=hit,
+                        stratum=stratum_dict,
+                        metadata={**meta_base, "nominal": alpha},
+                    )
+                )
+            return rows
+
+        if ms.name == "ci_availability":
+            for alpha in ms.nominal_levels:
+                rows.append(
+                    MetricValue(
+                        run_id=run_id,
+                        record_id=record.record_id,
+                        estimator_name=estimator_spec.name,
+                        metric_name=ms.name,
+                        value=float(_ci_interval(est, alpha) is not None),
                         stratum=stratum_dict,
                         metadata={**meta_base, "nominal": alpha},
                     )

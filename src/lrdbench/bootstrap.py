@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from collections.abc import Callable
 
 import numpy as np
@@ -39,30 +40,62 @@ def bootstrap_statistic_distribution(
     *,
     n_boot: int,
     block_len: int,
+    diagnostics: dict[str, object] | None = None,
 ) -> np.ndarray:
     """Compute a bootstrap distribution for ``statistic`` using circular block resampling.
 
-    Only finite replicate values are retained; ``None`` or non-finite results
-    are silently dropped. This is important for estimators that may fail on
-    short resampled blocks.
+    Only finite replicate values are retained. Every attempted draw is counted;
+    invalid values and exceptions are recorded separately in ``diagnostics``.
+    When no diagnostics sink is supplied, discarded draws emit a warning.
+    This accounting does not establish statistical validity of the bootstrap.
 
     Args:
         x: 1-D input array (the original time series).
         rng: NumPy random generator instance.
         statistic: Function that takes a 1-D array and returns a scalar or ``None``.
-        n_boot: Number of bootstrap replicates.
+        n_boot: Nonnegative number of bootstrap replicates; zero disables resampling.
         block_len: Block length in samples. A common pragmatic default is
             ``max(4, n // 10)``.
 
     Returns:
         1-D array of finite bootstrap replicates.
     """
+    if n_boot < 0:
+        raise ValueError("n_boot must be nonnegative")
     reps: list[float] = []
-    for _ in range(max(1, n_boot)):
+    invalid = failed = 0
+    reasons: dict[str, int] = {}
+    for _ in range(n_boot):
         xb = circular_block_resample(x, rng, block_len)
-        s = statistic(xb)
+        try:
+            s = statistic(xb)
+        except Exception as exc:  # noqa: BLE001
+            failed += 1
+            reason = f"exception:{type(exc).__name__}"
+            reasons[reason] = reasons.get(reason, 0) + 1
+            continue
         if s is not None and np.isfinite(s):
             reps.append(float(s))
+        else:
+            invalid += 1
+            reason = "none" if s is None else "nonfinite"
+            reasons[reason] = reasons.get(reason, 0) + 1
+    if diagnostics is not None:
+        diagnostics.update(
+            {
+                "bootstrap_replicates_attempted": n_boot,
+                "bootstrap_replicates_used": len(reps),
+                "bootstrap_replicates_invalid": invalid,
+                "bootstrap_replicates_failed": failed,
+                "bootstrap_failure_reasons": reasons,
+            }
+        )
+    elif invalid or failed:
+        warnings.warn(
+            f"bootstrap discarded {invalid} invalid and {failed} failed draws of {n_boot}",
+            RuntimeWarning,
+            stacklevel=2,
+        )
     return np.asarray(reps, dtype=np.float64)
 
 

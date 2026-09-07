@@ -167,7 +167,7 @@ class RSEstimator(BaseEstimator):
                 scale_ratio=scale_ratio,
             )
             dt = time.perf_counter() - t0
-            if h is None:
+            if h is None or not np.isfinite(h):
                 return EstimateResult(
                     record_id=record.record_id,
                     estimator_name=self._spec.name,
@@ -187,12 +187,14 @@ class RSEstimator(BaseEstimator):
                     scale_ratio=scale_ratio,
                 )
 
+            bootstrap_diagnostics: dict[str, object] = {}
             samples = bootstrap_statistic_distribution(
                 record.values,
                 rng,
                 _rs_stat,
                 n_boot=n_boot,
                 block_len=block_len,
+                diagnostics=bootstrap_diagnostics,
             )
             cis = symmetric_percentile_cis(samples, ci_levels) if samples.size >= 5 else ()
             bstd = float(np.std(samples)) if samples.size >= 2 else None
@@ -201,8 +203,6 @@ class RSEstimator(BaseEstimator):
                 if abs(a - 0.95) < 1e-9:
                     ci_low, ci_high = lo, hi
                     break
-            if cis and (ci_low is None):
-                ci_low, ci_high = cis[-1][1], cis[-1][2]
 
             diag: dict[str, object] = {
                 "ci_method": "circular_block_bootstrap",
@@ -210,6 +210,17 @@ class RSEstimator(BaseEstimator):
                 "bootstrap_block_len": block_len,
                 "bootstrap_replicates_used": int(samples.size),
                 "bootstrap_point_std": bstd,
+                **bootstrap_diagnostics,
+                "ci_available_levels": tuple(a for a, _, _ in cis),
+                "ci_unavailable_reason": (
+                    "disabled"
+                    if n_boot == 0
+                    else "insufficient_replicates"
+                    if samples.size < 5
+                    else "no_valid_levels"
+                )
+                if not cis
+                else None,
                 "min_scale": min_scale,
                 "max_scale": max_scale,
                 "scale_ratio": scale_ratio,
@@ -225,6 +236,7 @@ class RSEstimator(BaseEstimator):
                 valid=True,
                 estimator_version=self.VERSION,
                 diagnostics=diag,
+                warnings=("bootstrap_draws_discarded",) if samples.size < n_boot else (),
                 bootstrap_cis=cis,
             )
         except Exception as exc:  # noqa: BLE001
