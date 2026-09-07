@@ -1,0 +1,16 @@
+{
+  "lossless_gzip_csv_point_round_trip": true,
+  "lossless_npz_draw_round_trip": true,
+  "rehearsal_point_rows": 14910,
+  "rehearsal_csv_gzip_bytes": 665755,
+  "rehearsal_statistic_values": 647784,
+  "rehearsal_npz_bytes": 4850459,
+  "projected_point_archive_bytes": 212854063.3802817,
+  "projected_draw_archive_bytes": 2088043888.0390687,
+  "raw_signal_bytes_conservative": 1619968000,
+  "projected_archive_bytes": 3920865951.4193506,
+  "planning_bytes_with_2x_allowance_and_10GiB_free_reserve": 18579150142.8387,
+  "observed_free_bytes": 47708188672,
+  "within_planning_disk_budget": true,
+  "limit": "A sampled storage projection. Full-run summary exports and duplication must remain bounded; recheck immediately before execution. Raw bootstrap signals are reconstructed from seeds and are not all retained."
+}

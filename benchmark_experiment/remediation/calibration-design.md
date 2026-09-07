@@ -1,6 +1,8 @@
-# Next calibration experiment: design and decision gates
+# Earlier calibration design and subsequent decision gates
 
-This is a prospective design for development and confirmation, not a claim that
+This records the earlier prospective development design and its evolution. The
+[frozen confirmation protocol](confirmation-protocol.md) now supersedes the
+unexecuted broad confirmation grid below. This is not a claim that
 any interval procedure is calibrated. The completed block-length pilot is described
 in [remaining-audit.md](remaining-audit.md). Its data may guide development but must
 not become confirmatory results after settings are selected.
@@ -25,7 +27,7 @@ development cells at n=256/512/1024. It makes the mean-treatment choice explicit
 retains model-mismatch failures and does not select a general-purpose interval.
 The [paired-summary helper](paired-summary.md) now supplies a tested research
 implementation for joint error-inflation/MAE-ratio summaries. Shared-parent stress
-materialization and final integration remain pending; the 36-cell grid below is
+materialization and point-summary integration were completed by the seventh package; the 36-cell grid below is
 still prospective rather than a claim about this smaller candidate comparison.
 
 ## Scientific targets and inputs
@@ -130,3 +132,15 @@ the final severity/position grid or validate within-record intervals under stres
 The next decision is a scoped final protocol and precision budget, followed by
 fresh confirmation rather than treating these reused development inputs as new
 evaluation data. No general-purpose H interval is accepted by this screen.
+
+
+## Frozen confirmation design
+
+The [eighth package](confirmation-protocol.md) replaces the earlier broad
+confirmation proposal with an explicit 33-cell accuracy grid, 14-cell stress
+subset and ten-cell clean interval study. Core coverage uses 2,000 parents per
+cell and the length sensitivity uses 500. All use 1,999 within-record draws,
+supported by a separately seeded numerical rehearsal. No universal interval
+acceptance or calibrated LRD testing claim is defined. Runtime/storage profiles,
+the exact grid and the immutable scientific design lock are linked in that report.
+Confirmation execution and paper rebuilding remain pending.

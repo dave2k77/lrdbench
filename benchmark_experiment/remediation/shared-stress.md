@@ -238,3 +238,10 @@ excluded from its claims. Correctly implemented procedures may remain comparator
 even when they perform poorly. Fresh confirmation seeds, hypothesis-test
 calibration and regenerated paper tables/figures remain pending; these development
 records and their repeated executions must not be repurposed as confirmation.
+
+
+Subsequent update: the [eighth package](confirmation-protocol.md) now freezes
+those scientific choices and verifies a full-grid execution rehearsal. Its
+23-condition grid adds the declared severities and step positions, while
+within-record interval inference is explicitly scoped to clean inputs. The
+production confirmation executor and fresh-data run are the next release step.
