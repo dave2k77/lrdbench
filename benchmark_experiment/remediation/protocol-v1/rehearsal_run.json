@@ -1,0 +1,747 @@
+{
+  "identity": {
+    "actual_repetitions": 2,
+    "config": {
+      "global_seed": 20260915,
+      "lengths": [
+        512,
+        1024,
+        2048
+      ],
+      "processes": {
+        "AR1": [
+          -0.5,
+          0.5,
+          0.8,
+          0.95
+        ],
+        "ARFIMA": [
+          -0.25,
+          0.0,
+          0.25
+        ],
+        "fGn": [
+          0.25,
+          0.5,
+          0.75,
+          0.85
+        ]
+      },
+      "repetitions": 2,
+      "seed_namespace": "lrdbench-classical-rehearsal-v1"
+    },
+    "environment": {
+      "machine": "AMD64",
+      "numpy_build": "Build Dependencies:\n  blas:\n    detection method: pkgconfig\n    found: true\n    include directory: C:/Users/runneradmin/AppData/Local/Temp/cibw-run-sp8l_b7i/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/include\n    lib directory: C:/Users/runneradmin/AppData/Local/Temp/cibw-run-sp8l_b7i/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/lib\n    name: scipy-openblas\n    openblas configuration: OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY\n      Haswell MAX_THREADS=24\n    pc file directory: D:/a/numpy-release/numpy-release/.openblas\n    version: 0.3.34.106.0\n  lapack:\n    detection method: pkgconfig\n    found: true\n    include directory: C:/Users/runneradmin/AppData/Local/Temp/cibw-run-sp8l_b7i/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/include\n    lib directory: C:/Users/runneradmin/AppData/Local/Temp/cibw-run-sp8l_b7i/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/lib\n    name: scipy-openblas\n    openblas configuration: OpenBLAS 0.3.34.106.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY\n      Haswell MAX_THREADS=24\n    pc file directory: D:/a/numpy-release/numpy-release/.openblas\n    version: 0.3.34.106.0\nCompilers:\n  c:\n    commands: cl\n    linker: link\n    name: msvc\n    version: 19.44.35228\n  c++:\n    commands: cl\n    linker: link\n    name: msvc\n    version: 19.44.35228\n  cython:\n    commands: cython\n    linker: cython\n    name: cython\n    version: 3.3.0\nMachine Information:\n  build:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: windows\n  host:\n    cpu: x86_64\n    endian: little\n    family: x86_64\n    system: windows\nPython Information:\n  path: C:\\Users\\runneradmin\\AppData\\Local\\Temp\\build-env-mk5sjh7q\\Scripts\\python.exe\n  version: '3.14'\nSIMD Extensions:\n  baseline:\n  - X86_V2\n  found:\n  - X86_V3\n\n",
+      "packages": {
+        "Jinja2": "3.1.6",
+        "Markdown": "3.10.3",
+        "MarkupSafe": "3.0.3",
+        "PyWavelets": "1.9.0",
+        "PyYAML": "6.0.3",
+        "Pygments": "2.21.0",
+        "ast_serialize": "0.9.0",
+        "babel": "2.18.0",
+        "backrefs": "8.0",
+        "build": "1.6.0",
+        "certifi": "2026.7.22",
+        "charset-normalizer": "3.5.1",
+        "click": "8.5.0",
+        "colorama": "0.4.6",
+        "contourpy": "1.3.3",
+        "coverage": "7.16.0",
+        "cycler": "0.12.1",
+        "editables": "0.6",
+        "fonttools": "4.64.0",
+        "ghp-import": "2.1.0",
+        "griffelib": "2.3.0",
+        "hatchling": "1.32.0",
+        "hypothesis": "6.167.1",
+        "idna": "3.19",
+        "iniconfig": "2.3.0",
+        "kiwisolver": "1.5.1",
+        "librt": "0.15.0",
+        "lrdbench": "1.2.1",
+        "matplotlib": "3.11.1",
+        "mergedeep": "1.3.4",
+        "mkdocs": "1.6.1",
+        "mkdocs-autorefs": "1.4.4",
+        "mkdocs-get-deps": "0.2.2",
+        "mkdocs-material": "9.7.7",
+        "mkdocs-material-extensions": "1.3.1",
+        "mkdocstrings": "1.0.6",
+        "mkdocstrings-python": "2.0.8",
+        "mypy": "2.3.1",
+        "mypy_extensions": "1.1.0",
+        "numpy": "2.5.3",
+        "packaging": "26.3",
+        "paginate": "0.5.7",
+        "pandas": "3.0.5",
+        "pathspec": "1.1.1",
+        "pillow": "12.3.0",
+        "platformdirs": "4.11.7",
+        "pluggy": "1.6.0",
+        "pymdown-extensions": "11.0.2",
+        "pyparsing": "3.3.2",
+        "pyproject_hooks": "1.2.0",
+        "pytest": "9.1.1",
+        "pytest-cov": "7.1.0",
+        "python-dateutil": "2.9.0.post0",
+        "pyyaml_env_tag": "1.1",
+        "requests": "2.34.2",
+        "ruff": "0.16.6",
+        "scipy": "1.18.1",
+        "seaborn": "0.13.2",
+        "six": "1.17.0",
+        "sortedcontainers": "2.4.0",
+        "tabulate": "0.10.0",
+        "tomlkit": "0.15.1",
+        "trove-classifiers": "2026.6.1.19",
+        "types-PyYAML": "6.0.12.20260906",
+        "typing_extensions": "4.16.0",
+        "tzdata": "2026.3",
+        "urllib3": "2.7.0",
+        "watchdog": "6.0.0"
+      },
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.14.5",
+      "thread_environment": {
+        "MKL_NUM_THREADS": null,
+        "OMP_NUM_THREADS": null,
+        "OPENBLAS_NUM_THREADS": null,
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "planned_protocol": {
+      "accuracy": {
+        "generator": "exact_covariance_cholesky_no_jitter_or_stationary_AR1_recursion",
+        "lengths": [
+          512,
+          1024,
+          2048
+        ],
+        "primary_metrics": [
+          "mae",
+          "bias"
+        ],
+        "processes": {
+          "AR1": [
+            -0.5,
+            0.5,
+            0.8,
+            0.95
+          ],
+          "ARFIMA": [
+            -0.25,
+            0.0,
+            0.25
+          ],
+          "fGn": [
+            0.25,
+            0.5,
+            0.75,
+            0.85
+          ]
+        },
+        "repetitions": 2000,
+        "roster": "audited_19_plus_centered_geometric_v1",
+        "scales": "fixed_sample_rules_expanded_in_method_settings",
+        "secondary_metrics": [
+          "rmse",
+          "validity",
+          "outside_0_1",
+          "runtime",
+          "H_ge_0p6_exceedance_diagnostic"
+        ]
+      },
+      "claim_exclusions": [
+        "calibrated_LRD_hypothesis_test_or_5pct_false_positive_rate",
+        "empirical_EEG_validation_or_biomarker_accuracy",
+        "contaminated_series_has_the_latent_clean_H",
+        "coverage_under_contamination",
+        "universal_interval_calibration_or_estimator_superiority",
+        "oscillatory_combined_artifact_or_infinite_variance_noise_robustness",
+        "matched_physical_or_relative_frequency_scales_across_lengths"
+      ],
+      "execution": {
+        "amendments": "new_protocol_version_and_explicit_reason_before_new_confirmation_results",
+        "large_run_requires": [
+          "compiled_scientific_design_lock",
+          "validated_confirmation_executor",
+          "runtime_source_environment_lock",
+          "dry_run_and_disk_capacity_check"
+        ],
+        "provisional_budget_hours": 24,
+        "reporting": "all_attempts_saved_failures_retained_source_and_input_hashes_verified",
+        "status": "design_only_no_confirmation_inputs_generated",
+        "workers": 1
+      },
+      "intervals": {
+        "availability": "finite_original_point_and_every_requested_statistic_draw",
+        "block_rule": "floor_n_divided_by_16",
+        "bootstrap_draws": 1999,
+        "calibration_decision": "report_cellwise_coverage_uncertainty_no_binary_universal_acceptance",
+        "candidates": [
+          "cbc_raw_percentile",
+          "cbc_raw_basic",
+          "cbc_centered_percentile",
+          "cbc_centered_basic",
+          "unknown_fgn_centered_basic",
+          "gph_normal_raw"
+        ],
+        "core": {
+          "lengths": [
+            512
+          ],
+          "processes": {
+            "AR1": [
+              0.8,
+              0.95
+            ],
+            "ARFIMA": [
+              0.25
+            ],
+            "fGn": [
+              0.25,
+              0.5,
+              0.75,
+              0.85
+            ]
+          },
+          "repetitions": 2000
+        },
+        "input_conditions": [
+          "clean"
+        ],
+        "length_sensitivity": {
+          "lengths": [
+            1024
+          ],
+          "processes": {
+            "AR1": [
+              0.95
+            ],
+            "fGn": [
+              0.5,
+              0.85
+            ]
+          },
+          "repetitions": 500
+        },
+        "mean_rule": "sample_center_each_record_and_each_bootstrap_record_separately",
+        "methods": [
+          "GPH::narrow_band",
+          "Higuchi",
+          "GHE"
+        ],
+        "model": "stationary_gaussian_fgn_unknown_constant_mean_profile_ML",
+        "model_boundary_policy": "retain_and_flag_bounds_0p01_0p99_within_0p001",
+        "nominal": 0.95,
+        "normal_candidate_methods": [
+          "GPH::narrow_band"
+        ],
+        "parent_selection": "first_declared_repetition_indices_from_accuracy_pool",
+        "primary_metric": "unconditional_coverage_unavailable_counted_as_miss",
+        "secondary_metrics": [
+          "conditional_coverage",
+          "availability",
+          "mean_width",
+          "median_width",
+          "paired_coverage_difference",
+          "boundary_hits"
+        ]
+      },
+      "phase": "scientific_design_before_confirmation",
+      "planned_contrasts": [
+        {
+          "comparison": "centered_minus_raw_MAE_separately_for_Higuchi_and_GHE",
+          "id": "geometric_mean_removal_clean",
+          "scope": "every_accuracy_cell"
+        },
+        {
+          "comparison": "centered_minus_raw_error_inflation_and_absolute_drift",
+          "id": "geometric_mean_removal_stress",
+          "scope": "every_stress_cell_and_condition"
+        },
+        {
+          "comparison": "centered_minus_raw_coverage_at_fixed_CBC_construction",
+          "id": "interval_centering",
+          "scope": "each_interval_cell_method_and_percentile_or_basic"
+        },
+        {
+          "comparison": "basic_minus_percentile_coverage_at_fixed_CBC_treatment",
+          "id": "interval_construction",
+          "scope": "each_interval_cell_method_and_raw_or_centered"
+        },
+        {
+          "comparison": "unknown_fGn_minus_CBC_basic_coverage_with_centered_statistic",
+          "id": "interval_model",
+          "scope": "each_interval_cell_and_method"
+        }
+      ],
+      "protocol_id": "lrdbench-classical-confirmation-v1",
+      "randomness": {
+        "confirmation_namespace": "lrdbench-classical-confirmation-v1",
+        "data_seed_depends_on": [
+          "namespace",
+          "global_seed",
+          "process_cell",
+          "repetition",
+          "stream"
+        ],
+        "global_seed": 20260915,
+        "parent_stream": "input",
+        "rehearsal_namespace": "lrdbench-classical-rehearsal-v1",
+        "stress_seed_namespace": "lrdbench-classical-confirmation-contamination-v1"
+      },
+      "schema_version": 1,
+      "signal": "stationary_scalar_increments_no_physical_sampling_rate",
+      "stress": {
+        "application": "each_condition_directly_to_its_clean_parent",
+        "lengths": [
+          512,
+          1024
+        ],
+        "noise_normalization": "realized_sample_sd_plus_1e-12_without_noise_centering",
+        "offset_shifts": [
+          1.0
+        ],
+        "outlier_amplitudes": [
+          8.0
+        ],
+        "outlier_rates": [
+          0.005,
+          0.01,
+          0.05
+        ],
+        "parent_selection": "first_declared_repetition_indices_from_accuracy_pool",
+        "polynomial_basis": "sum_t_to_power_k_for_k_1_through_order_then_center",
+        "polynomial_orders": [
+          1,
+          2
+        ],
+        "polynomial_strengths": [
+          0.25,
+          0.5,
+          1.0
+        ],
+        "primary_metrics": [
+          "absolute_error_inflation",
+          "absolute_estimate_drift"
+        ],
+        "processes": {
+          "AR1": [
+            0.8,
+            0.95
+          ],
+          "ARFIMA": [
+            0.25
+          ],
+          "fGn": [
+            0.25,
+            0.5,
+            0.75,
+            0.85
+          ]
+        },
+        "repetitions": 500,
+        "secondary_metrics": [
+          "signed_estimate_drift",
+          "paired_mae_ratio",
+          "validity_loss"
+        ],
+        "step_positions": [
+          0.25,
+          0.5,
+          0.75
+        ],
+        "step_shifts": [
+          0.5,
+          1.0,
+          2.0
+        ],
+        "student_t_df": [
+          3.0,
+          5.0
+        ],
+        "student_t_scales": [
+          0.5,
+          1.0
+        ],
+        "target_role": "latent_clean_recovery_not_contaminated_process_H"
+      },
+      "summaries": {
+        "bootstrap_draws": 1999,
+        "condition_weights": "report_each_condition_separately_no_global_stress_score",
+        "denominator_floor": 1e-12,
+        "domain_weights": "separate_fGn_ARFIMA_AR1_equal_cells_within_domain",
+        "independent_unit": "clean_parent_within_fixed_process_length_cell",
+        "monte_carlo_intervals": "Wilson_95_for_cell_proportions_and_paired_parent_resamples_for_effects",
+        "multiplicity": "descriptive_pointwise_intervals_no_significance_or_winner_claims",
+        "nominal": 0.95,
+        "precision": {
+          "continuous_metric_mcse": "report_achieved_per_cell_no_unbounded_error_guarantee",
+          "core_coverage_mcse_at_0p95_max": 0.005,
+          "secondary_coverage_mcse_at_0p95_max": 0.01,
+          "stopping": "fixed_repetitions_no_outcome_dependent_extension_or_early_stop"
+        },
+        "ratio": "ratio_of_weighted_aggregate_MAEs_recomputed_in_each_parent_draw",
+        "seed": 20260916,
+        "support": "common_complete_declared_methods_conditions_per_cell_plus_full_failure_accounting",
+        "zero_or_all_events": "report_Wilson_bounds_do_not_claim_zero_uncertainty"
+      },
+      "target": "fGn_H__ARFIMA_d_plus_half__AR1_asymptotic_half"
+    },
+    "profile": {
+      "endpoint_stability": {
+        "failure_action": "retain_counts_and_revisit_draw_budget_before_design_lock_no_method_selection",
+        "independent_repeat_90pct_absolute_change_limit": 0.02,
+        "largest_absolute_change_limit": 0.05,
+        "refinement_90pct_absolute_change_limit": 0.01
+      },
+      "interval_families": {
+        "AR1": [
+          0.95
+        ],
+        "fGn": [
+          0.25,
+          0.85
+        ]
+      },
+      "interval_lengths": [
+        512,
+        1024
+      ],
+      "parents_per_cell": 2,
+      "status": "rehearsal_never_confirmation",
+      "streams": {
+        "a": {
+          "draws": 3999,
+          "prefixes": [
+            1999,
+            3999
+          ]
+        },
+        "b": {
+          "draws": 1999,
+          "prefixes": [
+            1999
+          ]
+        }
+      }
+    },
+    "research_exports_only": true,
+    "roster": [
+      {
+        "base": "AbsoluteMoment",
+        "center": false,
+        "method": "AbsoluteMoment",
+        "params": {
+          "max_scale": 256,
+          "min_scale": 8,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "DFA",
+        "center": false,
+        "method": "DFA::balanced_scales",
+        "params": {
+          "detrend_order": 1,
+          "max_scale": 160,
+          "min_scale": 12,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "DFA",
+        "center": false,
+        "method": "DFA::long_scales",
+        "params": {
+          "detrend_order": 1,
+          "max_scale": 256,
+          "min_scale": 16,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "DFA",
+        "center": false,
+        "method": "DFA::short_scales",
+        "params": {
+          "detrend_order": 1,
+          "max_scale": 96,
+          "min_scale": 8,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "DMA",
+        "center": false,
+        "method": "DMA::balanced_windows",
+        "params": {
+          "max_scale": 160,
+          "min_scale": 12,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "DMA",
+        "center": false,
+        "method": "DMA::long_windows",
+        "params": {
+          "max_scale": 256,
+          "min_scale": 16,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "DMA",
+        "center": false,
+        "method": "DMA::short_windows",
+        "params": {
+          "max_scale": 96,
+          "min_scale": 8,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "GHE",
+        "center": false,
+        "method": "GHE",
+        "params": {
+          "input_representation": "increments",
+          "n_bootstrap": 0,
+          "n_scales": 18,
+          "q": 1.0
+        }
+      },
+      {
+        "base": "GHE",
+        "center": true,
+        "method": "GHE::centered",
+        "params": {
+          "input_representation": "increments",
+          "n_bootstrap": 0,
+          "n_scales": 18,
+          "q": 1.0
+        }
+      },
+      {
+        "base": "GPH",
+        "center": false,
+        "method": "GPH::narrow_band",
+        "params": {
+          "bootstrap_block_len": 32,
+          "ci_levels": [
+            0.95
+          ],
+          "m": 32,
+          "n_bootstrap": 0,
+          "taper": "none"
+        }
+      },
+      {
+        "base": "GPH",
+        "center": false,
+        "method": "GPH::wider_band",
+        "params": {
+          "bootstrap_block_len": 32,
+          "ci_levels": [
+            0.95
+          ],
+          "m": 64,
+          "n_bootstrap": 0,
+          "taper": "none"
+        }
+      },
+      {
+        "base": "Higuchi",
+        "center": false,
+        "method": "Higuchi",
+        "params": {
+          "input_representation": "increments",
+          "k_max": 32,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "Higuchi",
+        "center": true,
+        "method": "Higuchi::centered",
+        "params": {
+          "input_representation": "increments",
+          "k_max": 32,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "ModifiedLocalWhittle",
+        "center": false,
+        "method": "ModifiedLocalWhittle",
+        "params": {
+          "bootstrap_block_len": 32,
+          "ci_levels": [
+            0.95
+          ],
+          "m": 64,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "RS",
+        "center": false,
+        "method": "RS",
+        "params": {
+          "bootstrap_block_len": 32,
+          "ci_levels": [
+            0.95
+          ],
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "Variance",
+        "center": false,
+        "method": "Variance",
+        "params": {
+          "max_scale": 256,
+          "min_scale": 8,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "VarianceResidual",
+        "center": false,
+        "method": "VarianceResidual",
+        "params": {
+          "detrend_order": 1,
+          "max_scale": 256,
+          "min_scale": 8,
+          "n_bootstrap": 0
+        }
+      },
+      {
+        "base": "WaveletOLS",
+        "center": false,
+        "method": "WaveletOLS::broad_band",
+        "params": {
+          "j_drop_high": 1,
+          "j_drop_low": 1,
+          "n_bootstrap": 0,
+          "wavelet": "db2"
+        }
+      },
+      {
+        "base": "WaveletOLS",
+        "center": false,
+        "method": "WaveletOLS::conservative_band",
+        "params": {
+          "j_drop_high": 2,
+          "j_drop_low": 1,
+          "n_bootstrap": 0,
+          "wavelet": "db4"
+        }
+      },
+      {
+        "base": "WaveletOLS",
+        "center": false,
+        "method": "WaveletOLS::upper_band",
+        "params": {
+          "j_drop_high": 1,
+          "j_drop_low": 2,
+          "n_bootstrap": 0,
+          "wavelet": "db2"
+        }
+      },
+      {
+        "base": "WhittleMLE",
+        "center": false,
+        "method": "WhittleMLE",
+        "params": {
+          "bootstrap_block_len": 32,
+          "ci_levels": [
+            0.95
+          ],
+          "m": 64,
+          "n_bootstrap": 0
+        }
+      }
+    ],
+    "schema_version": 1,
+    "source_sha256": {
+      "benchmark_experiment\\remediation\\compile_confirmation_protocol.py": "e95e63934aaa47a16e7169a12bf8965c2a7e2ad2b3a4e56a86b928a139770927",
+      "benchmark_experiment\\remediation\\confirmation_batch.py": "b272e7a66855670b35dc41dbfa8134c7f874b7054bd23b536ad2853d47fe5450",
+      "benchmark_experiment\\remediation\\confirmation_intervals.py": "5817fdf98560737d3fe9b4cd4cc70c7786d2bc0b14252da10a2ec0d8ffa0810d",
+      "benchmark_experiment\\remediation\\estimator_eligibility.csv": "0dff0c086a4573b38d969c17e9825aba0ede99808a8a8df9c8c2cf38965c304f",
+      "benchmark_experiment\\remediation\\interval_candidates.py": "0eda0fb9f3543718825d39029063a08391705800e074d2d5380701c1a0a27b20",
+      "benchmark_experiment\\remediation\\materialize_shared_stress.py": "19df72e6bf17584b17cf63d179bfc97657712999666b70de646c5c56f623619c",
+      "benchmark_experiment\\remediation\\profile_confirmation.py": "c58aad178572549227197d5134d9fda26215a82abde72d22a9ae1bc3b24ea517",
+      "benchmark_experiment\\remediation\\run_calibration.py": "fa1bd2a86a0bed4f1c91ebe000c092dd9a856b3814fbad42b92438cecbc0d07b",
+      "benchmark_experiment\\remediation\\run_interval_comparison.py": "a45802ed65083e64a048000d4ce3c1a754008de3df9acadb12877cddab60caff",
+      "benchmark_experiment\\remediation\\run_mean_comparison.py": "373ffb828ee5d5fc5861e7f0a753f0a11446305fab53a0d886fdcbc2b2993c40",
+      "benchmark_experiment\\remediation\\run_remaining_audit.py": "748e199989fbd30bb3fb6a21377aadb2c298c9e8c168af688cff85c67f755291",
+      "benchmark_experiment\\remediation\\run_shared_stress.py": "1d93de423a979d54e3a1586598b88db11fa7d72c97c8823d30f9c368b1f4cd2f",
+      "src\\lrdbench\\__init__.py": "a123908f762c7367b2cfb00d2ccb775028d0ec5ebee9e6734b48915bfc52adef",
+      "src\\lrdbench\\bootstrap.py": "e7225ff9aaaf0b391e178b713fe85815a70a0a741e30b92ae300aeba8cab542c",
+      "src\\lrdbench\\cli\\__init__.py": "41107fba89d68e25aa1a3d8c70bae8c03dba148d9a9d0ea1a3717bc6a5fd7f58",
+      "src\\lrdbench\\cli\\main.py": "dac92c1f0a6cbcedfe13561ffc0fb7979239c8be0fb1d37875e51e5986b24ad3",
+      "src\\lrdbench\\contaminations\\__init__.py": "9dfa7bee2b6b93129e2c13a1f62a0e21531627d26c66f04fb16697b032f1c715",
+      "src\\lrdbench\\contaminations\\_common.py": "150aec9d03d2a9cae79f5aaf8da8dd59ebaa4a88bf8be97b94b43dd35a100260",
+      "src\\lrdbench\\contaminations\\heavy_tail.py": "f08cda0367caf9f7fbb2c24569bfa9de822a8acfe51cd3f81a0aadbf9f23fcaa",
+      "src\\lrdbench\\contaminations\\level_shift.py": "51d530c1c597ea18c02257efd1db9149153ebb0fa3b6dca7e1e308fefeb68571",
+      "src\\lrdbench\\contaminations\\outliers.py": "e17e5224999fb7fdfe429f2d4b21f11a539e27875c567e4b14a6d82598c6f1f3",
+      "src\\lrdbench\\contaminations\\polynomial.py": "d92a957be69cc7401ed6d3938fd5b8a704c1c7a155d10b82a60e607c569dbfa7",
+      "src\\lrdbench\\defaults.py": "cb5adccfe8b66456ce655c4e688ddc5a9e0cf51df5c97bee30cd0a84329c6857",
+      "src\\lrdbench\\enums.py": "ea90a6506de692af71c4d7e0f65e86b934f88408f428dd4fda193d4d6c9206de",
+      "src\\lrdbench\\estimators\\__init__.py": "345a7a196e8f4a978dbc6a45abafa86daef85a78653878135ebdb3a73095edba",
+      "src\\lrdbench\\estimators\\_fit_utils.py": "7b85c422696e2659f882b83b3caa4d6d3889bbb9202d274980f3ab755c56edcd",
+      "src\\lrdbench\\estimators\\data_driven.py": "7f3493110765c62df05d913f2f321c9dbae06c8f49bf9da7b0c9ea5a5d270a7b",
+      "src\\lrdbench\\estimators\\discrimination.py": "05dfced589ae7d7e578b4bbd7d8c24355262f779932efa6b9b64cb043a26bfad",
+      "src\\lrdbench\\estimators\\geometric.py": "adbfe7b882b9af2918d548dfb78056d778a618e096c2f57c30299f25cef6152a",
+      "src\\lrdbench\\estimators\\spectral.py": "599fa353db430e14c88fcf07051ed22de9872c5a79d34abef65bcb54362e2a76",
+      "src\\lrdbench\\estimators\\temporal.py": "575c353069ae191b519b17fddee1faa92d59d65c341ce6c4bc1af45cd454a08e",
+      "src\\lrdbench\\estimators\\timescale.py": "513df9f94d2c1b9ea71b667e3dacf5d42a380332381cffdc758fe30ae107379d",
+      "src\\lrdbench\\estimators\\wavelet.py": "df063aa68839474710dd49d541cf5950e5184d7cf74f9f670523daf8406e4def",
+      "src\\lrdbench\\evaluator.py": "ca9ecc1d4159e5f88e32661f995946378131e108a4dad3d3acb4a575f2f24eb4",
+      "src\\lrdbench\\examples\\__init__.py": "53df7efb6ac2e127efc7d920fc1fe3e0582f265114ca3f4a011755a13f65f990",
+      "src\\lrdbench\\examples\\custom_estimator.py": "c787df608e3b330596b8f8a2b34d196d0d1d4da782a23c69575840554f59d6d0",
+      "src\\lrdbench\\execution.py": "f92824d64c9f40d96e3a7abb89c628d958d2893717a21f6ccc99cf5112f7e003",
+      "src\\lrdbench\\failure_modes.py": "7d682229dc57f5b5596cc5503fc3be355ddeab4818a56fa8c48961d1de2fca9d",
+      "src\\lrdbench\\generators\\__init__.py": "d2f4d2a9d4b627f2994eeb59087ca8fa81ae7816f91ed9ba9961b91795081f71",
+      "src\\lrdbench\\generators\\_signal.py": "8568ea096ed5bead937fda472cf361ce63191f54730fb72c9e906c5aac3fb469",
+      "src\\lrdbench\\generators\\arfima.py": "ed09ddfe032a352517c5fabd395606de2be290ddd1d8ba5ec6c027415b1546e0",
+      "src\\lrdbench\\generators\\fbm.py": "b591a7ffbd87e2a8b377167c0c2793bc1646673643f107fc3ee8d33f9dc90554",
+      "src\\lrdbench\\generators\\fgn.py": "3a5e40b090a8f8e2f94b3525ff69281fc2ad276a53d61485247ba9e356813444",
+      "src\\lrdbench\\generators\\fou.py": "91f3a73f45bb661021f627d408ef231fd010709634cddfb380a3ca3ffb40d387",
+      "src\\lrdbench\\generators\\mrw.py": "d5b0d1ba22c8354373ff633a1fbc5394701d7e30f04b14d360284f1a6fe9324d",
+      "src\\lrdbench\\generators\\multitimescale.py": "0536ad7c1ce4aaa839d7767364085f0450034d4a9c87673311a736cd46687acf",
+      "src\\lrdbench\\generators\\nonstationary_lrd.py": "760bc7f270c94f5be4288e080d96f90660c32a1b4c8317f1783bd3d5f47eafd0",
+      "src\\lrdbench\\interfaces.py": "736e244c4bfb618bd4fe9237c24501ff3666999b237963a14dc7b2a9933a057e",
+      "src\\lrdbench\\leaderboard.py": "5ae52a6602978bcf17a2edbe02e85dcfe395514fb78aeb5432a9b184b08ba44b",
+      "src\\lrdbench\\manifest.py": "814cf7d7eb1273a50789fe83f3cf72827d01823ecfabcfcbb66de857d6ac4709",
+      "src\\lrdbench\\metrics_catalog.py": "7ea92abc990027e524cb59c26c98b21bfe7924b9fa04414b75a1c40e63c11b21",
+      "src\\lrdbench\\ml_training.py": "81fa366987b736cbc3d1687b93573ba6b2c6492c240f75eec275669a393fad10",
+      "src\\lrdbench\\observational_sources.py": "f87fab6a1c76b0a609951d471c79475a761bc35036c1372ac6c6a2c0bb2a11c0",
+      "src\\lrdbench\\openneuro_eeg.py": "599866a2f75f6d95de6ccb1ba4e67b88d9081801d36af82c23a71966514d1bda",
+      "src\\lrdbench\\output_contract.py": "909b99189a2c90365983f0e4f319d76b74e601b6205e59a80baca36ce6938f31",
+      "src\\lrdbench\\paired_metrics.py": "78baae669483451482d2dd801e7c22faa249474c641217ce307fc5133559729b",
+      "src\\lrdbench\\plugin_loader.py": "2afc1711c04e857eb7147cc79bd0b3a63df75dbfd51d1b45beb6ed23fe7051be",
+      "src\\lrdbench\\preprocessing\\__init__.py": "f73f1c0efeb074fe429c72ec7e130c2f116b488b6e5326dae68123ecc0ce5a32",
+      "src\\lrdbench\\preprocessing\\_common.py": "52327d2e34a774d99690dfffadabb030da7317467d088e292c4975d02bdf7b02",
+      "src\\lrdbench\\preprocessing\\nonstationary.py": "77c601bfb355dcc39e8c221764f2ca6768132712714532e2f8e6bed52de5b8eb",
+      "src\\lrdbench\\public_assets.py": "5ddef551aefbe09aca07e4df70e4be34fc8649dc4441f24e461cd104423ecf6f",
+      "src\\lrdbench\\registries.py": "b08d1d78f77a9e95096e1852bfab10b54ed57e6abddd8c74af34eab48553ed6c",
+      "src\\lrdbench\\reporter.py": "0d3d324ece25fa4788a4ec7e76ea14e15e2de1693f99e275343e85c1901183d1",
+      "src\\lrdbench\\result_store.py": "55e3d2a4415a17ec5cde20e1bbf26b3cd3b1b892d72240581d2cf94d3cbf8afa",
+      "src\\lrdbench\\runner.py": "b0c2a18cd3e0dd02286a019baca73b72b9d7f077432c84196eac3369cc245423",
+      "src\\lrdbench\\schema.py": "d69860c60c96a35795c900c16ade24bfaa45dada33b5a7e9b6d98d47dc6feb67",
+      "src\\lrdbench\\strata.py": "01f46b5664f50986587b06220806ef446694526dc87db068866370e6a95bda22",
+      "src\\lrdbench\\testing.py": "14b3b24a3bdc7e3900cb48b60ef2bd541b40a4c57b6d535034876a9ef67f3aac",
+      "src\\lrdbench\\validation.py": "414fff04805d4c64cd43e24420c2812d054b1529e4fe4a6882210f3711272956"
+    },
+    "status": "rehearsal_never_confirmation"
+  },
+  "identity_sha256": "dbe9e057d8fb6fc1422aa89da715909b3b2bff5b09e6215255190e4063ae3464",
+  "base_revision": "ca4d7809baf78f823b3ec5427bd42dfadf7ba236"
+}

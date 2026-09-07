@@ -130,6 +130,15 @@ but retain substantial step/trend sensitivity. The package includes exact seed
 exports, resumable provenance, three checked figures and 435 passing tests with
 eight skips. Final protocol/precision choices and fresh confirmation remain next.
 
+The [eighth package](confirmation-protocol.md) freezes the synthetic confirmation
+design: 66,000 clean parents, 23 stress conditions, 21 point pipelines and a
+15,500-parent clean interval sub-study. It expands the protocol into an immutable
+design lock, verifies numerical endpoint stability and introduces equation-matched
+batched bootstrap calculations. The projected compute cost is 7.35 hours, with
+a 14.70-hour planning allowance; storage round trips also pass. Verification totals
+465 tests passing and eight skips. No confirmation signals have been generated.
+Release of the resumable confirmation executor and final runtime lock is next.
+
 Continue validating every retained generator/estimator against mathematical references
 and appropriate inputs, and calibrate uncertainty procedures. Then freeze shared
 clean parents, null/alternative populations, scales, repetitions and paired or
