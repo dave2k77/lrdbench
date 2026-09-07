@@ -1,0 +1,27 @@
+{
+  "complete": true,
+  "completed_fits": 2016,
+  "actual_workload": {
+    "cells": 36,
+    "independent_inputs": 72,
+    "point_fits": 1368,
+    "ci_fits": 648,
+    "bootstrap_draws": 258552
+  },
+  "full_development_workload": {
+    "cells": 36,
+    "independent_inputs": 9216,
+    "point_fits": 175104,
+    "ci_fits": 82944,
+    "bootstrap_draws": 33094656
+  },
+  "observed_fit_seconds": 371.33812360001684,
+  "projected_full_fit_hours": 13.203133283556154,
+  "timing_limit": "Single-process measured fit time; excludes generation, disk/export overhead and contention. A small cost sample is not coverage evidence.",
+  "artifact_sha256": {
+    "estimates.jsonl": "b771a923d348e6da5e441437c029a208950c202e98320f761e34d2f2c0741da8",
+    "input_index.csv": "e755cf6ba42408b841e9a04119763031b4ce22f37aa601fcdbeff637ae7c3103",
+    "summary.csv": "3a3ecd4400a48537823ccfe60671240dc5048532e8edd951921f08fc46aec7ba",
+    "timing.csv": "6cb2254dea9fc4959c8a604f3d51b2e413dc33e6f712c9e38b420d04f7d23c9d"
+  }
+}

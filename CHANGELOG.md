@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Resumable calibration development
+- Add a dedicated research runner with stable shared inputs, separate input and
+  resampling streams, per-fit checkpoints, single-writer locking and strict resume
+  checks against configuration, source, environment and input/result hashes.
+- Export complete failure/interval denominators and stream raw research exports by
+  process/length cell. Keep the public output contract and historical bundles unchanged.
+- Add a Windows x64 / Python 3.14.5 dependency lock with distribution hashes and
+  verify a separate installation. Profile all 36 development cells with two records
+  each; retain the full 399 draws per candidate interval for cost measurement only.
+
 ### Remaining classical-method and generator audit
 - Remove silent H clipping from temporal estimators and wavelet slope conversion.
   Temporal and primary wavelet regressions expose out-of-range points and resamples.

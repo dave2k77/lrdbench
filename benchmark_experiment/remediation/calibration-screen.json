@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "stage": "development",
+  "seed_namespace": "lrdbench-calibration-development-v1",
+  "global_seed": 20260909,
+  "lengths": [512, 1024, 2048],
+  "processes": {
+    "fGn": [0.2, 0.35, 0.5, 0.65, 0.8],
+    "ARFIMA": [-0.3, 0.0, 0.3],
+    "AR1": [-0.5, 0.5, 0.8, 0.95]
+  },
+  "repetitions": 256,
+  "bootstrap_draws": 399,
+  "nominal": 0.95,
+  "block_divisors": [32, 16, 8],
+  "ci_methods": {
+    "GPH": {"m": 32},
+    "Higuchi": {"k_max": 32, "input_representation": "increments"},
+    "GHE": {"q": 1.0, "h_max": 32, "input_representation": "increments"}
+  }
+}
