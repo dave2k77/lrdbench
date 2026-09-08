@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "source_run": "43d0a7f75c8afab6d32ab6fd1f2ff8db49cca59e36971e2b74404173f4cbfcf2",
+  "canonical_rows": 118917,
+  "audited_inputs_verified": [
+    "accuracy_cells.csv.gz",
+    "accuracy_domains.csv.gz",
+    "stress_cells.csv.gz",
+    "stress_domains.csv.gz",
+    "intervals_cells.csv.gz",
+    "intervals_domains.csv.gz",
+    "planned_contrasts.csv.gz"
+  ],
+  "evidence_rows_reconciled": 2562,
+  "figure_cells_checked": 2302,
+  "physical_tables": 6,
+  "logical_tables": 5,
+  "figures": 5,
+  "references": 15,
+  "native_equations": 6,
+  "docx_sha256": "46a354b477291f6c559fbdc3469522f4ba70c44d0820c74156f2433325135557",
+  "visual_review": "separate page-by-page check required",
+  "rendered_pages": 24,
+  "pdf_sha256": "f348e574e81104daa282497b80405e006a798d79d2334952f22494a1e7eb89e7"
+}
