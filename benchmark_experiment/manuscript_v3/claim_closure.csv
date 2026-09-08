@@ -1,0 +1,14 @@
+claim_id,legacy_claim,new_location,disposition
+C01,Neural time series scope and empirical validation,Title; Abstract; Sections 2.1 and 4.4,Replaced with synthetic stationary increment scope
+C02,Historic experimental counts and roster,Sections 2.2 and 3.1; Tables 1 and S1,Replaced with frozen design and audited accounting
+C03,Davies Harte generation,Section 2.3,Replaced with exact covariance Cholesky and stationary AR1 recursion
+C04,Universal DFA winner,Sections 3.2 and 4.2; Table 2; Figure 1,Replaced with separate process and configuration profiles
+C05,Offset treated as internal step,Sections 2.5 and 3.3,Separated controls and demonstrated limits of centering
+C06,Drift and error ratio mixed,Sections 2.7 and 3.3; Table 3; Figures S1 to S3,Defined and reported each metric separately
+C07,DFA perfect coverage and contaminated interval collapse,Sections 2.6 and 3.4 to 3.5; Table 4; Figure 2,Removed unsupported inference and reported clean GPH Higuchi GHE procedures
+C08,Nominal LRD test and false positive claims,Sections 2.7 and 4.4,Removed test claims and labeled threshold diagnostic
+C09,Resamples treated as independent replication and nonoverlap significance,Sections 2.2 and 2.7; Table 1,Separated parent replication and two resampling levels with descriptive intervals
+C10,Intrinsic Higuchi saturation and GHE anchoring,Sections 3.2 and 4.1,Separated corrected implementation behavior from method performance
+C11,Eight EEG fixtures establish external validation,Sections 2.1 and 4.4,Removed from empirical findings and bounded observational relevance
+C12,Point validity proves interval validity,Sections 3.1 and 3.4 to 3.5,Reported point availability interval availability and coverage independently
+C13,Polynomial trend always worst,Section 3.3; Table 3; Figures S1 to S3,Replaced with condition specific results and complete profiles

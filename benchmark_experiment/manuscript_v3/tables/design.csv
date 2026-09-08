@@ -1,0 +1,10 @@
+Component,Design,Independent parents,Evaluations
+Clean accuracy,"11 settings × 3 lengths (512, 1024, 2048) × 2,000 repetitions; 21 pipelines","66,000","1,386,000 fits"
+Contamination,"7 settings × 2 lengths (512, 1024) × 500 repetitions; 23 separate descendants; 21 pipelines","7,000
+Subset of clean","161,000 descendants; 3,381,000 fits"
+Intervals core,"7 settings × n=512 × 2,000 repetitions; 16 candidates","14,000
+Subset of clean","224,000 intervals"
+Intervals sensitivity,3 settings × n=1024 × 500 repetitions; 16 candidates,"1,500
+Subset of clean","24,000 intervals"
+Within-record resampling,"1,999 circular-block and 1,999 fitted-fGn draws for each of 15,500 parents",No additional independent parents,"61,969,000 resampled records"
+Summary uncertainty,"1,999 resamples of parents within each fixed cell, preserving method and condition pairing",Uses declared parent counts,Pointwise Monte Carlo intervals
