@@ -33,7 +33,7 @@ print(out.result_store_path)
 
 ## Read the manifest
 
-The key parts of a ground-truth manifest are:
+The following is a manifest fragment; retain `manifest_id` and `name` from the full suite:
 
 ```yaml
 mode: ground_truth
@@ -47,6 +47,7 @@ source:
       replicates: 1
 estimators:
   - name: RS
+    family: temporal
     target_estimand: hurst_scaling_proxy
 metrics:
   - bias

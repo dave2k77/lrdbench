@@ -5,6 +5,11 @@ on: [push, pull_request]
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    env:
+      # Bound numerical-library threads on the shared CI runner.
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6

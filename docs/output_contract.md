@@ -1,101 +1,76 @@
 # Output Contract
 
-The public benchmark output contract is tracked in
-`configs/contracts/public_output_contract.json`. The same contract is exposed from
-`lrdbench.output_contract.PUBLIC_OUTPUT_CONTRACT` for tests and downstream tooling.
+This specification describes public `BenchmarkRunner` exports. It is distinct from the
+Python dataclass schema and the paper's frozen research archive. The current contract below
+is included directly from `configs/contracts/public_output_contract.json` during the docs build;
+`tests/unit/test_output_contract.py` checks that it equals
+`lrdbench.output_contract.PUBLIC_OUTPUT_CONTRACT`.
 
-The current contract version is `1.1.0`.
+## Run root and file requirements
 
-## Run Root
+Runs write under `<report.export_root>/<run_id>/`. Required files and minimum CSV headers,
+conditional files, dynamic columns and the contract version are defined in the embedded source.
+Extra columns are allowed; readers must not assume an exact column count or a fixed set of
+manifest-dependent metric/stratum columns.
 
-Each run writes artefacts under:
-
-```text
-<report.export_root>/<run_id>/
+```json
+--8<-- "configs/contracts/public_output_contract.json"
 ```
 
-For the public-small suites this is usually `reports/public_small/<run_id>/`. For public-medium
-suites it is usually `reports/public_medium/<run_id>/`.
+Contract 1.1.0 added the conditional `raw/truths.csv` companion-truth ledger while retaining the
+1.0.0 columns in existing files. It stores primary and companion estimands on the same
+realisation, with `is_primary` identifying the primary truth. `raw/records.csv` retains only
+that primary truth. Conditional correction and stress tables carry paired-record identifiers.
 
-## Required Files
+The manifest snapshot is written whenever `BenchmarkManifest.raw_yaml` is available. This
+includes both YAML loading and `manifest_from_mapping()`; a directly constructed dataclass
+with `raw_yaml=None` does not produce that snapshot.
 
-Every reported run should include these summary artefacts:
+## Persistence boundaries
 
-- `tables/run_summary.csv`
-- `tables/per_stratum_metrics.csv`
-- `tables/leaderboard.csv`
-- `tables/estimator_metadata.csv`
-- `tables/failures.csv`
-- `tables/failure_map.csv`
-- `tables/uncertainty_calibration.csv`
-- `tables/benchmark_uncertainty.csv`
-- `tables/estimator_disagreement.csv`
-- `tables/scale_window_sensitivity.csv`
-- `html/report.html`
-- `manifest/environment.json`
-- `artefacts/artefact_index.csv`
+The public store also writes `run_summary.json`, signal arrays under
+`raw/values/<record_id>.npy`, and `raw/plugin_provenance.csv` when plugin provenance rows exist.
+`raw/records.csv` points to each array through `values_path`. Preserve or relocate referenced
+files when moving a report; the CSVs alone are not a self-contained signal archive.
 
-Every raw result store should include:
+`raw/estimates.csv` retains points, endpoint fields, standard errors, validity, runtime,
+failure reasons, warnings and labelled bootstrap intervals. It does not persist the full
+`EstimateResult.diagnostics` mapping or bootstrap draw arrays. Use the returned Python objects
+when those fields are needed; a public CSV export cannot reconstruct the entire in-memory run.
 
-- `raw/records.csv`
-- `raw/estimates.csv`
-- `raw/metrics.csv`
-- `raw/artefacts.csv`
+The [confirmation archive](confirmation_benchmark.md) has separate point/draw storage,
+completion evidence, paired resampling and hash checks. Its files are not interchangeable
+with these public exports. Follow its protocol and audit instructions for paper reproduction.
 
-`raw/leaderboards.csv` is present when leaderboard rows are generated.
-`raw/truths.csv` is present when any record declares ground truth (all synthetic modes):
-it is a long-format ledger of every declared truth — the primary estimand plus any companion
-truths (e.g. `spectral_exponent_beta`, `timescale_tau`, `lrd_class`) attached to the same
-realisation — with columns `record_id`, `target_estimand`, `target_value`, `process_family`,
-`is_primary`, `notes`. `raw/records.csv` continues to carry only the primary truth.
-`tables/stress_metrics.csv` is present for stress-test reports. Figures and LaTeX tables are present
-only when requested and available for the run.
-
-> **Contract 1.1.0** added `raw/truths.csv` (companion-truth ledger) as a conditional file. This is
-> an additive change: `raw/records.csv` and all other files keep their `1.0.0` columns.
-
-## Required Columns
-
-The machine-readable JSON contract lists required columns for each stable CSV. Downstream checks
-should treat these as a minimum set: extra `metric__*` and `stratum__*` columns are expected in
-leaderboard, failure-map, and failure-summary tables when manifests or strata change.
-
-Core examples:
-
-| File | Required columns |
-| --- | --- |
-| `tables/run_summary.csv` | `run_id`, `manifest_id`, `benchmark_name`, `mode` |
-| `tables/per_stratum_metrics.csv` | `estimator_name`, `metric_name`, `value`, `stratum_json`, `metadata_json` |
-| `tables/leaderboard.csv` | `estimator_name`, `rank`, `score` |
-| `raw/metrics.csv` | `scope`, `record_id`, `estimator_name`, `metric_name`, `value`, `stratum_json`, `metadata_json` |
-| `raw/truths.csv` | `record_id`, `target_estimand`, `target_value`, `process_family`, `is_primary`, `notes` |
-| `artefacts/artefact_index.csv` | `artefact_id`, `run_id`, `artefact_type`, `format`, `path`, `hash`, `created_at`, `depends_on_json` |
-
-Use the JSON contract as the authority when building automated output checks.
-
-## Validation Command
-
-After generating a report, validate the run directory against the public output contract:
+## Validation command and limits
 
 ```bash
 lrdbench validate-output reports/public_small/<run_id>
 ```
 
-The command checks required files and required CSV columns. It returns exit code `0` for a valid
-output directory and exit code `2` with one `error=...` line per contract violation when validation
-fails.
+The command checks required-file presence and minimum CSV headers, including headers of
+conditional CSVs that exist. It returns `0` when those checks pass, or `2` with an `error=...`
+line per violation. It does not determine whether a conditional file should exist, verify a
+stored contract version, inspect row values/counts, follow array paths, verify hashes, or
+establish scientific validity. A passing check is structural validation, not a completeness audit.
 
-## Artefact Index
+## Artefact inventories
 
-`artefacts/artefact_index.csv` records every exported report artefact known to the reporter. Its
-rows include:
+`artefacts/artefact_index.csv` inventories report artefacts known to the reporter, including
+metric tables, figures, environment metadata, HTML and the index itself. Its hash and dependency
+metadata are optional; their presence as columns does not mean all files have been hashed.
 
-- a stable `artefact_id` within the run;
-- the `run_id`;
-- an `artefact_type`, such as `metric_export`, `leaderboard_export`, `figure`,
-  `environment_snapshot`, `html_report`, or `artefact_index`;
-- the file `format`;
-- the artefact `path`;
-- optional `hash`, `created_at`, and `depends_on_json` metadata.
+`raw/artefacts.csv` records the returned report bundle and any model artefacts appended by the
+runner after report generation. Consequently it can contain model files absent from the reporter
+index. Neither inventory enumerates every signal array or every raw CSV in the directory.
 
-The raw result store mirrors this information in `raw/artefacts.csv`.
+## Maintaining the specification
+
+Change the Python contract and tracked JSON together when changing a stable requirement; the
+existing equality test guards against divergence. Review the contract version and migration
+notes for compatibility changes. The docs include the JSON directly, so required paths and
+headers should not be copied into a second manually maintained schema table.
+
+For workflow or serialization changes, run relevant runner/reporter tests, generate a smoke
+report and validate it, then build the documentation with `python -m mkdocs build --strict`.
+Check conditional outputs and persistence semantics separately from the minimum-header check.

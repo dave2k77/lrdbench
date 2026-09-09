@@ -8,9 +8,16 @@
 
 **Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs and Read the Docs).
 
-Current public release: `1.2.1`. Releases are archived on Zenodo — cite the concept DOI
+Release version: `2.0.0`. Releases are archived on Zenodo — cite the concept DOI
 [`10.5281/zenodo.20937726`](https://doi.org/10.5281/zenodo.20937726) (it always resolves to the
 latest archived version) or use `CITATION.cff`.
+
+**Version 2.0:** the package includes the benchmark repairs; the repository also contains
+the audited confirmation results and rebuilt manuscript sources merged in [PR #3](https://github.com/dave2k77/lrdbench/pull/3).
+Review the [migration notes](docs/migration.md) before comparing results with `1.2.1`. Start with the
+[audited confirmation guide](docs/confirmation_benchmark.md) for the current experiment,
+reproduction paths and publication status. The full raw results archive still awaits
+public deposition; the software DOI does not identify that archive.
 
 `lrdbench` is a research-oriented benchmarking framework for studying the behaviour of long-range dependence (LRD) estimators across three distinct settings:
 
@@ -23,7 +30,7 @@ The framework is designed to support:
 - rigorous comparison of classical and new LRD estimators;
 - bundled temporal, spectral, geometric, wavelet, aggregation, and data-driven estimator families;
 - uncertainty-aware benchmarking, including empirical interval coverage where applicable;
-- robustness analysis under the bundled contamination operators: heavy-tailed noise, level shifts, outliers, and polynomial trends;
+- robustness analysis under explicit constant offsets, internal steps, heavy-tailed noise, outliers, and polynomial trends;
 - experimental data-driven baselines, including Random Forest, SVR, CNN, and LSTM estimators;
 - transparent failure analysis and validity-rate reporting;
 - manifest-driven, provenance-complete, reproducible benchmark execution.
@@ -32,7 +39,7 @@ The framework is designed to support:
 
 ## Why this project exists
 
-There is currently no widely adopted, comprehensive, reproducible benchmark specifically designed for long-range dependence estimation that simultaneously addresses:
+The framework makes the following parts of an LRD-estimation experiment explicit:
 
 - canonical synthetic processes with known targets;
 - contamination-induced estimator instability;
@@ -40,7 +47,7 @@ There is currently no widely adopted, comprehensive, reproducible benchmark spec
 - observational biomedical time series with no benchmark truth;
 - extensible enrolment of new estimators under a common interface.
 
-`lrdbench` aims to fill that gap.
+The aim is to make the assumptions, implementation choices and evidence behind a comparison inspectable.
 
 It is especially intended to support the careful evaluation of the hypothesis that many classical second-order LRD estimators behave well in their intended stationary finite-variance regime, but become unstable, miscalibrated, or non-identifiable under nonstationarity, heavy-tailed fluctuations, artefacts, and other out-of-regime conditions.
 

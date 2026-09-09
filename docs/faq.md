@@ -4,10 +4,10 @@
 
 ### `lrdbench run` fails with `ModuleNotFoundError: No module named 'matplotlib'`
 
-Install the reporting extras:
+Matplotlib is a core dependency. Reinstall the package in the interpreter used by the CLI:
 
 ```bash
-pip install "lrdbench[reports]"
+python -m pip install --upgrade lrdbench
 ```
 
 If you use data-driven estimators (Random Forest, SVR, CNN, LSTM), also install:
@@ -23,7 +23,7 @@ See [Installation](installation.md) for the full extras matrix.
 ### Manifest validation error: `unknown top-level manifest keys`
 
 `lrdbench` validates manifests strictly. Only the keys listed in
-[Benchmark protocol](benchmark_protocol.md) are allowed at the top level.
+[Design specification](design_specification.md) are allowed at the top level.
 Common mistakes:
 
 - Typos like `estimator` instead of `estimators`.
@@ -61,8 +61,9 @@ Common causes:
   estimators are especially sensitive to short records.
 - **Constant or zero-variance series:** RS and spectral estimators return
   invalid when the standard deviation is near zero.
-- **All-NaN input:** Observational loaders drop NaNs; if the result is empty,
-  every estimator will fail.
+- **Non-finite input:** CSV loading uses `missing_policy: drop` by default and
+  rejects records with no finite samples left. `missing_policy: error` rejects any missing
+  or non-finite value. Inline arrays follow a separate loading path.
 
 ### Why do bootstrap confidence intervals look very wide?
 
@@ -84,16 +85,16 @@ See [Benchmark protocol](benchmark_protocol.md) for more on uncertainty blocks.
 
 ### How do I know if my run reproduced correctly?
 
-Use the output contract validator:
+Start with structural validation:
 
 ```bash
 lrdbench validate-output reports/<run_id>
 ```
 
-This checks that all required files and columns are present. For full
-reproducibility, keep the manifest, the package version, and the global seed.
-Every run writes `manifest/environment.json` inside the report directory with
-exact versions.
+This checks required files and minimum headers, not reproduced values. Preserve the inputs,
+source revision, dependency environment, seed policy and estimator/plugin settings. Compare
+scientific outputs from repeated runs separately from UUIDs, timestamps and runtimes.
+See [Reproducibility](reproducibility.md) and [validation limits](output_contract.md).
 
 ### Can I re-use estimates from a previous run?
 
@@ -106,8 +107,9 @@ execution:
   cache_write: true
 ```
 
-The cache key is a hash of the series values, estimator name, and parameter
-schema, so identical inputs will skip re-computation.
+Cache reuse also depends on record identity/seed, target, parameters, estimator versions and
+the shared cache revision. See [execution settings](benchmark_protocol.md#execution-phase-5).
+Use caches only from trusted locations.
 
 ## Customisation
 
@@ -125,15 +127,16 @@ See [Third-party estimator workflow](third_party_estimators.md) for details.
 
 ### Can I benchmark on my own CSV data?
 
-Yes. Use observational mode with a `csv_series_index` source:
+Yes. Use this fragment within a complete observational manifest with IDs, estimators and
+truth-free metrics:
 
 ```yaml
 mode: observational
 source:
   type: csv_series_index
   series:
-    - file: data/sensor_1.csv
-      column: amplitude
+    - path: data/sensor_1.csv
+      value_column: amplitude
       record_id: sensor_1
 ```
 

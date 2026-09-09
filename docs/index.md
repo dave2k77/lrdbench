@@ -1,41 +1,39 @@
 # lrdbench documentation
 
-Welcome to the **lrdbench** documentation: a reproducible benchmark framework for long-range dependence estimators on synthetic (ground truth and stress-test) and observational series.
+`lrdbench` benchmarks long-range-dependence estimators on synthetic, contaminated and
+observational time series. Begin with a small run, inspect failures and uncertainty, then
+choose a design suited to the estimand you want to measure.
 
-## Hosted site
+!!! note "Documentation version"
+    These pages describe the source revision built by Read the Docs, with package version 2.0.0.
+    Version 2.0 changes estimator behavior and includes the September benchmark repairs.
+    See [migration notes](migration.md) before comparing results across revisions.
 
-This book is built with [MkDocs](https://www.mkdocs.org/) and the [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) theme. The canonical hosted copy is **[lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/)**.
+## Start here
 
-## Design authority
+| Your task | Reading path |
+| --- | --- |
+| Run a first benchmark | [Installation](installation.md) → [Quickstart](tutorials/quickstart.md) → [Read outputs](tutorials/reading_outputs.md) |
+| Design a comparison | [Protocol](benchmark_protocol.md) → [Parameters](parameter_glossary.md) → [Interpretation](interpretation_semantics.md) |
+| Use empirical data | [Observational tutorial](tutorials/observational_data.md) → [Limitations](known_limitations.md) |
+| Reproduce the paper | [Audited confirmation](confirmation_benchmark.md) → [Manuscript workflow](paper_workflow.md) |
+| Extend the framework | [Architecture](architecture.md) → [Estimator contract](estimator_contract.md) → [Python API](reference/api.md) |
 
-The tracked architecture, object contracts, manifest rules, and release-stability expectations are
-in [Design specification](design_specification.md). A short root-level traceability note remains in
-`SPECIFICATION.md`.
+## Find a reference
 
-## Repository layout (quick)
+The **User guide** groups setup, methods and outputs. **Research** covers the frozen experiment
+and publication work. **Development** covers implementation and contributions. **History** retains
+older plans; those plans are excluded from search to keep current guidance easier to find.
 
-- **Runnable suites**: `configs/suites/` (YAML + small data).
-- **Python package**: `src/lrdbench/`.
-- **Target tree sketch** (aspirational package split): `lrdbench_repo_schema.txt` at the repo root.
+Use the page table of contents for sections and the search box for estimator names, parameters
+or metric names. Start with the [FAQ](faq.md) for common execution problems.
 
-## Where to go next
+## Sources and contracts
 
-- [Quickstart tutorial](tutorials/quickstart.md) — run the first benchmark and validate the output.
-- [Tutorials](tutorials/ground_truth_benchmark.md) — ground-truth, stress-test,
-  [observational](tutorials/observational_data.md), and custom-estimator workflows.
-- [Installation](installation.md) — editable install, extras, local `mkdocs serve`.
-- [Benchmark protocol](benchmark_protocol.md) — manifest modes, execution block, outputs.
-- [Bundled estimators](bundled_estimators.md) — registry names, families, and key parameters.
-- [Data-driven estimators](data_driven_estimators.md) — RF/SVR/CNN/LSTM baselines and
-  manifest-level training.
-- [Interpretation semantics](interpretation_semantics.md) — uncertainty, leaderboard, and failure rules.
-- [Release candidate freeze](release_candidate_freeze.md) — historical pre-1.0 review of public APIs, schemas, columns, and metric names.
-- [Public small outputs](public_small_outputs.md) — expected artefacts for public-small suites.
-- [Migration notes](migration.md) — public-surface changes across releases.
-- [Citation guidance](citation.md) — software citation and benchmark metadata expectations.
-- [Estimator contract](estimator_contract.md) — `BaseEstimator` and `EstimateResult`.
-- [Estimator status](estimator_status.md) — public interpretation status for bundled estimators.
-- [Architecture](architecture.md) — how the orchestration pieces fit together.
-- [Python API](reference/api.md) — selected autodoc pages.
-- [Public release roadmap](public_release_roadmap.md) — phased alpha/beta/v1.0 plan.
-- [Governance and maintenance](governance.md) — compatibility, review, and release policy.
+The [design specification](design_specification.md) describes the public framework;
+[architecture](architecture.md) maps its stages to modules. The [output specification](output_contract.md)
+includes the tracked machine-readable contract. The paper's separate archive is documented in
+its [confirmation guide](confirmation_benchmark.md).
+
+Runnable manifests live in `configs/suites/` and implementation in `src/lrdbench/` in the
+[repository](https://github.com/dave2k77/lrdbench). The old target-layout sketch is historical.

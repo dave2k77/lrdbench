@@ -19,7 +19,22 @@ jobs:
       - name: Build distributions
         run: python -m build
       - name: Check distributions
-        run: python -m twine check dist/*
+        run: |
+          python -m twine check --strict dist/*
+          python scripts/check_dist.py dist
+      - name: Match release tag to package version
+        if: github.event_name == 'push'
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python scripts/check_dist.py dist --tag "$RELEASE_TAG"
+      - name: Smoke test built wheel outside the checkout
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -m pip install "$GITHUB_WORKSPACE"/dist/*.whl
+          python -m pip check
+          lrdbench run smoke_ground_truth | tee run.out
+          run_dir=$(grep '^result_store=' run.out | cut -d= -f2-)
+          lrdbench validate-output "$run_dir"
       - name: Upload release artefacts
         uses: actions/upload-artifact@v7
         with:
@@ -28,6 +43,8 @@ jobs:
 
   publish-pypi:
     needs: build
+    # Manual dispatch builds/validates artifacts; publication requires a version tag.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment:
       name: pypi

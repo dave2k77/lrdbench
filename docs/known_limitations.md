@@ -20,7 +20,9 @@ estimator rankings.
 
 ## Synthetic Data
 
-- Generator checks cover ordering and sanity properties, not full distributional conformance.
+- The confirmation study includes independent covariance and generation checks for its
+  fGn, ARFIMA and AR(1) settings. This does not establish distributional conformance for
+  every bundled generator or configuration; see the [audited study](confirmation_benchmark.md).
 - Finite-sample behaviour can differ substantially from asymptotic expectations.
 - Contamination suites are controlled stress tests, not exhaustive models of real measurement
   artefacts.
@@ -34,6 +36,10 @@ estimator rankings.
 - CSV and inline observational loaders currently support simple single-column series ingestion only.
 
 ## Reports
+
+- The completed confirmation reports accuracy, contamination response and interval coverage
+  separately. Complete numerical availability does not establish interval calibration, and
+  fitted-fGn intervals fail on the strong AR(1) controls in that study.
 
 - Leaderboards are summaries of declared component metrics and weights. They are not universal
   estimator rankings.

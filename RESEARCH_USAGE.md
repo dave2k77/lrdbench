@@ -62,7 +62,7 @@ Benchmark results must always be interpreted relative to the declared benchmark 
 
 ## Benchmark Modes and Interpretation Rules
 
-## Ground-truth mode
+### Ground-truth mode
 
 Ground-truth mode supports truth-based metrics such as:
 
@@ -76,7 +76,7 @@ Ground-truth mode supports truth-based metrics such as:
 
 Interpretation in this mode should focus on whether an estimator behaves well under benchmark conditions close to its intended theory regime.
 
-## Stress-test mode
+### Stress-test mode
 
 Stress-test mode supports degradation-oriented metrics such as:
 
@@ -88,7 +88,7 @@ Stress-test mode supports degradation-oriented metrics such as:
 
 Interpretation in this mode should focus on how estimator performance changes under controlled departures from ideal assumptions.
 
-## Observational mode
+### Observational mode
 
 Observational mode supports stability-oriented metrics such as:
 

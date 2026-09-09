@@ -1,24 +1,52 @@
 # Estimand triangle and LRD discrimination
 
-Beyond the Hurst exponent, `lrdbench` can benchmark two companion views of temporal-correlation
-structure — the spectral exponent `β` and the autocorrelation timescale `τ` — and can score whether
-an estimator distinguishes *genuine* long-range dependence (LRD) from a short-memory process that
-merely *mimics* it. This tutorial walks through both.
+The Hurst parameter $H$, spectral exponent $\beta$ and decay timescale $\tau$ describe
+related but different properties. This tutorial compares their declared model-relative targets,
+then introduces experimental LRD classifiers. These suites are separate from the
+[audited confirmation study](../confirmation_benchmark.md).
 
-## 1. The H / β / τ triangle
+## H, spectral slope and timescale
 
-The literature relates the Hurst exponent, the `1/f^β` spectral slope, and the autocorrelation decay
-time as three views of the same structure (`β = 2H − 1`, `H = (β + 1)/2`). A single realisation can
-now carry ground truth for all three via companion truths, so Hurst, spectral-exponent, and
-timescale estimators run side by side and are each scored against the truth for their own estimand.
+For stationary fractional Gaussian noise (fGn), the low-frequency convention is
+
+$$
+\begin{aligned}
+S(f) &\propto f^{-\beta}, \\
+\beta &= 2H - 1, \qquad H = \frac{\beta + 1}{2}.
+\end{aligned}
+$$
+
+This conversion is model-dependent. It does not apply unchanged to an integrated fBm path:
+fBm is nonstationary and its generalized spectral scaling has exponent $2H+1$.
+See [Caccia et al., *Analyzing exact fractal time series*](https://pmc.ncbi.nlm.nih.gov/articles/PMC3205082/).
+A finite exponential decay time is not determined by the fGn spectral exponent.
+
+For the implemented OU-style recurrence with $H=0.5$, the coefficient and stationary ACF obey
+
+$$
+\begin{aligned}
+a &= e^{-\theta\,\Delta t}, \\
+\rho(k) &= a^k = e^{-k/\tau}, \\
+\tau &= \frac{1}{\theta\,\Delta t}.
+\end{aligned}
+$$
+
+Here $k$ and $\tau$ are in samples. With correlated fGn innovations ($H\ne0.5$), the same
+mean-reversion parameter is stored, but it is not an exact single-exponential ACF timescale.
+The fractional OU distinction is also described by
+[Cheridito, Kawaguchi and Maejima](https://people.math.ethz.ch/~patrickc/foup.pdf).
+A companion truth records a declared target; it does not establish that every estimator is
+correctly specified for that target.
 
 ```bash
 lrdbench run configs/suites/smoke_neural_timescale.yaml --dry-run
 lrdbench run configs/suites/smoke_neural_timescale.yaml
 ```
 
-- `fGn` declares `(H, β = 2H − 1, τ = None)` — a power-law ACF has no finite exponential timescale.
-- `fOU` declares `(H, τ = 1/(θ·dt))` — the mean-reversion timescale in samples.
+- `fGn` declares H and spectral-slope truths, and leaves `timescale_tau` unavailable.
+  At H = 0.5 it is white noise; a positive decay time is not assigned there either.
+- `fOU` declares the driving H and mean-reversion timescale in samples; it does not
+  currently declare a spectral-exponent companion truth.
 
 Estimators: `DFA` (`hurst_scaling_proxy`), `PeriodogramBeta` (`spectral_exponent_beta`), `ACFDecay`
 (`timescale_tau`). Every declared truth is written to `raw/truths.csv` (primary + companions), so the
@@ -35,7 +63,7 @@ record_id  target_estimand         target_value  is_primary  notes
 
 The full-size counterpart is `neural_timescale_triangle_ground_truth`.
 
-## 2. True-vs-apparent LRD (false-positive rate)
+## Point-threshold exceedance on short-memory controls
 
 The `multi_timescale` generator is a finite superposition of AR(1) components: genuinely
 short-memory (truth `H = 0.5`) but engineered to look power-law over finite samples. It is a
@@ -45,28 +73,31 @@ controlled null for the LRD illusion, with severity graded by `tau_max`.
 lrdbench run configs/suites/smoke_lrd_discrimination.yaml
 ```
 
-The `false_positive_lrd_rate` metric counts how often each Hurst estimator calls `H ≥ 0.6` on these
-`H = 0.5` nulls. Clean `fGn` nulls are correctly rejected; the multi-timescale nulls fool most
-estimators — the point of the suite. Full size: `neural_lrd_discrimination_ground_truth`.
+The legacy `false_positive_lrd_rate` metric (clearer alias: `persistence_exceedance_rate`)
+counts valid null estimates at or above a point cutoff, H ≥ 0.6 by default. It is not the
+Type I error of a calibrated hypothesis test. Inspect the measured rate and validity for each
+family; neither clean-null rejection nor multi-timescale failure is guaranteed by the suite.
+Full size: `neural_lrd_discrimination_ground_truth`.
 
-## 3. Per-series model selection
+## Per-series classification
 
 A **discriminator** emits a score in `[0, 1]` for the decision estimand `lrd_class`, scored by the
 classification metric family — `roc_auc` (primary), `balanced_accuracy`, `true_positive_rate`,
-`false_positive_rate` — against binary `is_lrd` labels. Metrics are routed by estimand *kind*, so
+`false_positive_rate` — against binary `lrd_class` companion truths. Metrics are routed by estimand *kind*, so
 error metrics such as `bias`/`mae` never apply to a decision estimand.
 
 ```bash
 lrdbench run configs/suites/smoke_lrd_model_selection.yaml
 ```
 
-Four discriminators are bundled, from a naive baseline to principled tests:
+Four experimental discriminators are bundled. Their scores are not calibrated probabilities
+or tests with guaranteed Type I error:
 
 | Discriminator | Idea |
 | --- | --- |
 | `ThresholdHurstDiscriminator` | logistic squash of a point Hurst estimate (baseline) |
-| `LowFreqSpectralDiscriminator` | low-frequency memory parameter (survives as `f→0` only for true LRD) |
-| `ScaleCrossoverDiscriminator` | large-scale DFA slope (short memory crosses over to `0.5`) |
+| `LowFreqSpectralDiscriminator` | local-Whittle memory score over a selected low-frequency band |
+| `ScaleCrossoverDiscriminator` | large-scale DFA score; apparent persistence depends on scale support and record length |
 | `ICModelSelectDiscriminator` | Whittle-BIC of ARFIMA(0,d,0) vs AR(1)/AR(2) |
 
 Classification metrics are written as aggregate rows in `raw/metrics.csv` (with `scope = aggregate`,

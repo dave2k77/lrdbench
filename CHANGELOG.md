@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+## 2.0.0 — 2026-09-09
+
+This major release changes numerical behavior and rejects some formerly accepted estimator
+settings. Regenerate affected benchmark outputs and caches; preserve earlier results with their
+original versions. The public output contract remains independently versioned at `1.1.0`.
+See [migration notes](https://lrdbench.readthedocs.io/en/latest/migration/) for affected methods.
+
+### Package and release validation
+- Include documentation and distribution audit scripts in the source distribution.
+- Check strict metadata, package assets, version consistency and installed-wheel behavior
+  on Python 3.11 and 3.12, with CLI checks outside the checkout.
+- Require matching version tags before PyPI publication. Manual release workflow dispatch
+  builds and validates artefacts without publishing them.
+
+### Audited confirmation and manuscript
+- Complete the locally frozen shared-parent confirmation experiment and independently audit
+  all canonical summaries, interval endpoints and parent/descendant accounting. Publish the
+  compact exports and their provenance under `benchmark_experiment/remediation/confirmation_audit/`.
+- Rebuild the manuscript with source-linked numerical insertions, regenerated tables and
+  figures, native equations and a claim-reconciliation ledger. Numerical and page review pass.
+- Keep clean accuracy, contamination response and interval calibration separate. The findings
+  supersede the old manuscript's rankings and calibration claims within the declared scope.
+- Preserve producer `9c02d04`, audit `b3d0648` and manuscript `a2f4ee2` in the merge history.
+  The full raw archive remains local and awaits deposition; it is not included in the package.
+- Make the small CI rehearsal tests portable with a scoped test runtime, and explicitly test
+  the unchanged production environment guard. Normal CI does not certify a production runtime.
+
+### Documentation maintenance
+- Review hosted-documentation content, scientific claim boundaries and runnable examples;
+  enable protected MathJax rendering, reorganize navigation/search and add a built-site audit.
+- Align architecture, preprocessing/training order and persistence boundaries with the public
+  runner, and distinguish its exports from the frozen confirmation archive. Embed the tracked
+  output contract in the guide and expand the source-generated API reference.
+- Add the [confirmation guide](https://github.com/dave2k77/lrdbench/blob/main/docs/confirmation_benchmark.md), refresh the current handoff,
+  migration and paper workflow, and distinguish historical logs from active instructions.
+- Correct leaderboard tie semantics and interval-calibration status. Clarify published-source
+  availability versus raw-archive deposition and the release status of these changes.
+- Build documentation on every push and pull request, including root Markdown and research-only
+  changes. Add a documentation-impact section to the PR template and contributor checklist.
+
 ### Interval candidate development comparison
 - Speed up Higuchi's lag/offset sums while preserving the original equation;
   bump its version to 0.3.0 for the changed floating-point summation order.
@@ -56,7 +96,8 @@
   scalar-bootstrap uncertainty requests for the paired ratio and signed-drift rankings.
 - Add analytical equation checks and a reproducible diagnostic pilot. These repairs
   do not certify interval calibration or validate all methods. Research reruns and
-  manuscript reconciliation remain pending; historical outputs are unchanged.
+  manuscript reconciliation are recorded in the completed confirmation package above;
+  historical outputs are unchanged.
 
 ### Benchmark foundation repairs
 - Equal component values receive average ranks; missing and nonfinite values rank
@@ -75,7 +116,8 @@
   Global benchmark uncertainty figures separate metrics and levels, retain the full
   method roster and draw the actual interval endpoints.
 - These changes require new research outputs. Historical exports are preserved;
-  mathematical estimator validation and uncertainty calibration remain pending.
+  subsequent method checks and the confirmation study above evaluate the declared procedures
+  without implying universal interval calibration.
 
 ### Estimand triangle: spectral exponent and timescale
 - Estimands: added `spectral_exponent_beta` (`β = 2H − 1`, `H = (β + 1) / 2`) and `timescale_tau`

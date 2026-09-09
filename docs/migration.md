@@ -3,6 +3,44 @@
 This page records public-surface changes that matter when reproducing or comparing benchmark
 outputs across public releases.
 
+## 2.0.0
+
+Release `2.0.0` includes the September 2026 benchmark repairs and additional estimands and
+discriminators. The major version marks changed numerical behavior and rejected legacy
+settings. Record the package version and exact source revision; do not compare historical
+and corrected outputs as if they used identical implementations.
+
+Upgrade with `python -m pip install --upgrade "lrdbench==2.0.0"`, review the settings below,
+and use a fresh output directory and cache. The estimator interface and required CSV columns
+remain compatible, but numerical reproducibility across the version boundary is not promised.
+
+- GPH's slope conversion and the Higuchi normalization changed. GHE now uses absolute
+  q-th moments; the forced H = 0.5 fallback is removed and nonzero `flat_slope_tol` is
+  rejected. Declare `input_representation`, centering, lag range and q explicitly. The confirmation
+  uses q = 1, whereas the general GHE default remains q = 2.
+- Temporal and primary wavelet regression estimates are unclipped. Spectral optimizer
+  bounds remain part of those methods and boundary hits are reported.
+- `level_shift` retains its historical whole-record offset meaning. Use `constant_offset`
+  for an explicit offset control and `step_change` for an internal jump.
+- Equal leaderboard component values receive average ranks; unresolved composite ties
+  share competition ranks. See [interpretation semantics](interpretation_semantics.md).
+- Record attempted/used/invalid/failed bootstrap draws and `ci_availability`. A valid
+  point estimate does not imply an available or calibrated interval.
+- `persistence_exceedance_rate` clarifies the legacy `false_positive_lrd_rate` cutoff
+  diagnostic. It does not become a calibrated LRD test by renaming it.
+- Prefer explicit paired stress metrics. `paired_mae_ratio` differs from the legacy mean
+  of per-record error ratios; its joint resampling is supported by the research runner,
+  not the public evaluator's scalar bootstrap. See [stress testing](tutorials/stress_testing.md).
+- Seed derivation now uses the global seed and estimate-cache identity includes record
+  seeds and the shared fitting version. Regenerate affected results instead of reusing
+  old caches. Preserve historical exports with their original provenance.
+
+The estimand-triangle work advances the public output contract to `1.1.0`, adding the
+conditional `raw/truths.csv` ledger without removing existing required columns.
+The confirmation research archives use their own format and do not replace that contract.
+See the [audited confirmation guide](confirmation_benchmark.md) for the completed experiment
+and the frozen producer required for reproduction.
+
 ## 1.2.1
 
 Release `1.2.1` is the first published release of the nonstationary LRD benchmarking work

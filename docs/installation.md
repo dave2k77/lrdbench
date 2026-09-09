@@ -2,7 +2,13 @@
 
 ## Library and CLI
 
-From the repository root or PyPI:
+Python 3.11 or later is required. For a released package from PyPI:
+
+```bash
+python -m pip install lrdbench
+```
+
+For the current development source, clone the repository and install from its root:
 
 ```bash
 pip install -e .
@@ -30,7 +36,7 @@ The site configuration is `mkdocs.yml` at the repository root. **Read the Docs**
 | Extra        | Purpose                                      |
 | ------------ | -------------------------------------------- |
 | `reports`    | Jinja2 / tabulate helpers for richer reporting |
-| `parquet`    | Parquet export via PyArrow                   |
+| `parquet`    | PyArrow dependency for downstream use; the public result store currently writes CSV |
 | `ml`         | scikit-learn baselines: `MLRandomForest`, `MLSVR` |
 | `nn`         | PyTorch baselines: `MLCNN`, `MLLSTM`         |
 | `data-driven` | All ML and NN baseline dependencies        |

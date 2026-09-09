@@ -1,4 +1,7 @@
-# Target repository layout (aspirational for src/; root folders below match current repo)
+# Historical target layout proposal; not an inventory of the implemented repository
+# Root folders and package subtrees below may be aspirational.
+# Current implementation and workflow authority: docs/architecture.md and docs/design_specification.md
+# Current public exports: docs/output_contract.md; paper workflow: docs/confirmation_benchmark.md
 lrdbench/
 ├── pyproject.toml
 ├── README.md

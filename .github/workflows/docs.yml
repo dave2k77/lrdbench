@@ -1,18 +1,8 @@
 name: docs
 
-on:
-  push:
-    paths:
-      - "docs/**"
-      - "mkdocs.yml"
-      - ".readthedocs.yaml"
-      - "src/lrdbench/**"
-  pull_request:
-    paths:
-      - "docs/**"
-      - "mkdocs.yml"
-      - ".readthedocs.yaml"
-      - "src/lrdbench/**"
+# Root Markdown snippets, manifests, research packages and dependency changes can
+# affect the site too. Always build instead of maintaining an incomplete path list.
+on: [push, pull_request]
 
 jobs:
   mkdocs:
@@ -26,3 +16,5 @@ jobs:
         run: pip install ".[docs]"
       - name: MkDocs strict build
         run: mkdocs build --strict
+      - name: Documentation structure and contract audit
+        run: python scripts/check_docs.py site

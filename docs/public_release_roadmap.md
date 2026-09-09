@@ -1,4 +1,14 @@
+---
+search:
+  exclude: true
+---
+
 # Public Research Release Roadmap
+
+Historical release-planning record. Completed and pending items below refer to their recorded
+milestones. For current development and publication status, use
+[current next steps](current_research_next_steps.md); for implemented interfaces, use the
+[design specification](design_specification.md).
 
 This roadmap tracks the path from the current working research framework to a public,
 citeable research release. The goal is not to polish the local manuscript workflow, but to make

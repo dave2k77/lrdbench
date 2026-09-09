@@ -1,13 +1,21 @@
 # Benchmark protocol
 
+This guide describes the public manifest-driven benchmark interface. For the completed
+paper experiment's fixed design, paired resampling and audit exports, use the separate
+[confirmation benchmark guide](confirmation_benchmark.md).
+
 1. **Manifest** (YAML): declares `mode`, `source`, optional `contamination`, optional
-   `ml_training`, `estimators`, `metrics`, `leaderboards`, `report`, and `seeds`.
+   `preprocessing`, `ml_training`, `estimators`, `metrics`, `leaderboards`, `report`, and `seeds`.
 2. **Records**: synthetic grid (`generator_grid`), stress pairs (clean + contaminated), or observational series (`csv_series_index` / `inline_table`).
-3. **Optional data-driven training**: built-in ML/NN estimators train from `ml_training` and write
+3. **Optional preprocessing**: operators independently transform each source record; `include_raw`
+   controls whether the original records also enter estimation.
+4. **Optional data-driven training**: built-in ML/NN estimators train from `ml_training` and write
    run-local model artefacts before benchmark estimation.
-4. **Estimation**: each `(record, estimator_spec)` yields an `EstimateResult`.
-5. **Evaluation**: mode-appropriate metrics (`MetricBundle`) and optional leaderboards.
-6. **Outputs**: CSV result store under `reports/<run_id>/` plus HTML/CSV summaries from the reporter.
+5. **Estimation**: each `(record, estimator_spec)` yields an `EstimateResult`.
+6. **Evaluation**: mode-appropriate metrics (`MetricBundle`) and optional leaderboards.
+7. **Outputs**: result store and reports under `<report.export_root>/<run_id>/` (default export root
+   `reports`). See [architecture](architecture.md) for write order and [output contract](output_contract.md)
+   for required and conditional files.
 
 Example suite manifests: `configs/suites/smoke_*.yaml`.
 
@@ -19,7 +27,7 @@ Before running an expensive manifest, preview the materialised record-estimator 
 lrdbench run configs/suites/public_medium_stress_contamination.yaml --dry-run
 ```
 
-`--dry-run` loads and validates the manifest, materialises synthetic or observational records, and
+`--dry-run` loads and validates the manifest, materialises and preprocesses records, and
 prints the benchmark mode, record count, estimator count, total fit jobs, clean/contaminated split
 for stress tests, and global seed. It does **not** fit estimators, train data-driven models, write
 reports, or populate caches. The same capability is available programmatically through
@@ -134,7 +142,8 @@ Optional `report.figure_set` entries:
 - `disagreement_heatmap`: aggregate estimator-disagreement heatmap.
 - `sensitivity_heatmap`: aggregate scale/window-sensitivity heatmap.
 - `benchmark_uncertainty_intervals`: point estimates with bootstrap interval error bars.
-- `false_positive_lrd`: balanced-global false-positive LRD rate bar plot.
+- `false_positive_lrd`: legacy plot name for the null point-threshold exceedance rate;
+  it is not the Type I error rate of a calibrated LRD test. See [stress metric semantics](tutorials/stress_testing.md).
 
 Figure generation is part of the core reporting contract and uses the standard plotting stack
 (`matplotlib` and `seaborn`). Requested figures are omitted only when the relevant data is absent;
@@ -221,8 +230,9 @@ max(4, n // 10)
 ```
 
 where `n` is the record length. This is a pragmatic compromise, not a data-adaptive choice.
-It respects local dependence structure (essential for LRD series) while remaining reproducible
-from the manifest alone.
+It preserves short blocks of local dependence but truncates dependence between resampled
+blocks. This does not guarantee calibration under long memory. Reproduction requires the
+record, seeds, implementation and environment as well as the manifest.
 
 You can override the block length per estimator:
 
@@ -242,7 +252,7 @@ data-adaptive length, compute it externally and set `bootstrap_block_len` explic
 Optional YAML block `execution`:
 
 - `max_workers` (integer ≥ 1, default 1): when greater than 1, estimator `fit` calls run in parallel with a thread pool (order of results matches the serial `(record × estimator)` grid).
-- `estimate_cache_dir` (string, optional): directory for pickle caches of `EstimateResult` keyed by record id, estimator name, parameter schema, and a hash of the series values. Resolve relative paths against the same working base as observational CSV paths (manifest directory when using `lrdbench run <file.yaml>`, else current working directory / `base_dir` for programmatic runs).
+- `estimate_cache_dir` (string, optional): directory for pickle caches of `EstimateResult` keyed by record id and seed, estimator name and target, specification/implementation versions, parameter schema, series-value hash and the shared fitting cache revision. Resolve relative paths against the same working base as observational CSV paths (manifest directory when using `lrdbench run <file.yaml>`, else current working directory / `base_dir` for programmatic runs).
 - `cache_read` / `cache_write` (booleans, default true): control cache lookup and population.
 
 Only use estimate caches from trusted locations (pickle execution model).
