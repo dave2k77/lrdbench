@@ -1,39 +1,32 @@
 name: package
 
-on:
-  push:
-    paths:
-      - "pyproject.toml"
-      - "src/**"
-      - "configs/**"
-      - "README.md"
-      - "LICENSE"
-      - ".github/workflows/package.yml"
-  pull_request:
-    paths:
-      - "pyproject.toml"
-      - "src/**"
-      - "configs/**"
-      - "README.md"
-      - "LICENSE"
-      - ".github/workflows/package.yml"
+on: [push, pull_request]
 
 jobs:
   build-and-install:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
       - name: Install build frontend
-        run: python -m pip install build
+        run: python -m pip install build twine
       - name: Build source and wheel distributions
         run: python -m build
+      - name: Check metadata and packaged assets
+        run: |
+          python -m twine check --strict dist/*
+          python scripts/check_dist.py dist
       - name: Install built wheel
         run: python -m pip install dist/*.whl
       - name: Check console script
+        working-directory: ${{ runner.temp }}
         run: |
+          python -m pip check
           lrdbench list-metrics
           lrdbench list-estimators
           lrdbench list-suites

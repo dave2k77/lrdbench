@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Package and release validation
+- Include documentation and distribution audit scripts in the source distribution.
+- Check strict metadata, package assets, version consistency and installed-wheel behavior
+  on Python 3.11 and 3.12, with CLI checks outside the checkout.
+- Require matching version tags before PyPI publication. Manual release workflow dispatch
+  builds and validates artefacts without publishing them.
+
 ### Audited confirmation and manuscript
 - Complete the locally frozen shared-parent confirmation experiment and independently audit
   all canonical summaries, interval endpoints and parent/descendant accounting. Publish the
