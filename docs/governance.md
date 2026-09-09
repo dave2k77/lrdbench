@@ -20,7 +20,7 @@ not part of the public release contract.
 
 ## Compatibility Policy
 
-For `1.x` releases:
+Within a major release series:
 
 - existing public manifest fields should remain valid;
 - required output files and required output columns should not be removed or renamed;

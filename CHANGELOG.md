@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 2.0.0 — 2026-09-09
+
+This major release changes numerical behavior and rejects some formerly accepted estimator
+settings. Regenerate affected benchmark outputs and caches; preserve earlier results with their
+original versions. The public output contract remains independently versioned at `1.1.0`.
+See [migration notes](https://lrdbench.readthedocs.io/en/latest/migration/) for affected methods.
+
 ### Package and release validation
 - Include documentation and distribution audit scripts in the source distribution.
 - Check strict metadata, package assets, version consistency and installed-wheel behavior
@@ -18,7 +25,7 @@
 - Keep clean accuracy, contamination response and interval calibration separate. The findings
   supersede the old manuscript's rankings and calibration claims within the declared scope.
 - Preserve producer `9c02d04`, audit `b3d0648` and manuscript `a2f4ee2` in the merge history.
-  The full raw archive remains local and awaits deposition; this is not a new package release.
+  The full raw archive remains local and awaits deposition; it is not included in the package.
 - Make the small CI rehearsal tests portable with a scoped test runtime, and explicitly test
   the unchanged production environment guard. Normal CI does not certify a production runtime.
 
@@ -31,7 +38,7 @@
 - Add the [confirmation guide](https://github.com/dave2k77/lrdbench/blob/main/docs/confirmation_benchmark.md), refresh the current handoff,
   migration and paper workflow, and distinguish historical logs from active instructions.
 - Correct leaderboard tie semantics and interval-calibration status. Clarify published-source
-  availability versus raw-archive deposition and the unreleased status of these changes.
+  availability versus raw-archive deposition and the release status of these changes.
 - Build documentation on every push and pull request, including root Markdown and research-only
   changes. Add a documentation-impact section to the PR template and contributor checklist.
 

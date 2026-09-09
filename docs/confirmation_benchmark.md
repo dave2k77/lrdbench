@@ -98,9 +98,10 @@ and use a fresh output directory to retain earlier evidence.
 ## Release and publication status
 
 These sources were merged into `main` in [PR #3](https://github.com/dave2k77/lrdbench/pull/3).
-The latest published GitHub release checked on 9 September 2026 is `v1.2.1`; the repairs
-are unreleased development changes. Installing that release does not install this work.
-Use a Git checkout and record its revision when evaluating the corrected implementations.
+Package release `2.0.0` includes the repaired implementations; `1.2.1` predates them.
+Installing the package does not install the research archive or recreate the frozen
+confirmation runtime. Use the producer revision and archive described above to reproduce
+the paper, and record the installed version for new evaluations.
 
 The full raw bootstrap archive has not been deposited publicly. The software concept DOI
 does not identify this confirmation archive. Author review and declarations, journal

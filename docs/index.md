@@ -5,8 +5,8 @@ observational time series. Begin with a small run, inspect failures and uncertai
 choose a design suited to the estimand you want to measure.
 
 !!! note "Documentation version"
-    These pages describe the source revision built by Read the Docs. The latest published
-    release checked on 9 September 2026 is v1.2.1; `main` also contains unreleased repairs.
+    These pages describe the source revision built by Read the Docs, with package version 2.0.0.
+    Version 2.0 changes estimator behavior and includes the September benchmark repairs.
     See [migration notes](migration.md) before comparing results across revisions.
 
 ## Start here

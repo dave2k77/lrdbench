@@ -10,7 +10,7 @@ manual reference lists, include:
 
 - software name: `lrdbench`;
 - author: Davian Chin;
-- version: `1.2.1`;
+- version: `2.0.0`;
 - DOI (concept, resolves to latest): `10.5281/zenodo.20937726`;
 - repository: `https://github.com/dave2k77/lrdbench`;
 - license: MIT.
@@ -25,7 +25,7 @@ For the [audited confirmation study](confirmation_benchmark.md), report the prod
 audit and manuscript source revisions, run identity and canonical summary hash in addition
 to the method settings. The sources are public on GitHub, but the full raw archive awaits
 deposition. Do not cite the software concept DOI as identifying these experiment results.
-The unreleased corrections on `main` are not part of package release `1.2.1`.
+The corrections are included in package release `2.0.0`; `1.2.1` predates them.
 
 For published comparisons, report:
 
