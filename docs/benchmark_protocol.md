@@ -230,8 +230,9 @@ max(4, n // 10)
 ```
 
 where `n` is the record length. This is a pragmatic compromise, not a data-adaptive choice.
-It respects local dependence structure (essential for LRD series) while remaining reproducible
-from the manifest alone.
+It preserves short blocks of local dependence but truncates dependence between resampled
+blocks. This does not guarantee calibration under long memory. Reproduction requires the
+record, seeds, implementation and environment as well as the manifest.
 
 You can override the block length per estimator:
 

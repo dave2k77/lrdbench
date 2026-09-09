@@ -84,23 +84,22 @@ See [Data-driven estimators](data_driven_estimators.md).
 
 ## Spectral-Exponent and Timescale Estimators
 
-These target the two companion estimands of the temporal-correlation triangle (see the
-[parameter glossary](parameter_glossary.md) and `raw/truths.csv`). A single realisation can carry
-ground truth for `hurst_scaling_proxy`, `spectral_exponent_beta`, and `timescale_tau` at once (e.g.
-the `fOU` generator), so a suite may run Hurst, spectral-exponent, and timescale estimators side by
-side; each is scored only against the truth for its own estimand.
+These target spectral slope and an effective exponential ACF timescale. A realisation can carry
+multiple truths, but only those explicitly declared by its generator: fGn supplies H and β with
+no finite τ target; fOU supplies driving H and mean-reversion τ, with no β truth. See the
+[estimand tutorial](tutorials/estimand_triangle_and_discrimination.md) for model restrictions.
 
 | Name | Family | Target estimand | Method |
 | --- | --- | --- | --- |
-| `PeriodogramBeta` | `spectral` | `spectral_exponent_beta` | Low-frequency log-periodogram slope, reported as `β = 2d = 2H − 1` (`S(f) ~ f^(-β)`). |
+| `PeriodogramBeta` | `spectral` | `spectral_exponent_beta` | Low-frequency log-periodogram slope, reported as $\beta$ in $S(f) \propto f^{-\beta}$; conversion to H requires an appropriate model. |
 | `ACFDecay` | `timescale` | `timescale_tau` | Log-linear fit of the autocorrelation over its leading exponential band; reports the decay constant `τ₀` in samples. Correctly specified for AR(1)/OU-type single-timescale dynamics and deliberately misspecified (window-dependent) under true long-range dependence. |
 
 ## LRD Discriminators
 
 These target the decision estimand `lrd_class`: each emits a score in `[0, 1]` (higher = stronger
-evidence of true long-range dependence) rather than a scalar, and is scored by the classification
+evidence of true long-range dependence) as a classification score, and is scored by the classification
 metrics (`roc_auc`, `balanced_accuracy`, `true_positive_rate`, `false_positive_rate`) against binary
-`is_lrd` labels. These experimental methods compare declared LRD models with short-memory
+`lrd_class` companion truths. These experimental methods compare declared LRD models with short-memory
 controls, including `multi_timescale` signals that mimic scaling. Their scores are not
 automatically calibrated probabilities or hypothesis tests; they are outside the
 [confirmation paper's scope](confirmation_benchmark.md).

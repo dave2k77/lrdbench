@@ -16,6 +16,8 @@
   the unchanged production environment guard. Normal CI does not certify a production runtime.
 
 ### Documentation maintenance
+- Review hosted-documentation content, scientific claim boundaries and runnable examples;
+  enable protected MathJax rendering, reorganize navigation/search and add a built-site audit.
 - Align architecture, preprocessing/training order and persistence boundaries with the public
   runner, and distinguish its exports from the frozen confirmation archive. Embed the tracked
   output contract in the guide and expand the source-generated API reference.

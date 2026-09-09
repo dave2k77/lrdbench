@@ -34,7 +34,7 @@ Third-party estimators can be loaded automatically via two environment variables
 
 - `LRD_BENCH_ESTIMATOR_PLUGIN` — colon-separated list of importable module names that define
   `ENTRY_POINTS: dict[str, Callable[[EstimatorSpec], BaseEstimator]]`.
-- `LRD_BENCH_ESTIMATOR_PLUGIN_PATH` — colon-separated list of absolute or relative `.py` file paths
+- `LRD_BENCH_ESTIMATOR_PLUGIN_PATH` — platform-path-separated list (`;` on Windows, `:` on Unix) of `.py` file paths
   that define the same `ENTRY_POINTS` dict.
 
 All import failures are captured as structured warnings (no crashes), and built-in estimators

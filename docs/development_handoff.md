@@ -1,3 +1,8 @@
+---
+search:
+  exclude: true
+---
+
 # Development Handoff
 
 Historical development log through 29 May 2026. Status banner reviewed 9 September 2026.

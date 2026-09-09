@@ -28,8 +28,9 @@ analysis, replication checks, and custom plotting.
 lrdbench validate-output reports/<run_id>
 ```
 
-The validator checks the public output contract: required files, required CSV columns, environment
-metadata, report files, and artefact index entries.
+The validator checks required-file presence and minimum CSV headers. It does not inspect
+environment contents, artefact references, hashes or scientific completeness. See the
+[output specification](../output_contract.md) for exact checks and persistence limits.
 
 ## Match files to interpretation
 

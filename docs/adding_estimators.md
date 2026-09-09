@@ -10,6 +10,7 @@ the manifest-level `ml_training` protocol instead of custom registry enrolment.
 ## 1. Implement `BaseEstimator`
 
 Create a class that stores its `EstimatorSpec` and returns `EstimateResult` from `fit`.
+The statistic below is an integration example, not a validated LRD estimator.
 
 ```python
 from __future__ import annotations
@@ -34,7 +35,7 @@ class MyEstimator(BaseEstimator):
     def fit(self, record: SeriesRecord) -> EstimateResult:
         t0 = time.perf_counter()
         x = np.asarray(record.values, dtype=float)
-        if x.size < 32:
+        if x.size < int(self.spec.parameter_schema.get("min_n", 32)):
             return EstimateResult(
                 record_id=record.record_id,
                 estimator_name=self.spec.name,
@@ -44,7 +45,14 @@ class MyEstimator(BaseEstimator):
                 failure_reason="insufficient_signal_for_my_estimator",
                 estimator_version=self.VERSION,
             )
-        point = float(np.clip(np.var(x) / (np.var(x) + np.var(np.diff(x))), 0.0, 1.0))
+        if x.ndim != 1 or not np.isfinite(x).all():
+            return EstimateResult(record.record_id, self.spec.name, point=None,
+                                  valid=False, failure_reason="nonfinite_or_nonvector_input")
+        denominator = float(np.var(x) + np.var(np.diff(x)))
+        if denominator <= 0.0:
+            return EstimateResult(record.record_id, self.spec.name, point=None,
+                                  valid=False, failure_reason="constant_signal")
+        point = float(np.var(x) / denominator)
         return EstimateResult(
             record_id=record.record_id,
             estimator_name=self.spec.name,

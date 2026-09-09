@@ -61,6 +61,7 @@ Run:
 python -m ruff check .
 python -m pytest
 python -m mkdocs build --strict
+python scripts/check_docs.py site
 python -m build
 ```
 

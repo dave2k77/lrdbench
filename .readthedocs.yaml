@@ -1,4 +1,4 @@
-# Read the Docs configuration — https://docs.readthedocs.io/en/stable/config-file/v2.html
+# Read the Docs configuration: https://docs.readthedocs.com/platform/stable/config-file/v2.html
 version: 2
 
 build:
@@ -8,6 +8,7 @@ build:
 
 mkdocs:
   configuration: mkdocs.yml
+  fail_on_warning: true
 
 python:
   install:
@@ -15,3 +16,12 @@ python:
       path: .
       extra_requirements:
         - docs
+
+# Match Material search exclusions in the hosted server-side search index.
+search:
+  ignore:
+    - 404.html
+    - development_handoff/*
+    - observational_readiness_plan/*
+    - public_release_roadmap/*
+    - release_candidate_freeze/*

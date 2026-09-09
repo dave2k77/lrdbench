@@ -1,3 +1,8 @@
+---
+search:
+  exclude: true
+---
+
 # Public Research Release Roadmap
 
 Historical release-planning record. Completed and pending items below refer to their recorded

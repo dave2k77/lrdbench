@@ -43,6 +43,7 @@ The manifest then refers to the registered name:
 ```python
 from pathlib import Path
 
+from examples.custom_estimator_benchmark import custom_estimator_manifest
 from lrdbench.manifest import manifest_from_mapping
 from lrdbench.runner import BenchmarkRunner
 

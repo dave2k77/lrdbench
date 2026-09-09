@@ -33,7 +33,13 @@ The script runs `configs/suites/smoke_ground_truth.yaml` and prints:
 - the HTML report path;
 - a command for validating the public output contract.
 
-The same run can be launched through the CLI:
+The installed package can run the same suite by name, without a repository checkout:
+
+```bash
+lrdbench run smoke_ground_truth
+```
+
+From a checkout, the manifest path also works:
 
 ```bash
 lrdbench run configs/suites/smoke_ground_truth.yaml
@@ -63,8 +69,8 @@ Use the `result_store` path printed by the command:
 lrdbench validate-output reports/<run_id>
 ```
 
-The command returns exit code `0` when the expected CSV, HTML, manifest, environment, and artefact
-files are present with the required columns.
+The command returns `0` when required files and minimum CSV headers are present. It does not
+verify values or scientific completeness; see [output validation](../output_contract.md).
 
 ## What was benchmarked
 
