@@ -11,7 +11,7 @@ from lrdbench.schema import SeriesRecord
 
 
 class OutliersContamination(BaseContamination):
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     @property
     def name(self) -> str:
@@ -38,9 +38,11 @@ class OutliersContamination(BaseContamination):
         n = x.size
         rate = float(params["rate"])
         amplitude = float(params["amplitude"])
+        if not 0.0 <= rate <= 1.0 or not np.isfinite(amplitude):
+            raise ValueError("outliers requires 0 <= rate <= 1 and finite amplitude")
         rng = np.random.default_rng(seed)
         x2 = x.copy()
-        k = max(1, int(round(rate * n)))
+        k = max(1, int(round(rate * n))) if rate > 0 and n > 0 else 0
         idx = rng.choice(n, size=k, replace=False)
         scale = float(np.std(x)) + 1e-12
         signs = rng.choice([-1.0, 1.0], size=k)

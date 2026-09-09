@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "stage": "development_mean_comparison",
+  "seed_namespace": "lrdbench-mean-candidates-v1",
+  "global_seed": 20260911,
+  "lengths": [256, 512, 1024],
+  "processes": {"fGn": [0.25, 0.5, 0.75, 0.85], "ARFIMA": [0.25], "AR1": [0.8, 0.95]},
+  "repetitions": 64,
+  "bootstrap_draws": 199,
+  "nominal": 0.95,
+  "block_divisor": 16,
+  "methods": ["GPH", "Higuchi", "GHE"],
+  "fgn_model": "known_zero_and_unknown_constant_mean_ml",
+  "offset_probe": 1.0
+}

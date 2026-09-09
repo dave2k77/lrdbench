@@ -17,12 +17,17 @@ def fit_with_block_bootstrap(
     estimator_version: str,
     failure_reason: str,
     seed_offset: int = 0,
+    bootstrap_values: np.ndarray | None = None,
+    bootstrap_statistic: Callable[[np.ndarray], float | None] | None = None,
+    unbounded_hurst: bool = False,
 ) -> EstimateResult:
     """Run point estimate plus optional circular block-bootstrap CIs (RS/GPH pattern)."""
     t0 = time.perf_counter()
     params = dict(spec.parameter_schema)
     n_boot = int(params.get("n_bootstrap", 200))
-    block_len = int(params.get("bootstrap_block_len", 0)) or max(4, record.values.size // 10)
+    resample_values = record.values if bootstrap_values is None else bootstrap_values
+    resample_statistic = statistic if bootstrap_statistic is None else bootstrap_statistic
+    block_len = int(params.get("bootstrap_block_len", 0)) or max(4, resample_values.size // 10)
     levels_raw = params.get("ci_levels")
     ci_levels = tuple(float(x) for x in levels_raw) if levels_raw is not None else (0.95,)
     seed = seed_offset
@@ -44,12 +49,14 @@ def fit_with_block_bootstrap(
                 estimator_version=estimator_version,
             )
 
+        bootstrap_diagnostics: dict[str, object] = {}
         samples = bootstrap_statistic_distribution(
-            record.values,
+            resample_values,
             rng,
-            statistic,
+            resample_statistic,
             n_boot=n_boot,
             block_len=block_len,
+            diagnostics=bootstrap_diagnostics,
         )
         cis = symmetric_percentile_cis(samples, ci_levels) if samples.size >= 5 else ()
         bstd = float(np.std(samples)) if samples.size >= 2 else None
@@ -58,8 +65,6 @@ def fit_with_block_bootstrap(
             if abs(a - 0.95) < 1e-9:
                 ci_low, ci_high = lo, hi
                 break
-        if cis and ci_low is None:
-            ci_low, ci_high = cis[-1][1], cis[-1][2]
 
         diag: dict[str, object] = {
             "ci_method": "circular_block_bootstrap",
@@ -67,7 +72,32 @@ def fit_with_block_bootstrap(
             "bootstrap_block_len": block_len,
             "bootstrap_replicates_used": int(samples.size),
             "bootstrap_point_std": bstd,
+            **bootstrap_diagnostics,
+            "ci_available_levels": tuple(a for a, _, _ in cis),
+            "ci_unavailable_reason": (
+                "disabled"
+                if n_boot == 0
+                else "insufficient_replicates"
+                if samples.size < 5
+                else "no_valid_levels"
+            )
+            if not cis
+            else None,
         }
+        warnings: tuple[str, ...] = ("bootstrap_draws_discarded",) if samples.size < n_boot else ()
+        if unbounded_hurst:
+            outside = not 0.0 < point < 1.0
+            diag.update(
+                point_clipped=False,
+                outside_nominal_hurst_range=outside,
+                bootstrap_points_outside_nominal_hurst_range=int(
+                    np.count_nonzero((samples <= 0.0) | (samples >= 1.0))
+                ),
+                input_interpretation="stationary_increment_scaling_proxy",
+                method_parameters=params,
+            )
+            if outside:
+                warnings += ("estimate_outside_nominal_hurst_range",)
         return EstimateResult(
             record_id=record.record_id,
             estimator_name=spec.name,
@@ -78,6 +108,7 @@ def fit_with_block_bootstrap(
             valid=True,
             estimator_version=estimator_version,
             diagnostics=diag,
+            warnings=warnings,
             bootstrap_cis=cis,
         )
     except Exception as exc:  # noqa: BLE001

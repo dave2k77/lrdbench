@@ -19,7 +19,7 @@ class ARFIMAGenerator(BaseGenerator):
 
     @property
     def version(self) -> str:
-        return "0.1.0"
+        return "0.2.0"
 
     def generate(
         self,
@@ -33,13 +33,16 @@ class ARFIMAGenerator(BaseGenerator):
         d = float(params["d"])
         sigma = float(params.get("sigma", 1.0))
         rng = np.random.default_rng(seed)
-        x = simulate_arfima_zero_d_zero(n, d, rng, sigma=sigma)
+        method = str(params.get("method", "truncated_ma"))
+        x = simulate_arfima_zero_d_zero(n, d, rng, sigma=sigma, method=method)
         truth = TruthSpec(
             process_family="ARFIMA(0,d,0)",
             generating_params=dict(params),
             target_estimand="long_memory_parameter",
             target_value=d,
-            notes=None,
+            notes="Stationary ARFIMA target; truncated_ma approximates its infinite filter."
+            if method == "truncated_ma"
+            else "Exact stationary Gaussian covariance on the sampled grid.",
         )
         additional_truths = (
             TruthSpec(
@@ -65,6 +68,10 @@ class ARFIMAGenerator(BaseGenerator):
             "n": n,
             "d": d,
             "sigma": sigma,
+            "simulation_method": method,
+            "ma_truncation_lag": min(10 * n, 50000) if method == "truncated_ma" else None,
+            "sigma_interpretation": "innovation_standard_deviation",
+            "covariance_diagonal_jitter": 0.0,
         }
         return SeriesRecord(
             record_id=record_id,

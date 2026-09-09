@@ -138,7 +138,7 @@ class ThresholdHurstDiscriminator(BaseEstimator):
     scale (default 0.05). Score = ``sigmoid((H - h0) / width)`` in ``[0, 1]``.
     """
 
-    VERSION = "0.1.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -169,7 +169,9 @@ class ThresholdHurstDiscriminator(BaseEstimator):
         )
 
 
-def _lowfreq_spectral_score(x: np.ndarray, *, m_power: float, d0: float, width: float) -> float | None:
+def _lowfreq_spectral_score(
+    x: np.ndarray, *, m_power: float, d0: float, width: float
+) -> float | None:
     """Local-Whittle memory parameter at low frequency, squashed to [0, 1].
 
     True LRD keeps a positive memory parameter as the frequency band shrinks to
@@ -187,7 +189,7 @@ def _lowfreq_spectral_score(x: np.ndarray, *, m_power: float, d0: float, width: 
 class LowFreqSpectralDiscriminator(BaseEstimator):
     """LRD discriminator from the low-frequency memory parameter (local Whittle)."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -264,7 +266,9 @@ class ScaleCrossoverDiscriminator(BaseEstimator):
         )
 
 
-def _ic_model_select_score(x: np.ndarray, *, ar_orders: tuple[int, ...], scale: float) -> float | None:
+def _ic_model_select_score(
+    x: np.ndarray, *, ar_orders: tuple[int, ...], scale: float
+) -> float | None:
     """Score from BIC comparison of ARFIMA(0,d,0) against short-memory AR(p).
 
     Uses the summed Whittle likelihood on a common frequency grid. If the
@@ -313,7 +317,7 @@ def _ic_model_select_score(x: np.ndarray, *, ar_orders: tuple[int, ...], scale: 
 class ICModelSelectDiscriminator(BaseEstimator):
     """LRD discriminator from BIC model comparison (ARFIMA(0,d,0) vs AR(p))."""
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec

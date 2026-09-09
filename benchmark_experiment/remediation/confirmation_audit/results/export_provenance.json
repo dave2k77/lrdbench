@@ -1,0 +1,36 @@
+{
+  "run_identity_sha256": "43d0a7f75c8afab6d32ab6fd1f2ff8db49cca59e36971e2b74404173f4cbfcf2",
+  "canonical_summary_sha256": "95b8e938fb98a674c7ba2e92b7d59ed0f909ffd6ae2e8585c90a0f23f7c01504",
+  "export_source_sha256": "e73b94896762e69c45a6cd6eb0d595794cb376a578694012b6b37ca32058c687",
+  "table_rows": {
+    "accuracy_cells.csv.gz": 5610,
+    "accuracy_domains.csv.gz": 510,
+    "stress_cells.csv.gz": 91574,
+    "stress_domains.csv.gz": 19623,
+    "intervals_cells.csv.gz": 1120,
+    "intervals_domains.csv.gz": 480,
+    "planned_contrasts.csv.gz": 2120,
+    "accuracy_mae.csv": 756,
+    "interval_coverage.csv": 240,
+    "stress_effects_domains.csv": 2898
+  },
+  "files": {
+    "accuracy_cells.csv.gz": "9c187fd4778514d99d2e914aff5e6b36a554ea1c673d98286c8add9f54521b1a",
+    "accuracy_domains.csv.gz": "d57ab24a4490c86187366c1e74b971231916022dd8b774247fc6ffc9eb90f39b",
+    "accuracy_mae.csv": "897ac03e2ab2e7686ccd26b902d3fc0f318ee92831f20743e85329734d646ecb",
+    "cell_accounting.csv": "91b54648bc77f674f967c57122308d025a24a958069a6eec4d0cf643833d025d",
+    "clean_accuracy.png": "91312a537ad576e459fe28d6b17bba6506940a32e693e1d01cd398cbc7d6566f",
+    "clean_accuracy.svg": "6bea4afe56ccd7f10fa666c779526663239bf73b744d52a310472ecbc6d15f67",
+    "draft_claim_ledger.csv": "bbd03191dbe28764064713c297a3d02d4f0976ac89c52511fcfc4bab5a1811c8",
+    "interval_coverage.csv": "c8ed74d38729d29a2a18825b19493fee89851dd5cd1f9444d88f7089331867dc",
+    "interval_coverage.png": "5ad03687fef4c2874a4a94f5198905134e96c54abb7dcfef10be3c4520553111",
+    "interval_coverage.svg": "9e77039884e994b4fc8fe2ae32767771d58cf1cffe0aa52489f8c8e62eba8ed6",
+    "intervals_cells.csv.gz": "86d4d010e6b1dae8fa4bdeb70ed8d57ff3053c21eb6e3ab7c61da773f9ccb684",
+    "intervals_domains.csv.gz": "1edfc9ceab0e709e9edc4335830c3828c8fa79d9c644712fb9e454e615781b0d",
+    "narrative_evidence.csv": "fa85eed067f3f5622f6cd6fe05c48913046c2f34ba600ba7e4bd3857cc5d3ba7",
+    "planned_contrasts.csv.gz": "3587b3f8040be92e2c0503260ea08de2bb0b4c794d05844a05ed7a14963d86cc",
+    "stress_cells.csv.gz": "8342939918c091cf7f1d0036cf287dd93085f855f7d3d5e5640d40c5e7143052",
+    "stress_domains.csv.gz": "e062d5f45e77d707d7df3594a8dd00716b3193994dcea46c7d6b218b124fb09f",
+    "stress_effects_domains.csv": "2a1bdc9eb8fb37561dc6a5ce2f3a7d053670e883ebbdab0da617879b42c54a91"
+  }
+}

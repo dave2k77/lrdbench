@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 
 import numpy as np
 from scipy.optimize import minimize_scalar
@@ -14,8 +15,9 @@ from lrdbench.schema import EstimateResult, EstimatorSpec, SeriesRecord
 def _as_target_estimand(value: float | None, target_estimand: str) -> float | None:
     """Map the native ARFIMA memory parameter ``d`` to the declared estimand.
 
-    Spectral long-memory estimators natively produce the fractional-integration
-    parameter ``d`` in ``(-1/2, 1/2)``. When a suite declares
+    Spectral long-memory estimators natively estimate the fractional-integration
+    parameter ``d``. Its stationary fractional-noise model range is ``(-1/2, 1/2)``;
+    unconstrained regression estimates may fall outside that range. When a suite declares
     ``hurst_scaling_proxy`` (i.e. compares against a Hurst exponent ``H``),
     convert via the fractional-noise identity ``H = d + 1/2`` so the estimate
     is on the same scale as the ground truth. For ``long_memory_parameter``
@@ -56,14 +58,20 @@ def _log_periodogram_regression_d(
 ) -> float | None:
     """Log-periodogram regression slope as a long-memory parameter proxy.
 
-    This is the shared core used by both GPH and Periodogram estimators.
+    With regressor log(4 sin²(lambda/2)), the fitted slope is -d, not -2d.
+    The unconstrained OLS estimate is returned, including values outside the
+    stationary parameter range. This core is shared by GPH and Periodogram.
     An optional ``taper`` can reduce periodogram bias from spectral leakage.
     """
     x = np.asarray(x, dtype=float)
     n = x.size
-    if n < 64:
+    if x.ndim != 1 or n < 64 or not np.isfinite(x).all():
         return None
     x = x - np.mean(x)
+    scale = float(np.max(np.abs(x)))
+    if scale == 0.0:
+        return None
+    x = x / scale
     x = _apply_taper(x, taper)
     x = x - np.mean(x)
     if m is None:
@@ -84,10 +92,10 @@ def _log_periodogram_regression_d(
     if denom < 1e-20:
         return None
     beta = float(np.sum((log_freq - x_mean) * (log_per - y_mean)) / denom)
-    d = float(-0.5 * beta)
+    d = float(-beta)
     if not np.isfinite(d):
         return None
-    return float(np.clip(d, -0.499, 0.499))
+    return d
 
 
 # Backward-compatible aliases for internal callers
@@ -97,14 +105,14 @@ def _gph_long_memory(x: np.ndarray, *, m: int | None = None) -> float | None:
 
 
 def _log_periodogram_slope_d(x: np.ndarray, *, m: int | None = None) -> float | None:
-    """Log-periodogram regression memory parameter (GPH-type) in (-0.5, 0.5)."""
+    """Unclipped log-periodogram regression memory estimate (GPH-type)."""
     return _log_periodogram_regression_d(x, m=m, taper=None)
 
 
 class GPHEstimator(BaseEstimator):
     """Geweke–Porter–Hudak log-periodogram regression for long-memory parameter d."""
 
-    VERSION = "0.4.0"
+    VERSION = "0.5.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -133,7 +141,7 @@ class GPHEstimator(BaseEstimator):
                 _log_periodogram_regression_d(record.values, m=m, taper=taper), estimand
             )
             dt = time.perf_counter() - t0
-            if d is None:
+            if d is None or not np.isfinite(d):
                 return EstimateResult(
                     record_id=record.record_id,
                     estimator_name=self._spec.name,
@@ -149,12 +157,14 @@ class GPHEstimator(BaseEstimator):
                     _log_periodogram_regression_d(z, m=m, taper=taper), estimand
                 )
 
+            bootstrap_diagnostics: dict[str, object] = {}
             samples = bootstrap_statistic_distribution(
                 record.values,
                 rng,
                 _gph_stat,
                 n_boot=n_boot,
                 block_len=block_len,
+                diagnostics=bootstrap_diagnostics,
             )
             cis = symmetric_percentile_cis(samples, ci_levels) if samples.size >= 5 else ()
             bstd = float(np.std(samples)) if samples.size >= 2 else None
@@ -163,8 +173,6 @@ class GPHEstimator(BaseEstimator):
                 if abs(a - 0.95) < 1e-9:
                     ci_low, ci_high = lo, hi
                     break
-            if cis and ci_low is None:
-                ci_low, ci_high = cis[-1][1], cis[-1][2]
 
             diag: dict[str, object] = {
                 "ci_method": "circular_block_bootstrap",
@@ -172,8 +180,21 @@ class GPHEstimator(BaseEstimator):
                 "bootstrap_block_len": block_len,
                 "bootstrap_replicates_used": int(samples.size),
                 "bootstrap_point_std": bstd,
+                **bootstrap_diagnostics,
+                "ci_available_levels": tuple(a for a, _, _ in cis),
+                "ci_unavailable_reason": (
+                    "disabled"
+                    if n_boot == 0
+                    else "insufficient_replicates"
+                    if samples.size < 5
+                    else "no_valid_levels"
+                )
+                if not cis
+                else None,
                 "m": m,
                 "taper": taper,
+                "regression_slope_multiplier": -1.0,
+                "point_clipped": False,
             }
             return EstimateResult(
                 record_id=record.record_id,
@@ -185,6 +206,7 @@ class GPHEstimator(BaseEstimator):
                 valid=True,
                 estimator_version=self.VERSION,
                 diagnostics=diag,
+                warnings=("bootstrap_draws_discarded",) if samples.size < n_boot else (),
                 bootstrap_cis=cis,
             )
         except Exception as exc:  # noqa: BLE001
@@ -212,7 +234,7 @@ def _whittle_profile_negloglik(d: float, lam: np.ndarray, i_per: np.ndarray) -> 
     sig2 = float(np.mean(i_per / h))
     if sig2 <= 0.0 or not np.isfinite(sig2):
         return 1e12
-    f = (sig2 / (2.0 * np.pi)) * h
+    f = sig2 * h  # i_per uses |FFT|²/n, so its profiled scale has no 2*pi divisor.
     return float(np.mean(np.log(f) + i_per / f))
 
 
@@ -222,7 +244,13 @@ def _whittle_arfima_d(x: np.ndarray, *, m: int | None = None) -> float | None:
     n = x.size
     if n < 128:
         return None
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     x = x - np.mean(x)
+    amplitude = float(np.max(np.abs(x)))
+    if amplitude == 0.0:
+        return None
+    x = x / amplitude
     if m is None:
         m = max(8, n // 8)
     m = min(m, n // 2 - 1)
@@ -260,7 +288,13 @@ def _modified_local_whittle_d(x: np.ndarray, *, m: int | None = None) -> float |
     n = x.size
     if n < 256:
         return None
+    if x.ndim != 1 or not np.isfinite(x).all():
+        return None
     x = x - np.mean(x)
+    amplitude = float(np.max(np.abs(x)))
+    if amplitude == 0.0:
+        return None
+    x = x / amplitude
     if m is None:
         m = max(8, int(n**0.55))
     m = min(m, n // 3)
@@ -285,7 +319,7 @@ def _modified_local_whittle_d(x: np.ndarray, *, m: int | None = None) -> float |
 class PeriodogramRegressionEstimator(BaseEstimator):
     """Log-periodogram regression (memory parameter d, GPH-type)."""
 
-    VERSION = "0.3.0"
+    VERSION = "0.4.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -301,9 +335,7 @@ class PeriodogramRegressionEstimator(BaseEstimator):
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _as_target_estimand(
-                _log_periodogram_regression_d(z, m=m, taper=taper), estimand
-            )
+            return _as_target_estimand(_log_periodogram_regression_d(z, m=m, taper=taper), estimand)
 
         return fit_with_block_bootstrap(
             record,
@@ -322,11 +354,11 @@ class PeriodogramBetaEstimator(BaseEstimator):
     the ``spectral_exponent_beta`` estimand, reporting ``beta = 2d`` so a suite
     can benchmark the spectral slope directly against a beta ground truth on the
     same realisation used for Hurst estimation. The default frequency count is
-    the shared ``m = sqrt(n)``; suites may widen ``m`` to reduce the known
-    low-``m`` attenuation bias.
+    the shared ``m = sqrt(n)``. Bandwidth controls the bias-variance tradeoff;
+    the former factor-of-two error was an implementation defect, not bandwidth bias.
     """
 
-    VERSION = "0.1.0"
+    VERSION = "0.2.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -342,9 +374,7 @@ class PeriodogramBetaEstimator(BaseEstimator):
 
         def stat(z: np.ndarray) -> float | None:
             m = int(params["m"]) if params.get("m") is not None else None
-            return _as_target_estimand(
-                _log_periodogram_regression_d(z, m=m, taper=taper), estimand
-            )
+            return _as_target_estimand(_log_periodogram_regression_d(z, m=m, taper=taper), estimand)
 
         return fit_with_block_bootstrap(
             record,
@@ -359,7 +389,7 @@ class PeriodogramBetaEstimator(BaseEstimator):
 class WhittleMLEEstimator(BaseEstimator):
     """Gaussian Whittle likelihood for ARFIMA(0,d,0) spectral density."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -376,7 +406,7 @@ class WhittleMLEEstimator(BaseEstimator):
             m = int(params["m"]) if params.get("m") is not None else None
             return _as_target_estimand(_whittle_arfima_d(z, m=m), estimand)
 
-        return fit_with_block_bootstrap(
+        result = fit_with_block_bootstrap(
             record,
             self._spec,
             statistic=stat,
@@ -384,12 +414,16 @@ class WhittleMLEEstimator(BaseEstimator):
             failure_reason="insufficient_signal_for_whittle",
             seed_offset=203,
         )
+        return _bounded_memory_diagnostics(result, estimand, "arfima_0_d_0_whittle")
 
 
 class ModifiedLocalWhittleEstimator(BaseEstimator):
-    """Modified (Gaussian) local Whittle estimator of long-memory parameter d."""
+    """Ordinary Gaussian local Whittle, retaining the legacy registry name.
 
-    VERSION = "0.2.0"
+    No taper, differencing or nonstationary correction is implemented.
+    """
+
+    VERSION = "0.3.0"
 
     def __init__(self, spec: EstimatorSpec) -> None:
         self._spec = spec
@@ -406,7 +440,7 @@ class ModifiedLocalWhittleEstimator(BaseEstimator):
             m = int(params["m"]) if params.get("m") is not None else None
             return _as_target_estimand(_modified_local_whittle_d(z, m=m), estimand)
 
-        return fit_with_block_bootstrap(
+        result = fit_with_block_bootstrap(
             record,
             self._spec,
             statistic=stat,
@@ -414,3 +448,28 @@ class ModifiedLocalWhittleEstimator(BaseEstimator):
             failure_reason="insufficient_signal_for_mlw",
             seed_offset=307,
         )
+        return _bounded_memory_diagnostics(result, estimand, "ordinary_local_whittle")
+
+
+def _bounded_memory_diagnostics(
+    result: EstimateResult, estimand: str, algorithm: str
+) -> EstimateResult:
+    native = result.point
+    if native is not None:
+        if estimand == "hurst_scaling_proxy":
+            native -= 0.5
+        elif estimand == "spectral_exponent_beta":
+            native /= 2.0
+    boundary = native is not None and min(abs(native + 0.49), abs(native - 0.49)) <= 1e-4
+    return replace(
+        result,
+        diagnostics={
+            **result.diagnostics,
+            "algorithm": algorithm,
+            "native_d": native,
+            "optimization_bounds_d": (-0.49, 0.49),
+            "optimization_boundary_hit": boundary,
+            "point_clipped": False,
+        },
+        warnings=result.warnings + (("optimization_boundary_hit",) if boundary else ()),
+    )

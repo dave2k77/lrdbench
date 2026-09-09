@@ -1,0 +1,89 @@
+{
+  "reviewed_commit": "59a6b65069fca80b89447921ed20afaa5246e60f",
+  "development_base": "59a6b65069fca80b89447921ed20afaa5246e60f",
+  "recorded_at": "2026-09-07T05:34:56.516518+00:00",
+  "historical_status": "partially_traceable: compact tables and manifests available; original environment, source revision and full row-level bundles not established",
+  "historical_files": [
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/checksums.sha256.csv",
+      "sha256": "9f47ace1ef122eff50d3ede186c27c982a12b172d8dbbd423ac21ab3f5d3a11c"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/estimator_leaderboard_comparison.csv",
+      "sha256": "066fd4058404619eef37ac554bf88e915783e8b7372dbb94dd421a7e2ce97c62"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/false_positive_summary.csv",
+      "sha256": "0526539e2a3e86d8102479c81c1bab8d403b6e23f8c7cdd77f62a87ae7c4bfdf"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/run_index.csv",
+      "sha256": "c30baf76b16fdd5c592ac87a0987636097c06323c4ae8763ab81c0f3d4414e4f"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/scale_window_sensitivity_summary.csv",
+      "sha256": "fbc2e0844893e647f3e80c4398f090be2b894ebda8fbefea3ae6bff6cfe4355f"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/stress_estimator_failure_modes.csv",
+      "sha256": "c9a97e9e83430f6fea06eb3e1e76c16647f84293fa44cd232509e85bbb92938c"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/stress_operator_summary.csv",
+      "sha256": "b8c1c23449a86d21844e6bcc2aa31acae4a62335be6d0279169076e67ff5f1fa"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation/uncertainty_coverage_summary.csv",
+      "sha256": "b4f21f85b9cd5badc7e661f65ae8138ce8e11e60d33a6436c7173b7f4cbaaf8a"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/checksums.sha256.csv",
+      "sha256": "b8dbd1fc51a6f762cf9f40744992fcdbec31f9e6b7874cf4beda64b13b7c2d3c"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/estimator_leaderboard_comparison.csv",
+      "sha256": "d4f92496a414cf3f48c1af4b7b6c527ce7351a5263a4a74d385955363312aff6"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/false_positive_summary.csv",
+      "sha256": "fc3154d52bd3d1fc0c17461168f63f134e8859cdc41614e00e2905c4720c6ce8"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/run_index.csv",
+      "sha256": "275149f35079a7eef2ef833cc0241fc8a1739ed98210a224d538e60fdd12cc93"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/scale_window_sensitivity_summary.csv",
+      "sha256": "06dc0ea401a318ac0dc82a02b6cdad09158282c6e039a86b6d2afec6e96d1de7"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/stress_estimator_failure_modes.csv",
+      "sha256": "482e635dbad480b8a12fc345ce94fad16851145ea77bd6843962a8579f861a9f"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/stress_operator_summary.csv",
+      "sha256": "e36208279f23d3e940e612462ef499f130d9b2d78561c1182e06630d9a325f9c"
+    },
+    {
+      "path": "benchmark_experiment/results/neural_classical_workstation_v2/uncertainty_coverage_summary.csv",
+      "sha256": "09631416a3de57547ee51a2e0ed4a00b6b590a5c97a3383f30c56bda1e693d24"
+    },
+    {
+      "path": "configs/suites/neural_classical_workstation_ground_truth.yaml",
+      "sha256": "c5a2201119afda8344d426173d78dc4b9602cd3b51bc8e174d6bd9490b958f81"
+    },
+    {
+      "path": "configs/suites/neural_classical_workstation_ground_truth_v2.yaml",
+      "sha256": "2f45c6592a12d09cb57305de3a860dc96b4ab4b6b64042cf5a662afe16be36ec"
+    },
+    {
+      "path": "configs/suites/neural_classical_workstation_stress.yaml",
+      "sha256": "25bcbc994ecdf056fd17e80b15ebbb62e0c30bd334ad19463c4e6667fd923c71"
+    },
+    {
+      "path": "configs/suites/neural_classical_workstation_stress_v2.yaml",
+      "sha256": "40d14735590f31d044030e3cdd65839f95d3d0be7281b6bdf70532a7a9a363ce"
+    }
+  ],
+  "full_benchmark_rerun": false
+}

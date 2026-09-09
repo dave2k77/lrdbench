@@ -1,0 +1,514 @@
+{
+  "tables": {
+    "design": {
+      "caption": "Table 1 Experimental design and units of replication",
+      "headers": [
+        "Component",
+        "Design",
+        "Independent parents",
+        "Evaluations"
+      ],
+      "widths": [
+        0.9,
+        2.8,
+        1.1,
+        1.2
+      ],
+      "rows": [
+        [
+          "Clean accuracy",
+          "11 settings × 3 lengths (512, 1024, 2048) × 2,000 repetitions; 21 pipelines",
+          "66,000",
+          "1,386,000 fits"
+        ],
+        [
+          "Contamination",
+          "7 settings × 2 lengths (512, 1024) × 500 repetitions; 23 separate descendants; 21 pipelines",
+          "7,000\nSubset of clean",
+          "161,000 descendants; 3,381,000 fits"
+        ],
+        [
+          "Intervals core",
+          "7 settings × n=512 × 2,000 repetitions; 16 candidates",
+          "14,000\nSubset of clean",
+          "224,000 intervals"
+        ],
+        [
+          "Intervals sensitivity",
+          "3 settings × n=1024 × 500 repetitions; 16 candidates",
+          "1,500\nSubset of clean",
+          "24,000 intervals"
+        ],
+        [
+          "Within-record resampling",
+          "1,999 circular-block and 1,999 fitted-fGn draws for each of 15,500 parents",
+          "No additional independent parents",
+          "61,969,000 resampled records"
+        ],
+        [
+          "Summary uncertainty",
+          "1,999 resamples of parents within each fixed cell, preserving method and condition pairing",
+          "Uses declared parent counts",
+          "Pointwise Monte Carlo intervals"
+        ]
+      ],
+      "note": "The seven-setting subset comprises all four fGn H values, ARFIMA d=0.25 and AR(1) φ=0.8 and 0.95. The three sensitivity settings are fGn H=0.50 and 0.85 and AR(1) φ=0.95. Bootstrap draws and contaminated descendants are not independent repetitions. Each physical resampling pool is reused across multiple statistics. Counts follow the frozen protocol and audited accounting."
+    },
+    "clean": {
+      "caption": "Table 2 Clean domain mean absolute error",
+      "headers": [
+        "Pipeline",
+        "fGn",
+        "ARFIMA",
+        "AR(1)"
+      ],
+      "widths": [
+        2.05,
+        1.32,
+        1.32,
+        1.31
+      ],
+      "rows": [
+        [
+          "R/S",
+          "0.0650 [0.0646, 0.0654]",
+          "0.0807 [0.0803, 0.0811]",
+          "0.2109 [0.2105, 0.2113]"
+        ],
+        [
+          "Absolute moment",
+          "0.1392 [0.1376, 0.1409]",
+          "0.1275 [0.1258, 0.1293]",
+          "0.1455 [0.1440, 0.1469]"
+        ],
+        [
+          "Variance",
+          "0.1279 [0.1263, 0.1294]",
+          "0.1186 [0.1169, 0.1203]",
+          "0.1448 [0.1434, 0.1461]"
+        ],
+        [
+          "Residual variance",
+          "0.0402 [0.0398, 0.0406]",
+          "0.0430 [0.0425, 0.0434]",
+          "0.3185 [0.3178, 0.3191]"
+        ],
+        [
+          "DFA short",
+          "0.0352 [0.0348, 0.0355]",
+          "0.0458 [0.0454, 0.0463]",
+          "0.3876 [0.3870, 0.3882]"
+        ],
+        [
+          "DFA balanced",
+          "0.0415 [0.0411, 0.0419]",
+          "0.0459 [0.0454, 0.0464]",
+          "0.3188 [0.3181, 0.3196]"
+        ],
+        [
+          "DFA long",
+          "0.0488 [0.0482, 0.0492]",
+          "0.0490 [0.0485, 0.0496]",
+          "0.2646 [0.2638, 0.2654]"
+        ],
+        [
+          "DMA short",
+          "0.0541 [0.0535, 0.0547]",
+          "0.0545 [0.0539, 0.0551]",
+          "0.1629 [0.1622, 0.1635]"
+        ],
+        [
+          "DMA balanced",
+          "0.0744 [0.0737, 0.0752]",
+          "0.0668 [0.0660, 0.0676]",
+          "0.1284 [0.1276, 0.1291]"
+        ],
+        [
+          "DMA long",
+          "0.1001 [0.0991, 0.1010]",
+          "0.0860 [0.0850, 0.0870]",
+          "0.1132 [0.1124, 0.1141]"
+        ],
+        [
+          "GPH m32",
+          "0.1067 [0.1056, 0.1078]",
+          "0.1061 [0.1050, 0.1073]",
+          "0.2124 [0.2111, 0.2136]"
+        ],
+        [
+          "GPH m64",
+          "0.0717 [0.0711, 0.0724]",
+          "0.0710 [0.0702, 0.0718]",
+          "0.2577 [0.2568, 0.2586]"
+        ],
+        [
+          "ARFIMA-shape Whittle",
+          "0.0573 [0.0568, 0.0579]",
+          "0.0568 [0.0562, 0.0575]",
+          "0.2150 [0.2143, 0.2156]"
+        ],
+        [
+          "Local Whittle",
+          "0.0571 [0.0565, 0.0576]",
+          "0.0567 [0.0560, 0.0573]",
+          "0.2147 [0.2141, 0.2154]"
+        ],
+        [
+          "Wavelet db2 broad",
+          "0.0775 [0.0768, 0.0783]",
+          "0.0876 [0.0866, 0.0886]",
+          "0.3561 [0.3553, 0.3570]"
+        ],
+        [
+          "Wavelet db2 reduced",
+          "0.0616 [0.0610, 0.0623]",
+          "0.0677 [0.0669, 0.0685]",
+          "0.4109 [0.4101, 0.4118]"
+        ],
+        [
+          "Wavelet db4 conservative",
+          "0.0965 [0.0955, 0.0975]",
+          "0.0990 [0.0979, 0.1002]",
+          "0.3534 [0.3522, 0.3546]"
+        ],
+        [
+          "Higuchi raw",
+          "0.0342 [0.0338, 0.0345]",
+          "0.0374 [0.0370, 0.0378]",
+          "0.2265 [0.2260, 0.2269]"
+        ],
+        [
+          "Higuchi centered",
+          "0.0388 [0.0385, 0.0392]",
+          "0.0402 [0.0397, 0.0406]",
+          "0.2239 [0.2235, 0.2243]"
+        ],
+        [
+          "GHE raw",
+          "0.0411 [0.0407, 0.0415]",
+          "0.0410 [0.0406, 0.0415]",
+          "0.1858 [0.1853, 0.1863]"
+        ],
+        [
+          "GHE centered",
+          "0.0500 [0.0495, 0.0505]",
+          "0.0460 [0.0455, 0.0465]",
+          "0.1803 [0.1798, 0.1808]"
+        ]
+      ],
+      "font": 8.5,
+      "note": "Entries are MAE [95% Monte Carlo interval] in H units. Domains give equal weight to 12 fGn, 9 ARFIMA and 12 AR(1) process–length cells, each with 2,000 parents. Intervals resample parents within cells jointly across pipelines, with 1,999 draws. Domains and configurations are not ranked. Raw and centered refer to the increments before cumulative-path construction."
+    },
+    "stress": {
+      "caption": "Table 3 Illustrative paired contamination effects on fractional Gaussian noise",
+      "headers": [
+        "Condition",
+        "DFA short",
+        "GPH m32",
+        "Higuchi raw",
+        "GHE raw"
+      ],
+      "widths": [
+        1.55,
+        1.12,
+        1.12,
+        1.12,
+        1.09
+      ],
+      "rows": [
+        [
+          "Offset 1 SD",
+          "0.000 [-0.000, 0.000]",
+          "-0.000 [-0.000, 0.000]",
+          "0.341 [0.340, 0.342]",
+          "0.339 [0.338, 0.341]"
+        ],
+        [
+          "Step p=0.5, a=2",
+          "0.194 [0.192, 0.196]",
+          "0.367 [0.363, 0.371]",
+          "0.314 [0.313, 0.315]",
+          "0.314 [0.313, 0.315]"
+        ],
+        [
+          "Impulses 5%, 8 SD",
+          "0.120 [0.118, 0.122]",
+          "0.054 [0.050, 0.058]",
+          "0.105 [0.103, 0.107]",
+          "0.094 [0.093, 0.096]"
+        ],
+        [
+          "Trend order 1, a=1",
+          "0.042 [0.041, 0.043]",
+          "0.588 [0.584, 0.591]",
+          "0.304 [0.303, 0.305]",
+          "0.295 [0.294, 0.296]"
+        ],
+        [
+          "Trend order 2, a=1",
+          "0.057 [0.056, 0.058]",
+          "0.580 [0.576, 0.584]",
+          "0.303 [0.302, 0.304]",
+          "0.296 [0.295, 0.297]"
+        ],
+        [
+          "t noise df=3, a=1",
+          "0.068 [0.067, 0.070]",
+          "0.033 [0.029, 0.036]",
+          "0.055 [0.054, 0.056]",
+          "0.053 [0.051, 0.054]"
+        ],
+        [
+          "t noise df=5, a=1",
+          "0.068 [0.067, 0.070]",
+          "0.032 [0.028, 0.035]",
+          "0.055 [0.054, 0.057]",
+          "0.053 [0.051, 0.054]"
+        ]
+      ],
+      "font": 8.5,
+      "note": "Entries are changes in MAE [95% Monte Carlo interval], relative to the same clean parents, in H units. Equal weights cover eight fGn cells (four H values × two lengths), each with 500 parents. The rows illustrate different operators; they are not a new inferential selection or ranking. All 23 conditions and 21 pipelines are shown separately by domain in Figures S1–S3 and the complete machine-readable exports. Drift measures are distinct from these changes in error. SD is the parent standard deviation."
+    },
+    "coverage": {
+      "caption": "Table 4 Coverage and width at fGn H of 0.85 and n of 512",
+      "headers": [
+        "Statistic",
+        "Interval",
+        "Coverage % [95% interval]",
+        "Mean width [95% interval]"
+      ],
+      "widths": [
+        0.7,
+        2.25,
+        1.55,
+        1.5
+      ],
+      "rows": [
+        [
+          "GPH m32",
+          "Block raw percentile",
+          "95.50 [94.50, 96.32]",
+          "0.517 [0.516, 0.518]"
+        ],
+        [
+          "GPH m32",
+          "Block raw basic",
+          "69.65 [67.60, 71.63]",
+          "0.517 [0.516, 0.518]"
+        ],
+        [
+          "GPH m32",
+          "Block centered percentile",
+          "95.50 [94.50, 96.32]",
+          "0.517 [0.516, 0.518]"
+        ],
+        [
+          "GPH m32",
+          "Block centered basic",
+          "69.65 [67.60, 71.63]",
+          "0.517 [0.516, 0.518]"
+        ],
+        [
+          "GPH m32",
+          "Fitted fGn centered basic",
+          "95.00 [93.96, 95.87]",
+          "0.534 [0.533, 0.534]"
+        ],
+        [
+          "GPH m32",
+          "Normal raw",
+          "94.75 [93.68, 95.64]",
+          "0.529 [0.529, 0.529]"
+        ],
+        [
+          "Higuchi",
+          "Block raw percentile",
+          "63.80 [61.67, 65.88]",
+          "0.171 [0.169, 0.172]"
+        ],
+        [
+          "Higuchi",
+          "Block raw basic",
+          "72.25 [70.25, 74.17]",
+          "0.171 [0.169, 0.172]"
+        ],
+        [
+          "Higuchi",
+          "Block centered percentile",
+          "17.60 [15.99, 19.33]",
+          "0.194 [0.193, 0.195]"
+        ],
+        [
+          "Higuchi",
+          "Block centered basic",
+          "80.25 [78.45, 81.94]",
+          "0.194 [0.193, 0.195]"
+        ],
+        [
+          "Higuchi",
+          "Fitted fGn centered basic",
+          "92.20 [90.94, 93.30]",
+          "0.223 [0.222, 0.223]"
+        ],
+        [
+          "GHE",
+          "Block raw percentile",
+          "60.65 [58.49, 62.77]",
+          "0.183 [0.181, 0.185]"
+        ],
+        [
+          "GHE",
+          "Block raw basic",
+          "71.20 [69.18, 73.14]",
+          "0.183 [0.181, 0.185]"
+        ],
+        [
+          "GHE",
+          "Block centered percentile",
+          "6.95 [5.92, 8.15]",
+          "0.207 [0.206, 0.207]"
+        ],
+        [
+          "GHE",
+          "Block centered basic",
+          "75.60 [73.67, 77.43]",
+          "0.207 [0.206, 0.207]"
+        ],
+        [
+          "GHE",
+          "Fitted fGn centered basic",
+          "92.95 [91.74, 93.99]",
+          "0.242 [0.241, 0.242]"
+        ]
+      ],
+      "font": 8.5,
+      "note": "There were 2,000 parent records and all intervals were available. Coverage intervals are Wilson 95% Monte Carlo intervals; width intervals use paired parent resampling. Width is in H units. Block denotes the circular block bootstrap with block length 32 and 1,999 draws. Fitted fGn uses unknown-mean Gaussian profile likelihood and centered basic endpoints. Every nominal interval is 95%. The displayed uncertainty describes the benchmark summary, not the interval for a new individual record."
+    },
+    "methods": {
+      "caption": "Table S1 Evaluated pipelines and exact settings",
+      "headers": [
+        "Manuscript name and repository identifier",
+        "Definition and configuration"
+      ],
+      "widths": [
+        2.1,
+        3.9
+      ],
+      "rows": [
+        [
+          "R/S\nRS",
+          "Mean rescaled range of forward disjoint blocks; no Anis–Lloyd correction. Scales start at 8, end at floor(n/2), rounded ×1.5. Population SD within blocks; log–log OLS slope is H."
+        ],
+        [
+          "Absolute moment\nAbsoluteMoment",
+          "First centered absolute moment of nonoverlapping block means. Scales 8 to 256, rounded ×1.5. H=1+slope."
+        ],
+        [
+          "Variance\nVariance",
+          "Sample variance (divisor number of blocks minus one) of nonoverlapping block means. Scales 8 to 256, rounded ×1.5. H=1+slope/2."
+        ],
+        [
+          "Residual variance\nVarianceResidual",
+          "Linearly detrended variance of the demeaned cumulative profile within forward disjoint blocks, averaged across blocks. Scales 8 to 256, rounded ×1.5. H=slope/2."
+        ],
+        [
+          "DFA short\nDFA::short_scales",
+          "Linear DFA of demeaned profile; forward disjoint segments, RMS residuals. Scale bounds [8,96], rounded ×1.25, at every n. Log–log OLS slope is H."
+        ],
+        [
+          "DFA balanced\nDFA::balanced_scales",
+          "Linear DFA of demeaned profile; forward disjoint segments, RMS residuals. Scale bounds [12,160], rounded ×1.25, at every n. Log–log OLS slope is H."
+        ],
+        [
+          "DFA long\nDFA::long_scales",
+          "Linear DFA of demeaned profile; forward disjoint segments, RMS residuals. Scale bounds [16,256], rounded ×1.25, at every n. Log–log OLS slope is H."
+        ],
+        [
+          "DMA short\nDMA::short_windows",
+          "Backward moving average of demeaned profile; RMS over every valid residual. Scale bounds [8,96], rounded ×1.25, at every n. Log–log OLS slope is H."
+        ],
+        [
+          "DMA balanced\nDMA::balanced_windows",
+          "Backward moving average of demeaned profile; RMS over every valid residual. Scale bounds [12,160], rounded ×1.25, at every n. Log–log OLS slope is H."
+        ],
+        [
+          "DMA long\nDMA::long_windows",
+          "Backward moving average of demeaned profile; RMS over every valid residual. Scale bounds [16,256], rounded ×1.25, at every n. Log–log OLS slope is H."
+        ],
+        [
+          "GPH m32\nGPH::narrow_band",
+          "Untapered log-periodogram OLS at j=1,…,32. Regressor log[4sin²(πj/n)], H=0.5−slope. Frequency band 1/n to 32/n cycles/sample."
+        ],
+        [
+          "GPH m64\nGPH::wider_band",
+          "Untapered log-periodogram OLS at j=1,…,64. Regressor log[4sin²(πj/n)], H=0.5−slope. Frequency band 1/n to 64/n cycles/sample."
+        ],
+        [
+          "ARFIMA-shape Whittle\nWhittleMLE",
+          "Band-limited ARFIMA-shape Whittle, m=64, λj=2πj/n. Shape |2sin(λj/2)|^(−2d), profiled scale mean(Ij/shape). Minimize mean(log fitted spectrum + Ij/fitted spectrum), d∈[−0.49,0.49]; H=d+0.5. No taper."
+        ],
+        [
+          "Local Whittle\nModifiedLocalWhittle",
+          "Ordinary Gaussian local Whittle, m=64. Minimize log(mean(λj^(2d)Ij))−2d mean(log λj), d∈[−0.49,0.49]; H=d+0.5. No taper or extra modification."
+        ],
+        [
+          "Wavelet db2 broad\nWaveletOLS::broad_band",
+          "db2, symmetric boundary extension, unweighted OLS of log₂ sample detail variance versus octave. H=(slope+1)/2. Retained octaves n=512: [2, 3, 4, 5, 6]; n=1024: [2, 3, 4, 5, 6, 7]; n=2048: [2, 3, 4, 5, 6, 7, 8]."
+        ],
+        [
+          "Wavelet db2 reduced\nWaveletOLS::upper_band",
+          "db2, symmetric boundary extension, unweighted OLS of log₂ sample detail variance versus octave. H=(slope+1)/2. Retained octaves n=512: [2, 3, 4, 5]; n=1024: [2, 3, 4, 5, 6]; n=2048: [2, 3, 4, 5, 6, 7]."
+        ],
+        [
+          "Wavelet db4 conservative\nWaveletOLS::conservative_band",
+          "db4, symmetric boundary extension, unweighted OLS of log₂ sample detail variance versus octave. H=(slope+1)/2. Retained octaves n=512: [3, 4, 5]; n=1024: [3, 4, 5, 6]; n=2048: [3, 4, 5, 6, 7]."
+        ],
+        [
+          "Higuchi raw\nHiguchi",
+          "Cumulative path; k=1,…,32. With path length N and J=floor((N−1−m)/k), each subsequence length is sum|X(m+ik)−X(m+(i−1)k)| × (N−1)/(Jk²), then averaged over offsets m. H=2−slope(log length versus log(1/k))."
+        ],
+        [
+          "Higuchi centered\nHiguchi::centered",
+          "Subtract increment mean first. Cumulative path; k=1,…,32. With path length N and J=floor((N−1−m)/k), each subsequence length is sum|X(m+ik)−X(m+(i−1)k)| × (N−1)/(Jk²), then averaged over offsets m. H=2−slope(log length versus log(1/k))."
+        ],
+        [
+          "GHE raw\nGHE",
+          "q=1 absolute moments of cumulative-path increments; unweighted log–log OLS slope. 18 geometric candidate lags, rounded and deduplicated, from 1 to floor((n+1)/8), i.e. maxima 64, 128, 256. No slope substitution."
+        ],
+        [
+          "GHE centered\nGHE::centered",
+          "Subtract increment mean first. q=1 absolute moments of cumulative-path increments; unweighted log–log OLS slope. 18 geometric candidate lags, rounded and deduplicated, from 1 to floor((n+1)/8), i.e. maxima 64, 128, 256. No slope substitution."
+        ]
+      ],
+      "font": 9,
+      "note": "All inputs are increments. For both geometric statistics the cumulative path includes the initial zero. The centered variant removes the arithmetic increment mean before integration. All point bootstraps are disabled. The accompanying method_settings.csv preserves all 63 pipeline–length configurations verbatim, including base identifiers and expanded frequency and wavelet bands. No method was retuned using confirmation outcomes."
+    }
+  },
+  "figures": {
+    "clean": {
+      "path": "figures/clean.png",
+      "caption": "Figure 1 Clean accuracy across every process and record length",
+      "note": "Each tile is MAE from 2,000 independent parents. Column labels give generating parameter / record length. All panels share the color scale (0 to 0.9), spanning every observed value without clipping. Rows retain all 21 declared pipelines. Table 2 gives domain means and their Monte Carlo intervals; complete cell values and uncertainty accompany the figure."
+    },
+    "coverage": {
+      "path": "figures/coverage.png",
+      "caption": "Figure 2 Coverage of all interval candidates",
+      "note": "Entries are percentages; all intervals were available. Nominal coverage is 95%. Each column identifies the generating model parameter and n, with ARFIMA values denoting d and AR(1) values denoting φ. CBC is circular block resampling. The vertical line separates the core and sensitivity designs. Values are rounded to two decimals for display; Table 4 and the machine-readable tables also provide Wilson intervals. Zero observed coverage has a nonzero upper confidence bound."
+    },
+    "stress_fGn": {
+      "path": "figures/stress_fGn.png",
+      "caption": "Figure S1 Complete contamination profile for fGn",
+      "note": "Equal cell weights; 500 paired parents per cell. Red indicates increased MAE and blue decreased MAE; white is zero. All three panels use the same color scale. O: offset 1 SD. S1–S9: step positions .25, .50, .75, with amplitudes .5, 1, 2 within each position. I1–I3: impulses at .5%, 1%, 5% of samples, amplitude 8 SD. P1–P6: orders 1, 2 with strengths .25, .5, 1 within each order. T1–T4: Student-t df 3, 5 with strengths .5, 1 within each df. Order two is the centered sum t+t². Negative error change is not evidence of decontamination. Exact values, uncertainty and drift are supplied in the source tables."
+    },
+    "stress_ARFIMA": {
+      "path": "figures/stress_ARFIMA.png",
+      "caption": "Figure S2 Complete contamination profile for ARFIMA",
+      "note": "Equal cell weights; 500 paired parents per cell. Red indicates increased MAE and blue decreased MAE; white is zero. All three panels use the same color scale. O: offset 1 SD. S1–S9: step positions .25, .50, .75, with amplitudes .5, 1, 2 within each position. I1–I3: impulses at .5%, 1%, 5% of samples, amplitude 8 SD. P1–P6: orders 1, 2 with strengths .25, .5, 1 within each order. T1–T4: Student-t df 3, 5 with strengths .5, 1 within each df. Order two is the centered sum t+t². Negative error change is not evidence of decontamination. Exact values, uncertainty and drift are supplied in the source tables."
+    },
+    "stress_AR1": {
+      "path": "figures/stress_AR1.png",
+      "caption": "Figure S3 Complete contamination profile for AR(1)",
+      "note": "Equal cell weights; 500 paired parents per cell. Red indicates increased MAE and blue decreased MAE; white is zero. All three panels use the same color scale. O: offset 1 SD. S1–S9: step positions .25, .50, .75, with amplitudes .5, 1, 2 within each position. I1–I3: impulses at .5%, 1%, 5% of samples, amplitude 8 SD. P1–P6: orders 1, 2 with strengths .25, .5, 1 within each order. T1–T4: Student-t df 3, 5 with strengths .5, 1 within each df. Order two is the centered sum t+t². Negative error change is not evidence of decontamination. Exact values, uncertainty and drift are supplied in the source tables."
+    }
+  }
+}

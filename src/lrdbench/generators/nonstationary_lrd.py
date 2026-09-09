@@ -89,8 +89,7 @@ def _smooth_drift(n: int, amplitude: float, period: int | None = None) -> np.nda
     period = 2 * n if period is None else int(period)
     t = np.arange(n, dtype=float)
     return float(amplitude) * (
-        np.sin(2.0 * np.pi * t / period)
-        + 0.35 * np.sin(2.0 * np.pi * t / (period / 4.0))
+        np.sin(2.0 * np.pi * t / period) + 0.35 * np.sin(2.0 * np.pi * t / (period / 4.0))
     )
 
 
@@ -249,7 +248,10 @@ class NonstationaryLRDGenerator(BaseGenerator):
         elif case == "short_regime_switch":
             state = _regime_state(n, rng, switch_prob=float(params.get("switch_prob", 0.004)))
             short2 = _ar1_process(n, float(params.get("regime_ar_phi", 0.75)), rng)
-            gain = np.where(state > 0, np.exp(gain_amplitude), np.exp(-gain_amplitude / 2.0))
+            gain = np.asarray(
+                np.where(state > 0, np.exp(gain_amplitude), np.exp(-gain_amplitude / 2.0)),
+                dtype=float,
+            )
             z, target_h = np.where(state > 0, short2, short) * gain + eps, 0.5
             nonstationarity_family = "regime_switch"
         elif case == "short_qsoc":

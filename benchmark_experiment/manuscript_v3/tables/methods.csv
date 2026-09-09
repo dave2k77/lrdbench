@@ -1,0 +1,43 @@
+Manuscript name and repository identifier,Definition and configuration
+"R/S
+RS","Mean rescaled range of forward disjoint blocks; no Anis–Lloyd correction. Scales start at 8, end at floor(n/2), rounded ×1.5. Population SD within blocks; log–log OLS slope is H."
+"Absolute moment
+AbsoluteMoment","First centered absolute moment of nonoverlapping block means. Scales 8 to 256, rounded ×1.5. H=1+slope."
+"Variance
+Variance","Sample variance (divisor number of blocks minus one) of nonoverlapping block means. Scales 8 to 256, rounded ×1.5. H=1+slope/2."
+"Residual variance
+VarianceResidual","Linearly detrended variance of the demeaned cumulative profile within forward disjoint blocks, averaged across blocks. Scales 8 to 256, rounded ×1.5. H=slope/2."
+"DFA short
+DFA::short_scales","Linear DFA of demeaned profile; forward disjoint segments, RMS residuals. Scale bounds [8,96], rounded ×1.25, at every n. Log–log OLS slope is H."
+"DFA balanced
+DFA::balanced_scales","Linear DFA of demeaned profile; forward disjoint segments, RMS residuals. Scale bounds [12,160], rounded ×1.25, at every n. Log–log OLS slope is H."
+"DFA long
+DFA::long_scales","Linear DFA of demeaned profile; forward disjoint segments, RMS residuals. Scale bounds [16,256], rounded ×1.25, at every n. Log–log OLS slope is H."
+"DMA short
+DMA::short_windows","Backward moving average of demeaned profile; RMS over every valid residual. Scale bounds [8,96], rounded ×1.25, at every n. Log–log OLS slope is H."
+"DMA balanced
+DMA::balanced_windows","Backward moving average of demeaned profile; RMS over every valid residual. Scale bounds [12,160], rounded ×1.25, at every n. Log–log OLS slope is H."
+"DMA long
+DMA::long_windows","Backward moving average of demeaned profile; RMS over every valid residual. Scale bounds [16,256], rounded ×1.25, at every n. Log–log OLS slope is H."
+"GPH m32
+GPH::narrow_band","Untapered log-periodogram OLS at j=1,…,32. Regressor log[4sin²(πj/n)], H=0.5−slope. Frequency band 1/n to 32/n cycles/sample."
+"GPH m64
+GPH::wider_band","Untapered log-periodogram OLS at j=1,…,64. Regressor log[4sin²(πj/n)], H=0.5−slope. Frequency band 1/n to 64/n cycles/sample."
+"ARFIMA-shape Whittle
+WhittleMLE","Band-limited ARFIMA-shape Whittle, m=64, λj=2πj/n. Shape |2sin(λj/2)|^(−2d), profiled scale mean(Ij/shape). Minimize mean(log fitted spectrum + Ij/fitted spectrum), d∈[−0.49,0.49]; H=d+0.5. No taper."
+"Local Whittle
+ModifiedLocalWhittle","Ordinary Gaussian local Whittle, m=64. Minimize log(mean(λj^(2d)Ij))−2d mean(log λj), d∈[−0.49,0.49]; H=d+0.5. No taper or extra modification."
+"Wavelet db2 broad
+WaveletOLS::broad_band","db2, symmetric boundary extension, unweighted OLS of log₂ sample detail variance versus octave. H=(slope+1)/2. Retained octaves n=512: [2, 3, 4, 5, 6]; n=1024: [2, 3, 4, 5, 6, 7]; n=2048: [2, 3, 4, 5, 6, 7, 8]."
+"Wavelet db2 reduced
+WaveletOLS::upper_band","db2, symmetric boundary extension, unweighted OLS of log₂ sample detail variance versus octave. H=(slope+1)/2. Retained octaves n=512: [2, 3, 4, 5]; n=1024: [2, 3, 4, 5, 6]; n=2048: [2, 3, 4, 5, 6, 7]."
+"Wavelet db4 conservative
+WaveletOLS::conservative_band","db4, symmetric boundary extension, unweighted OLS of log₂ sample detail variance versus octave. H=(slope+1)/2. Retained octaves n=512: [3, 4, 5]; n=1024: [3, 4, 5, 6]; n=2048: [3, 4, 5, 6, 7]."
+"Higuchi raw
+Higuchi","Cumulative path; k=1,…,32. With path length N and J=floor((N−1−m)/k), each subsequence length is sum|X(m+ik)−X(m+(i−1)k)| × (N−1)/(Jk²), then averaged over offsets m. H=2−slope(log length versus log(1/k))."
+"Higuchi centered
+Higuchi::centered","Subtract increment mean first. Cumulative path; k=1,…,32. With path length N and J=floor((N−1−m)/k), each subsequence length is sum|X(m+ik)−X(m+(i−1)k)| × (N−1)/(Jk²), then averaged over offsets m. H=2−slope(log length versus log(1/k))."
+"GHE raw
+GHE","q=1 absolute moments of cumulative-path increments; unweighted log–log OLS slope. 18 geometric candidate lags, rounded and deduplicated, from 1 to floor((n+1)/8), i.e. maxima 64, 128, 256. No slope substitution."
+"GHE centered
+GHE::centered","Subtract increment mean first. q=1 absolute moments of cumulative-path increments; unweighted log–log OLS slope. 18 geometric candidate lags, rounded and deduplicated, from 1 to floor((n+1)/8), i.e. maxima 64, 128, 256. No slope substitution."
