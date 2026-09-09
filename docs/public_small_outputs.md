@@ -7,6 +7,9 @@ reports are intentionally ignored by Git; these notes provide a clean-clone veri
 
 Each suite should produce:
 
+The list below is a reading guide; the [output specification](output_contract.md) includes the
+complete current file and column requirements directly from the tracked contract.
+
 - `html/report.html`;
 - `tables/run_summary.csv`;
 - `tables/per_stratum_metrics.csv`;
@@ -14,15 +17,15 @@ Each suite should produce:
 - `tables/estimator_metadata.csv`;
 - `tables/failures.csv`;
 - `tables/failure_map.csv`;
-- `tables/benchmark_uncertainty.csv` when the manifest enables benchmark uncertainty;
-- `tables/estimator_disagreement.csv` when disagreement metrics are requested;
-- `tables/scale_window_sensitivity.csv` when variant-sensitivity metrics are requested;
+- `tables/benchmark_uncertainty.csv` (rows depend on enabled uncertainty);
+- `tables/estimator_disagreement.csv` (rows depend on requested disagreement metrics);
+- `tables/scale_window_sensitivity.csv` (rows depend on requested sensitivity metrics);
 - `tables/stress_metrics.csv` for stress-test suites;
 - `manifest/environment.json`;
 - `artefacts/artefact_index.csv`;
 - raw result-store tables under `raw/`.
 
-Some optional CSVs may be present but empty when their metric family is not requested. For example,
+Required summary CSVs can contain headers without rows when their metric family is not requested. For example,
 canonical public-small runs create an empty `scale_window_sensitivity.csv`.
 
 ## Local Reference Runs

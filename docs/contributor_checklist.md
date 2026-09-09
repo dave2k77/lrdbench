@@ -32,6 +32,8 @@ is needed, explain why in the pull request's documentation-impact section.
 | Estimator equation, input, default or bound | Implementation and registry; parameter glossary; estimator status; migration notes |
 | Metric, denominator, missingness or ranking | Evaluator/metric catalog/leaderboard; interpretation semantics; stress tutorial; output contract |
 | CLI, manifest or dependency | CLI/schema and `pyproject.toml`; installation, quickstart and runnable examples |
+| Stage order, module ownership or record lineage | Runner/execution/preprocessing; architecture; design specification; benchmark protocol; relevant workflow tests |
+| Python schema or persisted outputs | Dataclasses and generated API reference; result store/reporter; Python and JSON output contracts; migration notes; output-contract tests and a generated smoke report |
 | Research design, results or manuscript | Frozen protocol and audited exports; confirmation guide; current next steps; paper workflow |
 | Release or archive publication | Actual release/deposit metadata; README; citation guidance; availability statements |
 
@@ -46,6 +48,10 @@ is needed, explain why in the pull request's documentation-impact section.
   checks. Do not manually patch generated values to make a claim agree.
 - Run the strict documentation build. CI runs it on every push and pull request, but a
   passing build checks rendering and links, not whether prose is scientifically current.
+- The output guide embeds the tracked JSON contract and the API reference renders source
+  definitions. Keep these generated references; review explanatory prose against stage order,
+  pairing, conditional outputs and fields that are not persisted. `validate-output` checks
+  minimum structure, not scientific completeness or archive integrity.
 
 ## Validation commands
 

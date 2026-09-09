@@ -4,6 +4,11 @@ This page is the tracked clean-clone design authority for `lrdbench`. It replace
 local-only PDF dependency for public development. If an older local PDF exists, treat it as
 historical design context unless this page explicitly says otherwise.
 
+Reviewed against the implementation on 9 September 2026. This is the design of current `main`;
+released package behavior and the frozen paper experiment have separate version identities.
+See [architecture](architecture.md) for module ownership and the
+[confirmation guide](confirmation_benchmark.md) for the research execution contract.
+
 ## Scope
 
 `lrdbench` is a manifest-driven research benchmark framework for long-range dependence (LRD)
@@ -35,9 +40,11 @@ valid only relative to the declared source, estimand, metrics, and aggregation r
 The central schema objects live in `lrdbench.schema`.
 
 - `BenchmarkManifest`: parsed YAML contract for mode, source, estimators, metrics, leaderboards,
-  reporting, execution, uncertainty, optional data-driven training, and seeds.
+  reporting, execution, preprocessing, uncertainty, optional data-driven training, and seeds.
 - `SeriesRecord`: materialised time series plus truth, annotations, contamination/preprocessing
   history, and provenance.
+- `TruthSpec`: primary or companion model-relative estimand and validity domain.
+- `ProvenanceRecord` and `TransformationRecord`: source identity, seeds and transformation history.
 - `EstimatorSpec`: manifest-level estimator enrollment metadata and parameter schema.
 - `EstimateResult`: estimator output with point estimate, optional uncertainty, validity,
   diagnostics, runtime, and failure reason.
@@ -47,8 +54,10 @@ The central schema objects live in `lrdbench.schema`.
 - `ReportSpec`, `ReportBundle`, and `ArtefactRecord`: report request, generated outputs, and
   artefact metadata.
 
-These objects are intentionally simple dataclasses. Their fields form the current public schema
-surface governed by the stable public output contract.
+These dataclasses form the Python API schema, rendered from source in the
+[API reference](reference/api.md). The [output contract](output_contract.md) separately defines
+the persisted CSV projection; it does not serialize every dataclass field. The frozen research
+archive has its own protocol and audit schema.
 
 ## Benchmark Loop
 
@@ -56,13 +65,14 @@ The orchestration path is:
 
 1. load and validate the YAML manifest;
 2. materialise records from generator grids or observational sources;
-3. run each enrolled estimator on each record;
-4. evaluate mode-admissible metrics;
-5. compute configured leaderboards;
-6. persist a CSV result store;
-7. build requested HTML, CSV, LaTeX, and figure artefacts.
+3. apply optional preprocessing as independent branches from each source record;
+4. prepare optional data-driven estimators, training models when configured;
+5. run each enrolled estimator on each retained record, using configured execution/cache settings;
+6. evaluate mode-admissible metrics and compute configured leaderboards;
+7. stage raw records, estimates, metrics and leaderboard rows in the result store;
+8. build reports, collect model and plugin metadata, and finalise the raw CSV store.
 
-`BenchmarkRunner` is the execution entry point. The CLI exposes:
+`BenchmarkRunner` is the public library execution entry point. The CLI exposes:
 
 ```bash
 lrdbench validate <manifest>
@@ -84,7 +94,9 @@ A manifest must declare:
 Optional blocks:
 
 - `contamination`: required for `stress_test`, rejected for `ground_truth` and `observational` in
-  this release.
+  the public runner.
+- `preprocessing`: correction operators applied independently to source records, with optional
+  retention of raw records via `include_raw` (default true).
 - `leaderboards`: composite rankings with weights summing to 1.
 - `report`: requested formats, figures, table exports, and export root.
 - `execution`: parallelism and optional estimate-cache behavior.
@@ -94,11 +106,15 @@ Optional blocks:
 - `validation`: parser behavior such as unknown-key rejection.
 
 Unknown top-level keys are rejected by default.
+The parser also retains a `segmentation` mapping, but the current runner does not execute a
+segmentation stage. Its presence does not request windowing. The JSON manifest schema is an
+editor aid; `lrdbench validate` applies the implementation's structural and semantic rules.
 
 `ml_training` is additive and is required for built-in data-driven estimators unless an estimator
 entry provides an explicit `params.model_path`. The initial built-in data-driven target is
 `hurst_scaling_proxy`; trained model artefacts are written under the run report directory and are
-listed in the artefact index.
+listed in `raw/artefacts.csv`. The reporter index is created before the runner appends these model
+artefacts; it is not a complete inventory of the raw store.
 
 ## Mode Rules
 
@@ -108,6 +124,11 @@ record carries a `TruthSpec`.
 Stress-test mode compares clean and contaminated synthetic records. It permits truth-based metrics
 where truth remains model-relative, and degradation metrics such as estimate drift and relative
 degradation ratio.
+
+Contaminated and corrected records retain the declared latent clean-process target. A fitted
+scaling slope on a transformed finite record is not automatically a new process truth. Companion
+truths support other declared estimands; classification metrics require `lrd_class` truth.
+Legacy null point-threshold exceedance diagnostics are not calibrated-test false-positive rates.
 
 Observational mode has no benchmark truth. It permits stability, sensitivity, validity, runtime,
 and truth-free disagreement metrics. Accuracy, coverage, and false-positive claims are not
@@ -131,6 +152,7 @@ Parameter variants are declared in the manifest and materialised as names like
 Metrics are declared in `lrdbench.metrics_catalog`. Each metric specifies:
 
 - whether truth is required;
+- metric kind (scalar or classification);
 - admissible benchmark modes;
 - aggregation rule;
 - optimisation direction;
@@ -155,8 +177,10 @@ produced them.
 
 ## Release Stability
 
-The project has a stable public research release; the current version is `1.2.1`. Package `1.0.2`
-was the first PyPI-published stable package release, and the public output contract remains `1.0.0`.
+The latest published GitHub release checked on 9 September 2026 is `1.2.1`. The current `main`
+includes unreleased benchmark repairs; see [migration notes](migration.md). The output-contract
+version is independent of the package version and is included directly from its tracked source
+in the [output specification](output_contract.md).
 
 Manifest fields, metric names, output columns, and report artefacts documented here and in the
 output contract are stable public surfaces. Breaking changes require an explicit compatibility

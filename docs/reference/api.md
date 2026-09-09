@@ -35,6 +35,9 @@ Install the package and docs extras: `pip install -e ".[docs]"`.
         - version
         - generate
 
+::: lrdbench.interfaces.BaseContamination
+::: lrdbench.interfaces.BasePreprocessing
+
 ## Bundled temporal estimators
 
 ::: lrdbench.estimators.temporal.RSEstimator
@@ -92,17 +95,23 @@ classification metric family (`roc_auc`, `balanced_accuracy`, `true_positive_rat
 ::: lrdbench.registries.EstimatorRegistry
 ::: lrdbench.registries.GeneratorRegistry
 ::: lrdbench.registries.ContaminationRegistry
+::: lrdbench.registries.PreprocessingRegistry
 
 ## Defaults
 
 ::: lrdbench.defaults.build_default_estimator_registry
 ::: lrdbench.defaults.build_default_generator_registry
 ::: lrdbench.defaults.build_default_contamination_registry
+::: lrdbench.defaults.build_default_preprocessing_registry
 
 ## Schema dataclasses
 
 ::: lrdbench.schema.BenchmarkManifest
 ::: lrdbench.schema.SeriesRecord
+::: lrdbench.schema.TruthSpec
+::: lrdbench.schema.ProvenanceRecord
+::: lrdbench.schema.TransformationRecord
+::: lrdbench.schema.ArtefactRecord
 ::: lrdbench.schema.EstimateResult
 ::: lrdbench.schema.EstimatorSpec
 ::: lrdbench.schema.MetricSpec
@@ -146,4 +155,3 @@ classification metric family (`roc_auc`, `balanced_accuracy`, `true_positive_rat
 ::: lrdbench.testing.smoke_fit_estimator
 ::: lrdbench.testing.assert_valid_estimate
 ::: lrdbench.testing.assert_invalid_estimate
-
