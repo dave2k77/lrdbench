@@ -8,13 +8,13 @@
 
 **Documentation:** [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/) (built with MkDocs and Read the Docs).
 
-Latest published GitHub release checked on 9 September 2026: `1.2.1`. Releases are archived on Zenodo — cite the concept DOI
+Release version: `2.0.0`. Releases are archived on Zenodo — cite the concept DOI
 [`10.5281/zenodo.20937726`](https://doi.org/10.5281/zenodo.20937726) (it always resolves to the
 latest archived version) or use `CITATION.cff`.
 
-**Development status:** `main` now includes the benchmark repairs, audited confirmation
-results and rebuilt manuscript sources merged in [PR #3](https://github.com/dave2k77/lrdbench/pull/3).
-These changes are not included in release `1.2.1`. Start with the
+**Version 2.0:** the package includes the benchmark repairs; the repository also contains
+the audited confirmation results and rebuilt manuscript sources merged in [PR #3](https://github.com/dave2k77/lrdbench/pull/3).
+Review the [migration notes](docs/migration.md) before comparing results with `1.2.1`. Start with the
 [audited confirmation guide](docs/confirmation_benchmark.md) for the current experiment,
 reproduction paths and publication status. The full raw results archive still awaits
 public deposition; the software DOI does not identify that archive.

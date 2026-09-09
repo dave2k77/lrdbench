@@ -12,8 +12,8 @@ repository-code: "https://github.com/dave2k77/lrdbench"
 url: "https://github.com/dave2k77/lrdbench"
 doi: "10.5281/zenodo.20937726"
 license: "MIT"
-version: "1.2.1"
-date-released: "2026-06-26"
+version: "2.0.0"
+date-released: "2026-09-09"
 abstract: >-
   lrdbench is a reproducible benchmark framework for evaluating long-range
   dependence estimators on canonical synthetic, contaminated synthetic, and
@@ -35,6 +35,6 @@ preferred-citation:
       given-names: "Davian"
       orcid: "https://orcid.org/0009-0003-9434-3919"
   title: "lrdbench"
-  version: "1.2.1"
+  version: "2.0.0"
   doi: "10.5281/zenodo.20937726"
   url: "https://github.com/dave2k77/lrdbench"

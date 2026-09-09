@@ -177,8 +177,8 @@ produced them.
 
 ## Release Stability
 
-The latest published GitHub release checked on 9 September 2026 is `1.2.1`. The current `main`
-includes unreleased benchmark repairs; see [migration notes](migration.md). The output-contract
+Package version `2.0.0` includes the September benchmark repairs and marks the changed
+numerical behavior; see [migration notes](migration.md). The output-contract
 version is independent of the package version and is included directly from its tracked source
 in the [output specification](output_contract.md).
 

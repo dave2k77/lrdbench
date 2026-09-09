@@ -3,11 +3,16 @@
 This page records public-surface changes that matter when reproducing or comparing benchmark
 outputs across public releases.
 
-## Unreleased benchmark corrections on main
+## 2.0.0
 
-The September 2026 repairs are merged into `main`, not release `1.2.1`. Record an exact
-commit when running corrected methods; do not compare historical and corrected outputs
-as if they used identical implementations.
+Release `2.0.0` includes the September 2026 benchmark repairs and additional estimands and
+discriminators. The major version marks changed numerical behavior and rejected legacy
+settings. Record the package version and exact source revision; do not compare historical
+and corrected outputs as if they used identical implementations.
+
+Upgrade with `python -m pip install --upgrade "lrdbench==2.0.0"`, review the settings below,
+and use a fresh output directory and cache. The estimator interface and required CSV columns
+remain compatible, but numerical reproducibility across the version boundary is not promised.
 
 - GPH's slope conversion and the Higuchi normalization changed. GHE now uses absolute
   q-th moments; the forced H = 0.5 fallback is removed and nonzero `flat_slope_tol` is
@@ -30,7 +35,8 @@ as if they used identical implementations.
   seeds and the shared fitting version. Regenerate affected results instead of reusing
   old caches. Preserve historical exports with their original provenance.
 
-The separate estimand-triangle work advanced the public output contract to `1.1.0`.
+The estimand-triangle work advances the public output contract to `1.1.0`, adding the
+conditional `raw/truths.csv` ledger without removing existing required columns.
 The confirmation research archives use their own format and do not replace that contract.
 See the [audited confirmation guide](confirmation_benchmark.md) for the completed experiment
 and the frozen producer required for reproduction.
