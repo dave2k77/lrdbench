@@ -3,6 +3,11 @@
 This table describes the implementation status of estimators available through the default
 registry. Status is not a ranking. It tells users how cautiously to interpret results.
 
+The [confirmation study](confirmation_benchmark.md) now reports point accuracy for its
+21 pipelines and interval coverage for selected GPH, Higuchi and GHE procedures. These
+model- and configuration-specific results do not upgrade any method to reference-grade
+or establish calibration of every package-default interval.
+
 Status meanings:
 
 - **baseline**: suitable as a simple comparison method in public examples and smoke benchmarks.
@@ -25,7 +30,7 @@ Status meanings:
 | `Periodogram` | spectral | `long_memory_parameter` | approximate | Log-periodogram slope approximates long-memory parameter. | ARFIMA-style long-memory comparisons. | Bandwidth choices materially affect results; periodogram noise is high. Optional cosine taper (`params.taper: cosine`) can reduce spectral leakage. |
 | `WhittleMLE` | spectral | `long_memory_parameter` | approximate | ARFIMA(0,d,0) Whittle objective over a selected low-frequency band. | Records near the declared spectral model. | It is not exact time-domain Gaussian MLE or exact fGn likelihood. Model misspecification, bandwidth and bounds matter; optimizer boundary hits are reported. |
 | `ModifiedLocalWhittle` | spectral | `long_memory_parameter` | approximate | Ordinary Gaussian local Whittle objective under a legacy registry name. | Stationary low-frequency power-law regimes with adequate bandwidth support. | No nonstationary modification is implemented. Bandwidth sensitivity, finite-sample instability and optimizer bounds require validation. |
-| `Higuchi` | geometric | `hurst_scaling_proxy` | approximate | H = 2 - D for a suitable self-affine path graph; declare path versus increments explicitly. | Path roughness comparisons on sufficiently long records. | Normalization corrected; estimates are unclipped. Short-memory processes can show apparent persistence over the chosen lags. Increment-bootstrap calibration remains pending. |
+| `Higuchi` | geometric | `hurst_scaling_proxy` | approximate | H = 2 - D for a suitable self-affine path graph; declare path versus increments explicitly. | Path roughness comparisons on sufficiently long records. | Normalization corrected; estimates are unclipped. Short-memory processes can show apparent persistence over the chosen lags. The confirmation study measures substantial block-percentile undercoverage and fitted-fGn failure on strong AR(1) controls. |
 | `GHE` | geometric | `hurst_scaling_proxy` | approximate | Absolute q-th moments of path differences scale as lag raised to qH(q). | Selected-lag moment regression; default q = 2, with q = 1 available explicitly. | Forced H = 0.5 fallback removed; nonzero `flat_slope_tol` rejected. Declare input representation. Lag range, trends, moment existence and bootstrap calibration require attention. |
 | `WaveletOLS` | wavelet | `hurst_scaling_proxy` | approximate | Log detail variances scale linearly across levels under the fGn convention. | Stationary increments with at least three retained levels. | Scale-band selection, symmetric-extension boundaries and short signals. Raw slopes are retained; the conservative db4 pilot band is unavailable at n = 256. |
 | `WaveletAbryVeitch` | wavelet | `hurst_scaling_proxy` | experimental | Abry-Veitch-style wavelet log-scale regression approximation. | Exploratory wavelet comparison on long enough records. | Needs stronger validation; sensitive to wavelet family and usable levels. |

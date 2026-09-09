@@ -1,52 +1,47 @@
 # Paper workflow
 
-The publication workflow is intentionally split between tracked library support and local-only
-benchmark assets.
+The current paper is rebuilt from the audited confirmation experiment. Start with the
+[confirmation guide](confirmation_benchmark.md) for source links, version identities,
+rebuilding commands and remaining publication work.
 
-Tracked in the repository:
+## Tracked publication sources
 
-- core metrics, reporting, LaTeX table export, and figure generation;
-- smoke and shared suite manifests under `configs/suites/`;
-- documentation and handoff notes.
+- `benchmark_experiment/remediation/protocol-v1/` contains the frozen design and settings.
+- `benchmark_experiment/remediation/confirmation_audit/` contains the auditor, complete
+  summary exports, evidence hashes and findings.
+- `benchmark_experiment/manuscript_v3/` contains prose sources, native equation XML,
+  table/figure generation scripts, references and numerical/visual verification records.
 
-Local-only by design:
+Edit `manuscript.template.md`, then regenerate the resolved source and assets with
+`prepare_assets.py`. Build the editable Word document with `build_docx.py`, reconcile it
+with `verify_manuscript.py`, and render and inspect every page. Direct edits to generated
+tables or numeric insertions will be overwritten and can break their evidence mapping.
+Keep Monte Carlo intervals, estimator intervals, independent parents and bootstrap draws
+distinct in both captions and prose.
 
-- `paper_support/`;
-- `configs/suites/paper/`;
-- `tests/integration/test_paper_workflow.py`;
-- generated `reports/`;
-- `.lrdbench_cache/`.
+The source package can rebuild the manuscript from tracked summaries. A full raw-results
+audit additionally needs the preserved production archive; a fresh simulation needs the
+validated producer and environment. These are three different reproduction tasks.
 
-These paths are ignored by Git so draft paper runs, generated artefacts, and machine-specific cache
-state do not enter the remote repository.
+## Outputs outside Git
 
-## Expected local layout
+The delivered Word draft, compact delivery ZIP and QA renders are local build outputs.
+The much larger raw bootstrap archive remains outside Git and awaits public deposition.
+Do not identify the software DOI as an archive of these results. A source merge alone
+does not publish the raw archive or update the delivered document's availability text.
 
-When the paper kit is available on a workstation, a typical setup is:
+## Historical local paper kit
 
-```text
-paper_support/
-configs/suites/paper/
-  canonical_ground_truth.yaml
-  stress_contamination.yaml
-  null_false_positive.yaml
-  sensitivity_disagreement.yaml
-```
+The ignored `paper_support/`, `configs/suites/paper/`, `reports/` and `.lrdbench_cache/`
+paths belong to the earlier workstation workflow. A clean clone does not need that kit
+to rebuild the current manuscript. Old paper suites and their exports retain their
+historical meaning; do not combine their rankings or counts with the confirmation run.
 
-Run paper suites from the repository root:
-
-```bash
-python -m paper_support.run_paper_suites configs/suites/paper/canonical_ground_truth.yaml
-```
-
-The local runner should write normal reports under `reports/paper/<run_id>/`, stage selected
-LaTeX tables and figures under `paper_support/artefacts/`, and append a run index when configured.
-
-For clean clones without the paper kit, use the tracked manifests under `configs/suites/` and the
-standard CLI:
+For a general library smoke run, use the tracked CLI workflow:
 
 ```bash
 lrdbench run configs/suites/smoke_ground_truth.yaml
 ```
 
-See the development handoff for current execution notes and phase planning.
+See [Current research next steps](current_research_next_steps.md) for author review,
+journal preparation, archival deposition and future observational work.

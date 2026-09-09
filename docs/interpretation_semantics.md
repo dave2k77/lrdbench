@@ -3,6 +3,11 @@
 This page defines how to read uncertainty, leaderboard, and failure outputs. It is part of the
 stable public research contract.
 
+This page describes the public manifest-driven evaluator. The separate
+[confirmation research runner](confirmation_benchmark.md) uses fixed cell weights,
+joint parent resampling and unconditional interval coverage. Do not apply the public
+evaluator's missing-value aggregation rules to those research exports.
+
 ## Metric Scopes
 
 Metric rows have one of three scopes:
@@ -80,10 +85,14 @@ Current leaderboards use weighted ranks:
 
 1. Select balanced-global aggregate rows only.
 2. Exclude rows whose `estimator_name` is not declared in the manifest estimator specs.
-3. For each component metric, rank estimators according to the metric optimisation direction.
-4. Assign missing component values the worst rank for that component.
+3. For each component metric, rank finite values according to its optimisation direction;
+   equal values receive average ranks.
+4. Assign missing or nonfinite components rank N + 1, where N is the enrolled estimator count.
 5. Compute the score as the weighted sum of component ranks.
-6. Sort by score, then estimator name.
+6. Resolve score ties using `tie_break_rule`: the first component for `best_primary_metric`,
+   the specified component metric, or no secondary metric for `none`.
+7. Retain equal competition ranks for unresolved ties (for example, 1, 1, 3).
+   Estimator names order their display only; they do not break scientific ties.
 
 Lower scores rank better. Component weights must sum to 1. Metric optimisation directions come
 from the metric catalog.

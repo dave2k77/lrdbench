@@ -3,6 +3,10 @@
 `lrdbench` runs are intended to be reproducible from a manifest, package version, seed policy, and
 input data.
 
+For the completed manuscript experiment, use the [confirmation reproduction guide](confirmation_benchmark.md).
+Its frozen producer/runtime and raw audit archive differ from the public CLI workflows below.
+Rebuilding the manuscript from tracked summaries does not require rerunning that experiment.
+
 ## Minimal Reproduction Steps
 
 From a clean clone or installed package:
@@ -29,7 +33,9 @@ Otherwise they default to `seeds.global_seed`.
 ## Caches
 
 The optional `execution.estimate_cache_dir` stores pickled `EstimateResult` objects keyed by record,
-estimator, parameters, and signal hash. Use caches only from trusted locations.
+estimator, parameters, signal hash, record seed and shared-fitting version. Use caches only
+from trusted locations. The September repairs changed seed derivation and estimator behavior;
+preserve old outputs and regenerate affected comparisons under an explicitly recorded revision.
 
 For strict reproduction checks, either disable cache reads or use an empty cache directory:
 

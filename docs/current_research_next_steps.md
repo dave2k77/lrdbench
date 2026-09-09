@@ -1,98 +1,58 @@
-# Current Research Next Steps
+# Current research next steps
 
-Last updated: 2026-06-26
+Last reviewed: 9 September 2026.
 
-This page is the short, current-facing handoff for work after the stable public `lrdbench` release. It intentionally separates public-library maintenance from the neural-classical benchmark and future observational neural-data work.
+## Current state
 
-## Current project state
+The classical benchmark repairs, frozen confirmation run, independent audit and manuscript
+rebuild are complete and merged into `main`. Use the
+[audited confirmation guide](confirmation_benchmark.md) for the current evidence, exact
+revisions, workload counts, reproduction instructions and release status.
 
-- Public package status: last stable release is `1.2.1` (shipped public output contract `1.0.0`).
-- Unreleased on `main`: the estimand-triangle and LRD-discrimination work — `spectral_exponent_beta`
-  and `timescale_tau` estimands (with `PeriodogramBeta`/`ACFDecay` estimators), the `multi_timescale`
-  apparent-LRD generator, the `lrd_class` decision estimand with four discriminators and the
-  classification metric family (`roc_auc`, ...), and the output contract advanced to `1.1.0` (added
-  `raw/truths.csv`). See the `## Unreleased` section of the changelog.
-- Public library focus: maintain schema/API/output-contract stability, keep docs coherent, and avoid changing public CSV columns without a contract-version bump.
-- Current research focus: use the completed `neural_classical_workstation` benchmark campaign, clean observational-mode fixture, and OpenNeuro `ds002691` EEG pilot to prepare committee/manuscript figures and observational workflow text.
-- Completed synthetic campaign: `benchmark_experiment/neural_classical_workstation_analysis.md` summarises the ground-truth and stress-test runs.
-- Compact tracked results: `benchmark_experiment/results/neural_classical_workstation/` contains the public summary CSVs and checksums; large row-level report directories should be published separately as release or archive assets when cited.
-- Observational fixture results: `benchmark_experiment/results/neural_observational_fixture/` contains compact truth-free summaries from a no-truth, neural-like CSV workflow rehearsal; use it to verify report shape and analysis code, not as empirical evidence.
-- OpenNeuro EEG pilot results: `benchmark_experiment/results/openneuro_ds002691_pilot/` contains compact truth-free summaries from the first real open-data EEG observational run. Interpret it as workflow/diagnostic evidence only, not as estimator-accuracy or CI-coverage evidence.
+The library also contains estimand-triangle, discrimination, machine-learning and
+observational workflows. Those are separate from the confirmation paper. The older
+`neural_classical_workstation` exports and eight-record neural-like fixture do not provide
+the rebuilt manuscript's evidence. The OpenNeuro pilot remains a separate observational
+workflow demonstration, with no known H target or accuracy/coverage ground truth.
 
-## Dedicated local environment
+## Next publication work
 
-On this Windows workstation, use the repository-local virtual environment and source tree explicitly:
+1. Complete author review of the rebuilt manuscript and its claim-reconciliation ledger.
+2. Supply corresponding-author details, funding, competing interests and the target journal.
+3. Prepare deposition of the preserved raw results, frozen runtime and checksums. Assign an
+   archive identifier only after the deposit exists; the software DOI is not a result DOI.
+4. Update the manuscript's availability statement to reflect the public GitHub sources and
+   the eventual archive. The delivered 8 September draft predates the source merge.
+5. Apply journal formatting and recheck all tables, figures, equations and rendered pages.
 
-```bash
-PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q -o addopts=
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_ground_truth.yaml
-PYTHONPATH=src .venv/Scripts/python.exe -m mkdocs build --strict
-```
+Do not rerun or retune the confirmation merely to recover historical rankings. Extensions
+need a separately declared design, run identity and analysis, retaining the completed study.
 
-Do not rely on bare `python` for repository verification on this machine; it may resolve to a Python without project dependencies. Keep `PYTHONPATH=src` on source-tree CLI/test/doc commands unless the editable install has been refreshed and verified.
+## Library maintenance
 
-## Immediate next actions
+- Keep parameter defaults, input transformations, metric denominators and migration notes
+  aligned with code changes. Follow the [documentation maintenance checklist](contributor_checklist.md#documentation-maintenance).
+- Preserve historical outputs and frozen runtime snapshots; document which revision produced
+  each result. Current source is not a replacement for the validated producer checkout.
+- Keep release versions distinct from unreleased `main`. Update citation and release guidance
+  when a new package release or result archive is actually published.
+- Validate public output-contract changes separately from the research export format.
 
-1. Build committee/manuscript figures from the tracked compact summary CSVs:
-   - clean accuracy by estimator;
-   - stress drift by contamination operator;
-   - coverage and coverage-collapse panels;
-   - false-positive LRD at `H = 0.5`;
-   - estimator disagreement heatmap;
-   - scale/window sensitivity heatmap.
-2. Add the OpenNeuro `ds002691` pilot to the observational-mode manuscript section:
-   - cite DOI `10.18112/openneuro.ds002691.v1.1.0` and CC0 license;
-   - report the subset shape: four subjects, four channels, 16 ten-second windows;
-   - emphasize metadata/QC preservation, estimator validity/runtime/CI-width/disagreement summaries, and no benchmark truth.
-3. Keep the scientific claims separated in all writeups:
-   - synthetic truth-based claims;
-   - stress-test degradation claims;
-   - observational neural stability and failure-pattern claims.
-4. Decide publication packaging for large outputs:
-   - keep compact summaries and checksums in git;
-   - publish full report directories as GitHub Release or Zenodo assets if externally cited;
-   - update citation/DOI guidance only after an archive exists.
-5. Before adding new metrics or report columns, add or update output-contract tests first.
-6. When touching evaluator or reporter logic, keep changes narrow and regression-test the exact metric/report behavior.
-
-## Observational neural-data entry criteria
-
-For a concrete implementation backlog, see [Observational mode readiness plan](observational_readiness_plan.md).
-
-Start the observational neural-data suite only after the input segments have:
-
-- stable segment identifiers;
-- documented sampling rate and preprocessing history;
-- a CSV series index or inline manifest representation compatible with the observational loader;
-- a clear separation between raw signal metadata and benchmark annotations;
-- an interpretation plan that avoids truth-based metrics and reports only truth-free diagnostics.
-
-The observational run should initially report:
-
-- validity rate;
-- runtime;
-- confidence-interval width and missing uncertainty;
-- window/preprocessing instability;
-- estimator disagreement;
-- scale/window variant sensitivity;
-- failure-map summaries.
-
-## Verification commands
-
-Use this quick gate before committing documentation or benchmark-planning changes:
+For normal development, install the documented extras into a development environment and run:
 
 ```bash
-PYTHONPATH=src .venv/Scripts/python.exe -m ruff check src tests
-PYTHONPATH=src .venv/Scripts/python.exe -m pytest -q -o addopts=
-PYTHONPATH=src .venv/Scripts/python.exe -m mkdocs build --strict --quiet
+python -m ruff check src tests
+python -m pytest
+python -m mkdocs build --strict
 ```
 
-Use smoke-suite validation before benchmark-run changes:
+These commands use the chosen development interpreter. They do not reproduce the production
+run, which requires the frozen environment described in the confirmation guide.
 
-```bash
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_ground_truth.yaml
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_stress_test.yaml
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_observational.yaml
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/openneuro_ds002691_pilot.yaml
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/smoke_data_driven.yaml
-```
+## Future observational work
+
+Use the [observational readiness plan](observational_readiness_plan.md) for that separate
+workstream. Require stable segment identifiers, sampling rate and preprocessing metadata,
+quality-control records, and a truth-free interpretation plan. Report validity, runtime,
+interval availability/width, estimator disagreement and sensitivity; do not present these
+as evidence of estimator accuracy, calibrated coverage or neural LRD detection.

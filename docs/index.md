@@ -20,6 +20,7 @@ in [Design specification](design_specification.md). A short root-level traceabil
 
 ## Where to go next
 
+- [Audited confirmation benchmark](confirmation_benchmark.md) — completed experiment, current manuscript sources, provenance and reproduction instructions.
 - [Quickstart tutorial](tutorials/quickstart.md) — run the first benchmark and validate the output.
 - [Tutorials](tutorials/ground_truth_benchmark.md) — ground-truth, stress-test,
   [observational](tutorials/observational_data.md), and custom-estimator workflows.

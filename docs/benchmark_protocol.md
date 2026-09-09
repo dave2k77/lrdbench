@@ -1,5 +1,9 @@
 # Benchmark protocol
 
+This guide describes the public manifest-driven benchmark interface. For the completed
+paper experiment's fixed design, paired resampling and audit exports, use the separate
+[confirmation benchmark guide](confirmation_benchmark.md).
+
 1. **Manifest** (YAML): declares `mode`, `source`, optional `contamination`, optional
    `ml_training`, `estimators`, `metrics`, `leaderboards`, `report`, and `seeds`.
 2. **Records**: synthetic grid (`generator_grid`), stress pairs (clean + contaminated), or observational series (`csv_series_index` / `inline_table`).
@@ -134,7 +138,8 @@ Optional `report.figure_set` entries:
 - `disagreement_heatmap`: aggregate estimator-disagreement heatmap.
 - `sensitivity_heatmap`: aggregate scale/window-sensitivity heatmap.
 - `benchmark_uncertainty_intervals`: point estimates with bootstrap interval error bars.
-- `false_positive_lrd`: balanced-global false-positive LRD rate bar plot.
+- `false_positive_lrd`: legacy plot name for the null point-threshold exceedance rate;
+  it is not the Type I error rate of a calibrated LRD test. See [stress metric semantics](tutorials/stress_testing.md).
 
 Figure generation is part of the core reporting contract and uses the standard plotting stack
 (`matplotlib` and `seaborn`). Requested figures are omitted only when the relevant data is absent;
