@@ -21,6 +21,12 @@ the Zenodo record rather than a moving repository URL.
 
 ## Benchmark Metadata to Report
 
+For the [audited confirmation study](confirmation_benchmark.md), report the producer,
+audit and manuscript source revisions, run identity and canonical summary hash in addition
+to the method settings. The sources are public on GitHub, but the full raw archive awaits
+deposition. Do not cite the software concept DOI as identifying these experiment results.
+The unreleased corrections on `main` are not part of package release `1.2.1`.
+
 For published comparisons, report:
 
 - `lrdbench` package version or Git commit;

@@ -65,6 +65,7 @@ nav:
       - Research usage: research_usage.md
       - Design specification: design_specification.md
       - Benchmark protocol: benchmark_protocol.md
+      - Audited confirmation benchmark: confirmation_benchmark.md
       - Interpretation semantics: interpretation_semantics.md
       - Output contract: output_contract.md
       - Reproducibility: reproducibility.md

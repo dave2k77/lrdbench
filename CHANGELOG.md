@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+### Audited confirmation and manuscript
+- Complete the locally frozen shared-parent confirmation experiment and independently audit
+  all canonical summaries, interval endpoints and parent/descendant accounting. Publish the
+  compact exports and their provenance under `benchmark_experiment/remediation/confirmation_audit/`.
+- Rebuild the manuscript with source-linked numerical insertions, regenerated tables and
+  figures, native equations and a claim-reconciliation ledger. Numerical and page review pass.
+- Keep clean accuracy, contamination response and interval calibration separate. The findings
+  supersede the old manuscript's rankings and calibration claims within the declared scope.
+- Preserve producer `9c02d04`, audit `b3d0648` and manuscript `a2f4ee2` in the merge history.
+  The full raw archive remains local and awaits deposition; this is not a new package release.
+- Make the small CI rehearsal tests portable with a scoped test runtime, and explicitly test
+  the unchanged production environment guard. Normal CI does not certify a production runtime.
+
+### Documentation maintenance
+- Add the [confirmation guide](https://github.com/dave2k77/lrdbench/blob/main/docs/confirmation_benchmark.md), refresh the current handoff,
+  migration and paper workflow, and distinguish historical logs from active instructions.
+- Correct leaderboard tie semantics and interval-calibration status. Clarify published-source
+  availability versus raw-archive deposition and the unreleased status of these changes.
+- Build documentation on every push and pull request, including root Markdown and research-only
+  changes. Add a documentation-impact section to the PR template and contributor checklist.
+
 ### Interval candidate development comparison
 - Speed up Higuchi's lag/offset sums while preserving the original equation;
   bump its version to 0.3.0 for the changed floating-point summation order.
@@ -56,7 +77,8 @@
   scalar-bootstrap uncertainty requests for the paired ratio and signed-drift rankings.
 - Add analytical equation checks and a reproducible diagnostic pilot. These repairs
   do not certify interval calibration or validate all methods. Research reruns and
-  manuscript reconciliation remain pending; historical outputs are unchanged.
+  manuscript reconciliation are recorded in the completed confirmation package above;
+  historical outputs are unchanged.
 
 ### Benchmark foundation repairs
 - Equal component values receive average ranks; missing and nonfinite values rank
@@ -75,7 +97,8 @@
   Global benchmark uncertainty figures separate metrics and levels, retain the full
   method roster and draw the actual interval endpoints.
 - These changes require new research outputs. Historical exports are preserved;
-  mathematical estimator validation and uncertainty calibration remain pending.
+  subsequent method checks and the confirmation study above evaluate the declared procedures
+  without implying universal interval calibration.
 
 ### Estimand triangle: spectral exponent and timescale
 - Estimands: added `spectral_exponent_beta` (`β = 2H − 1`, `H = (β + 1) / 2`) and `timescale_tau`

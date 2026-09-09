@@ -1,11 +1,17 @@
-# Benchmark foundation repair — 7 September 2026
+# Benchmark repair and confirmation
 
-**Current status:** the [tenth package](confirmation-results.md) audits the complete
+**Status reviewed 9 September 2026:** the [tenth package](confirmation-results.md) audits the complete
 fresh confirmation: 66,000 parents, 4,767,000 point fits, 248,000 intervals and
 118,917 canonical summary rows. All checks pass; no producer results were changed.
 The package includes complete result tables, two verified figures and a 13-item
-draft-claim replacement ledger. Manuscript rebuilding is the remaining phase.
-The sections below retain the history and evidence of the earlier packages.
+draft-claim replacement ledger. The [rebuilt manuscript package](../manuscript_v3/README.md)
+is complete, with numerical reconciliation and page review. Sources and summaries are merged
+into `main`; author review, final availability wording, journal formatting and public raw-data
+deposition remain. The [current confirmation guide](../../docs/confirmation_benchmark.md)
+is the entry point for reproduction and next steps.
+
+The sections below retain the history and evidence of the earlier packages. Statements
+such as "pending" or "next" describe the stage of that package, not the present run status.
 
 The first repair package is implemented on `fix/benchmark-foundations`, based on
 `59a6b65069fca80b89447921ed20afaa5246e60f`. It addresses shared framework defects

@@ -1,10 +1,16 @@
 # Development Handoff
 
-Last updated: 2026-05-29
+Historical development log through 29 May 2026. Status banner reviewed 9 September 2026.
 
 For the concise current-facing research handoff, see [`current_research_next_steps.md`](current_research_next_steps.md). This file preserves the longer development history, local paper-workflow notes, and release-hardening log.
 
-## Current State
+The confirmation experiment, audit and rebuilt manuscript have since been completed and
+merged. Use the [confirmation guide](confirmation_benchmark.md) and
+[current next steps](current_research_next_steps.md) for active work. The local-only paper
+kit, counts, commands and recommendations below describe earlier revisions, not the
+current manuscript or API behavior.
+
+## Historical state
 
 The repository is on `main`.
 

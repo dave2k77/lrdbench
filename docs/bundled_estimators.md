@@ -34,7 +34,7 @@ These estimators target `hurst_scaling_proxy`.
 | `Variance` | Log-log slope of sample variance versus block size for block-aggregated series. | `min_scale`, `max_scale`, `scale_ratio`, bootstrap parameters |
 | `VarianceResidual` | Half the log-log slope of average sample variance of detrended cumulative-profile residuals versus block size. Closely related to DFA; uses a different scale grid and residual divisor. | `min_scale`, `max_scale`, `scale_ratio`, `detrend_order`, bootstrap parameters |
 
-The aggregation estimators map their fitted slopes onto a bounded Hurst-style proxy:
+The aggregation estimators map their fitted slopes onto an unclipped Hurst-style proxy:
 
 - `AbsoluteMoment`: `H = slope + 1`
 - `Variance`: `H = slope / 2 + 1`
@@ -52,6 +52,10 @@ Spectral estimators target `long_memory_parameter`:
 - `Periodogram`
 - `WhittleMLE`
 - `ModifiedLocalWhittle`
+
+The legacy `ModifiedLocalWhittle` name implements ordinary Gaussian local Whittle;
+`WhittleMLE` fits a band-limited ARFIMA spectral shape rather than exact fGn likelihood.
+See the [parameter glossary](parameter_glossary.md) for bandwidths and optimizer bounds.
 
 Geometric estimators target `hurst_scaling_proxy`:
 
@@ -96,14 +100,16 @@ side; each is scored only against the truth for its own estimand.
 These target the decision estimand `lrd_class`: each emits a score in `[0, 1]` (higher = stronger
 evidence of true long-range dependence) rather than a scalar, and is scored by the classification
 metrics (`roc_auc`, `balanced_accuracy`, `true_positive_rate`, `false_positive_rate`) against binary
-`is_lrd` labels. They distinguish genuine LRD from a short-memory `multi_timescale` process that
-merely mimics power-law scaling.
+`is_lrd` labels. These experimental methods compare declared LRD models with short-memory
+controls, including `multi_timescale` signals that mimic scaling. Their scores are not
+automatically calibrated probabilities or hypothesis tests; they are outside the
+[confirmation paper's scope](confirmation_benchmark.md).
 
 | Name | Method |
 | --- | --- |
 | `ThresholdHurstDiscriminator` | Naive baseline: a Hurst estimate (`base` = `dfa`/`gph`/`rs`) squashed through a logistic centred at `h0`. |
 | `LowFreqSpectralDiscriminator` | Local-Whittle memory parameter at a shrinking low-frequency band (true LRD keeps `d>0` as `f→0`; a bounded spectrum collapses to `d≈0`). |
-| `ScaleCrossoverDiscriminator` | Large-scale DFA slope (true LRD stays above `0.5` at all scales; short memory crosses over to `0.5` beyond its largest timescale). |
+| `ScaleCrossoverDiscriminator` | Large-scale DFA slope used as an experimental persistence score; finite-sample behavior depends on scale support and the underlying timescales. |
 | `ICModelSelectDiscriminator` | Whittle-BIC model comparison of ARFIMA(0,d,0) against short-memory AR(1)/AR(2); favours LRD when the fractional model wins. |
 
 ## Interpretation Notes

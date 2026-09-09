@@ -55,6 +55,13 @@ run the default `python -m pytest` after installing the `test` extra.
 
 ## Checklists and policies
 
+Review documentation in the same pull request as code, configuration or research changes.
+Use the PR template's documentation-impact section and the
+[maintenance checklist](docs/contributor_checklist.md#documentation-maintenance) to identify
+affected guides. Prefer links to authoritative settings and result packages over duplicated
+counts or defaults. The strict documentation build runs for every push and pull request;
+reviewers must still check that the prose matches the behavior and evidence.
+
 - [`docs/contributor_checklist.md`](docs/contributor_checklist.md) — pre-submission checklist for estimators, outputs, and validation.
 - [`docs/estimator_contract.md`](docs/estimator_contract.md) — formal contract every estimator must satisfy.
 - [`docs/third_party_estimators.md`](docs/third_party_estimators.md) — how to register estimators without modifying the core package.

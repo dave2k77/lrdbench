@@ -22,7 +22,32 @@ Use this checklist before opening a contribution that adds or changes benchmark 
 - `lrdbench validate-output <run_root>` still passes for smoke reports.
 - Changelog entries describe public-surface changes.
 
-## Validation
+## Documentation maintenance
+
+Update documentation in the same pull request as the behavior it describes. If no update
+is needed, explain why in the pull request's documentation-impact section.
+
+| Change | Review these sources and guides |
+| --- | --- |
+| Estimator equation, input, default or bound | Implementation and registry; parameter glossary; estimator status; migration notes |
+| Metric, denominator, missingness or ranking | Evaluator/metric catalog/leaderboard; interpretation semantics; stress tutorial; output contract |
+| CLI, manifest or dependency | CLI/schema and `pyproject.toml`; installation, quickstart and runnable examples |
+| Research design, results or manuscript | Frozen protocol and audited exports; confirmation guide; current next steps; paper workflow |
+| Release or archive publication | Actual release/deposit metadata; README; citation guidance; availability statements |
+
+- Link to the central [confirmation guide](confirmation_benchmark.md) instead of repeating
+  experimental counts across status pages. Check its counts against `audit_evidence.json`
+  and its hashes against `export_provenance.json` when the referenced study changes.
+- Date status reviews. Mark old development logs as historical; never relabel an old
+  result as having been produced by current source or rewrite frozen evidence in place.
+- Keep released package behavior distinct from unreleased `main`, and public source
+  availability distinct from public deposition of the full raw results.
+- Regenerate affected manuscript assets from their sources and repeat numerical and visual
+  checks. Do not manually patch generated values to make a claim agree.
+- Run the strict documentation build. CI runs it on every push and pull request, but a
+  passing build checks rendering and links, not whether prose is scientifically current.
+
+## Validation commands
 
 Run:
 
