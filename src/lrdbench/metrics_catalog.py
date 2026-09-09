@@ -66,6 +66,16 @@ METRIC_SPECS: dict[str, MetricSpec] = {
         optimisation_direction=OptimisationDirection.MINIMISE,
         unit="1",
     ),
+    "ci_availability": MetricSpec(
+        name="ci_availability",
+        symbol="CIAvail",
+        requires_truth=False,
+        admissible_modes=tuple(BenchmarkMode),
+        aggregation_rule="mean_over_stratum",
+        optimisation_direction=OptimisationDirection.MAXIMISE,
+        unit="1",
+        kind="neutral",
+    ),
     "validity_rate": MetricSpec(
         name="validity_rate",
         symbol="VR",
@@ -292,7 +302,35 @@ METRIC_SPECS: dict[str, MetricSpec] = {
     ),
 }
 
-_LEVEL_METRICS = frozenset({"coverage", "ci_width", "coverage_error", "coverage_collapse"})
+for _name, _base, _symbol in (
+    ("absolute_estimate_drift", "estimate_drift", "AbsDrift"),
+    ("signed_estimate_drift", "estimate_drift", "SignedDrift"),
+    ("absolute_error_inflation", "relative_degradation_ratio", "ErrorInflation"),
+    ("paired_mae_ratio", "relative_degradation_ratio", "PairedMAERatio"),
+    ("coverage_loss_rate", "coverage_collapse", "CoverageLoss"),
+    ("net_coverage_loss", "coverage_collapse", "NetCoverageLoss"),
+    ("persistence_exceedance_rate", "false_positive_lrd_rate", "PersistenceExceedance"),
+):
+    METRIC_SPECS[_name] = replace(METRIC_SPECS[_base], name=_name, symbol=_symbol)
+
+METRIC_SPECS["absolute_error_inflation"] = replace(
+    METRIC_SPECS["absolute_error_inflation"], unit=None
+)
+METRIC_SPECS["paired_mae_ratio"] = replace(
+    METRIC_SPECS["paired_mae_ratio"], aggregation_rule="ratio_of_paired_stratum_maes"
+)
+
+_LEVEL_METRICS = frozenset(
+    {
+        "coverage",
+        "ci_width",
+        "coverage_error",
+        "coverage_collapse",
+        "ci_availability",
+        "coverage_loss_rate",
+        "net_coverage_loss",
+    }
+)
 
 
 def _default_nominal_levels(spec: MetricSpec) -> MetricSpec:
@@ -315,11 +353,7 @@ def metric_specs_from_manifest_entries(entries: list[Any]) -> tuple[MetricSpec, 
                 raise ValueError(f"unknown metric: {key!r}")
             base = METRIC_SPECS[key]
             levels_raw = raw.get("levels")
-            params = {
-                str(k): v
-                for k, v in raw.items()
-                if k not in {"name", "levels"}
-            }
+            params = {str(k): v for k, v in raw.items() if k not in {"name", "levels"}}
             if params:
                 base = replace(base, parameters=params)
             if levels_raw is not None:

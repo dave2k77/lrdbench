@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "protocol_id": "lrdbench-classical-confirmation-v1",
+  "phase": "scientific_design_before_confirmation",
+  "signal": "stationary_scalar_increments_no_physical_sampling_rate",
+  "target": "fGn_H__ARFIMA_d_plus_half__AR1_asymptotic_half",
+  "randomness": {
+    "global_seed": 20260915,
+    "confirmation_namespace": "lrdbench-classical-confirmation-v1",
+    "rehearsal_namespace": "lrdbench-classical-rehearsal-v1",
+    "parent_stream": "input",
+    "data_seed_depends_on": ["namespace", "global_seed", "process_cell", "repetition", "stream"],
+    "stress_seed_namespace": "lrdbench-classical-confirmation-contamination-v1"
+  },
+  "accuracy": {
+    "lengths": [512, 1024, 2048],
+    "processes": {"fGn": [0.25, 0.5, 0.75, 0.85], "ARFIMA": [-0.25, 0.0, 0.25], "AR1": [-0.5, 0.5, 0.8, 0.95]},
+    "repetitions": 2000,
+    "roster": "audited_19_plus_centered_geometric_v1",
+    "generator": "exact_covariance_cholesky_no_jitter_or_stationary_AR1_recursion",
+    "scales": "fixed_sample_rules_expanded_in_method_settings",
+    "primary_metrics": ["mae", "bias"],
+    "secondary_metrics": ["rmse", "validity", "outside_0_1", "runtime", "H_ge_0p6_exceedance_diagnostic"]
+  },
+  "stress": {
+    "lengths": [512, 1024],
+    "processes": {"fGn": [0.25, 0.5, 0.75, 0.85], "ARFIMA": [0.25], "AR1": [0.8, 0.95]},
+    "repetitions": 500,
+    "parent_selection": "first_declared_repetition_indices_from_accuracy_pool",
+    "application": "each_condition_directly_to_its_clean_parent",
+    "target_role": "latent_clean_recovery_not_contaminated_process_H",
+    "offset_shifts": [1.0],
+    "step_shifts": [0.5, 1.0, 2.0],
+    "step_positions": [0.25, 0.5, 0.75],
+    "outlier_rates": [0.005, 0.01, 0.05],
+    "outlier_amplitudes": [8.0],
+    "polynomial_orders": [1, 2],
+    "polynomial_strengths": [0.25, 0.5, 1.0],
+    "student_t_df": [3.0, 5.0],
+    "student_t_scales": [0.5, 1.0],
+    "noise_normalization": "realized_sample_sd_plus_1e-12_without_noise_centering",
+    "polynomial_basis": "sum_t_to_power_k_for_k_1_through_order_then_center",
+    "primary_metrics": ["absolute_error_inflation", "absolute_estimate_drift"],
+    "secondary_metrics": ["signed_estimate_drift", "paired_mae_ratio", "validity_loss"]
+  },
+  "intervals": {
+    "input_conditions": ["clean"],
+    "core": {
+      "lengths": [512],
+      "processes": {"fGn": [0.25, 0.5, 0.75, 0.85], "ARFIMA": [0.25], "AR1": [0.8, 0.95]},
+      "repetitions": 2000
+    },
+    "length_sensitivity": {
+      "lengths": [1024],
+      "processes": {"fGn": [0.5, 0.85], "AR1": [0.95]},
+      "repetitions": 500
+    },
+    "parent_selection": "first_declared_repetition_indices_from_accuracy_pool",
+    "methods": ["GPH::narrow_band", "Higuchi", "GHE"],
+    "candidates": ["cbc_raw_percentile", "cbc_raw_basic", "cbc_centered_percentile", "cbc_centered_basic", "unknown_fgn_centered_basic", "gph_normal_raw"],
+    "normal_candidate_methods": ["GPH::narrow_band"],
+    "nominal": 0.95,
+    "bootstrap_draws": 1999,
+    "block_rule": "floor_n_divided_by_16",
+    "model": "stationary_gaussian_fgn_unknown_constant_mean_profile_ML",
+    "mean_rule": "sample_center_each_record_and_each_bootstrap_record_separately",
+    "availability": "finite_original_point_and_every_requested_statistic_draw",
+    "model_boundary_policy": "retain_and_flag_bounds_0p01_0p99_within_0p001",
+    "primary_metric": "unconditional_coverage_unavailable_counted_as_miss",
+    "secondary_metrics": ["conditional_coverage", "availability", "mean_width", "median_width", "paired_coverage_difference", "boundary_hits"],
+    "calibration_decision": "report_cellwise_coverage_uncertainty_no_binary_universal_acceptance"
+  },
+  "summaries": {
+    "independent_unit": "clean_parent_within_fixed_process_length_cell",
+    "domain_weights": "separate_fGn_ARFIMA_AR1_equal_cells_within_domain",
+    "condition_weights": "report_each_condition_separately_no_global_stress_score",
+    "support": "common_complete_declared_methods_conditions_per_cell_plus_full_failure_accounting",
+    "bootstrap_draws": 1999,
+    "nominal": 0.95,
+    "denominator_floor": 1e-12,
+    "seed": 20260916,
+    "ratio": "ratio_of_weighted_aggregate_MAEs_recomputed_in_each_parent_draw",
+    "monte_carlo_intervals": "Wilson_95_for_cell_proportions_and_paired_parent_resamples_for_effects",
+    "zero_or_all_events": "report_Wilson_bounds_do_not_claim_zero_uncertainty",
+    "multiplicity": "descriptive_pointwise_intervals_no_significance_or_winner_claims",
+    "precision": {
+      "core_coverage_mcse_at_0p95_max": 0.005,
+      "secondary_coverage_mcse_at_0p95_max": 0.01,
+      "continuous_metric_mcse": "report_achieved_per_cell_no_unbounded_error_guarantee",
+      "stopping": "fixed_repetitions_no_outcome_dependent_extension_or_early_stop"
+    }
+  },
+  "planned_contrasts": [
+    {"id": "geometric_mean_removal_clean", "comparison": "centered_minus_raw_MAE_separately_for_Higuchi_and_GHE", "scope": "every_accuracy_cell"},
+    {"id": "geometric_mean_removal_stress", "comparison": "centered_minus_raw_error_inflation_and_absolute_drift", "scope": "every_stress_cell_and_condition"},
+    {"id": "interval_centering", "comparison": "centered_minus_raw_coverage_at_fixed_CBC_construction", "scope": "each_interval_cell_method_and_percentile_or_basic"},
+    {"id": "interval_construction", "comparison": "basic_minus_percentile_coverage_at_fixed_CBC_treatment", "scope": "each_interval_cell_method_and_raw_or_centered"},
+    {"id": "interval_model", "comparison": "unknown_fGn_minus_CBC_basic_coverage_with_centered_statistic", "scope": "each_interval_cell_and_method"}
+  ],
+  "claim_exclusions": [
+    "calibrated_LRD_hypothesis_test_or_5pct_false_positive_rate",
+    "empirical_EEG_validation_or_biomarker_accuracy",
+    "contaminated_series_has_the_latent_clean_H",
+    "coverage_under_contamination",
+    "universal_interval_calibration_or_estimator_superiority",
+    "oscillatory_combined_artifact_or_infinite_variance_noise_robustness",
+    "matched_physical_or_relative_frequency_scales_across_lengths"
+  ],
+  "execution": {
+    "provisional_budget_hours": 24,
+    "workers": 1,
+    "large_run_requires": ["compiled_scientific_design_lock", "validated_confirmation_executor", "runtime_source_environment_lock", "dry_run_and_disk_capacity_check"],
+    "reporting": "all_attempts_saved_failures_retained_source_and_input_hashes_verified",
+    "amendments": "new_protocol_version_and_explicit_reason_before_new_confirmation_results",
+    "status": "design_only_no_confirmation_inputs_generated"
+  }
+}

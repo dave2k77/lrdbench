@@ -1,0 +1,10 @@
+{
+  "before_commit": "deliberate_before_commit",
+  "after_commit": "deliberate_after_commit",
+  "partial_noop_preserved_committed_bytes_and_mtimes": true,
+  "remaining_fit_seconds": 63.702035800000886,
+  "complete_noop_preserved_committed_bytes_and_mtimes": true,
+  "abandoned_uncommitted_chunks_preserved": 1,
+  "summary_seconds": 70.12588739999774,
+  "summary_noop_preserved_bytes_and_mtimes": true
+}

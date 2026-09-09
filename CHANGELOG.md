@@ -2,6 +2,81 @@
 
 ## Unreleased
 
+### Interval candidate development comparison
+- Speed up Higuchi's lag/offset sums while preserving the original equation;
+  bump its version to 0.3.0 for the changed floating-point summation order.
+- Add research-only block-basic, fitted-zero-mean-fGn percentile/basic and
+  untapered GPH normal interval candidates, with independent equation checks.
+- Compare candidates on 448 shared records, retaining model-boundary diagnostics,
+  all bootstrap-statistic draws, failures and paired coverage/width differences.
+  Persistent fGn coverage improves with model-based basic intervals, but the
+  short-memory controls still fail. No package default interval is changed.
+
+### Resumable calibration development
+- Add a dedicated research runner with stable shared inputs, separate input and
+  resampling streams, per-fit checkpoints, single-writer locking and strict resume
+  checks against configuration, source, environment and input/result hashes.
+- Export complete failure/interval denominators and stream raw research exports by
+  process/length cell. Keep the public output contract and historical bundles unchanged.
+- Add a Windows x64 / Python 3.14.5 dependency lock with distribution hashes and
+  verify a separate installation. Profile all 36 development cells with two records
+  each; retain the full 399 draws per candidate interval for cost measurement only.
+
+### Remaining classical-method and generator audit
+- Remove silent H clipping from temporal estimators and wavelet slope conversion.
+  Temporal and primary wavelet regressions expose out-of-range points and resamples.
+  Undefined constant/nonfinite inputs no longer produce valid Whittle/wavelet fits.
+- Record bounded spectral optimizer hits and identify the legacy
+  ModifiedLocalWhittle implementation as ordinary local Whittle. Make Whittle's
+  scale normalization internally consistent (the old discrepancy was constant in d).
+- Correct the profiled scale of the experimental WaveletWhittle likelihood;
+  verify against joint numerical optimization of H and scale. This method is
+  outside the paper's retained roster and remains an experimental approximation.
+- Add `ARFIMA` parameter `method: cholesky` for its exact stationary Gaussian
+  covariance; preserve the default `truncated_ma` for historical reproduction.
+  Record algorithm, truncation and scale interpretation; declare existing fGn/fBm
+  covariance jitter and reject invalid H/sigma inputs. Separate simulation methods
+  in metric strata.
+- Add independent projection, moving-window, spectral-integral and covariance-map
+  checks, plus a shared-input development pilot across all 19 paper configurations.
+- Resolve the four baseline typing findings and the new diagnostics annotation;
+  type checking passes with the installed Python 3.14 target.
+
+### Estimator equations and explicit stress metrics
+- Correct the GPH slope-to-d conversion for the squared-sine regressor. This also
+  changes Periodogram, PeriodogramBeta and the GPH-based threshold discriminator.
+  Regression outputs are unclipped; constant/nonfinite spectral inputs are invalid.
+- Restore Higuchi's missing lag normalization. GHE now fits absolute q-th moments
+  (default q = 2, q = 1 available); remove the forced H = 0.5 fallback and clipping.
+  Both geometric estimators expose path/increment input choice and resample
+  increments for candidate bootstrap intervals. Nonzero `flat_slope_tol` is rejected.
+- Add explicit absolute/signed drift, absolute-error inflation, paired aggregate
+  MAE ratio, coverage-loss rate, net coverage loss and persistence-exceedance names.
+  Preserve legacy calculations; count available/missing pairs and strata. Reject
+  scalar-bootstrap uncertainty requests for the paired ratio and signed-drift rankings.
+- Add analytical equation checks and a reproducible diagnostic pilot. These repairs
+  do not certify interval calibration or validate all methods. Research reruns and
+  manuscript reconciliation remain pending; historical outputs are unchanged.
+
+### Benchmark foundation repairs
+- Equal component values receive average ranks; missing and nonfinite values rank
+  last in both directions. Composite ties apply the declared primary/named metric,
+  and unresolved ties share competition ranks. Estimator names affect display only.
+- Preserve legacy `level_shift` as a constant offset; add explicit `constant_offset`
+  and `step_change` operators. Zero outlier rate now leaves the signal unchanged.
+- Bootstrap diagnostics record attempted, retained, invalid and failed draws, with
+  failure categories. Replicate failures preserve valid point estimates; zero
+  replicates disables resampling. Add `ci_availability` at each requested level.
+- Default CI endpoints now represent 95% only; other levels remain explicitly
+  labelled. Evaluation rejects unavailable, invalid, reversed and nonfinite CIs.
+- Seed derivation now includes `global_seed`, previously ignored. Estimate cache
+  keys include the record seed and a shared-fitting version to avoid stale results.
+- Stress figures separate drift and error-ratio panels and estimator values.
+  Global benchmark uncertainty figures separate metrics and levels, retain the full
+  method roster and draw the actual interval endpoints.
+- These changes require new research outputs. Historical exports are preserved;
+  mathematical estimator validation and uncertainty calibration remain pending.
+
 ### Estimand triangle: spectral exponent and timescale
 - Estimands: added `spectral_exponent_beta` (`β = 2H − 1`, `H = (β + 1) / 2`) and `timescale_tau`
   (autocorrelation-decay time constant, in samples).

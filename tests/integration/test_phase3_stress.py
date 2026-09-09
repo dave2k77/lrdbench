@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from lrdbench.manifest import manifest_from_mapping
+from lrdbench.output_contract import validate_output_contract
+from lrdbench.paired_metrics import STRESS_PAIR_METRICS
 from lrdbench.runner import _expand_contamination_grid, run_manifest_mapping, run_manifest_path
 from lrdbench.validation import ManifestValidationError
 
@@ -77,9 +80,7 @@ def test_relative_degradation_requires_mae() -> None:
 
 
 @pytest.mark.integration
-def test_stress_pipeline_inline_manifest(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_stress_pipeline_inline_manifest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     data = {
         "manifest_id": "p3_run",
@@ -119,7 +120,12 @@ def test_stress_pipeline_inline_manifest(
                 "name": "lb",
                 "mode": "stress_test",
                 "component_metrics": ["mae", "estimate_drift", "validity_rate", "runtime"],
-                "weights": {"mae": 0.35, "estimate_drift": 0.35, "validity_rate": 0.2, "runtime": 0.1},
+                "weights": {
+                    "mae": 0.35,
+                    "estimate_drift": 0.35,
+                    "validity_rate": 0.2,
+                    "runtime": 0.1,
+                },
                 "ranking_rule": "weighted_rank",
                 "tie_break_rule": "best_primary_metric",
             },
@@ -148,6 +154,62 @@ def test_smoke_stress_yaml(
 
 
 @pytest.mark.integration
+def test_explicit_stress_metrics_export_with_geometric_adapter(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    data = {
+        "manifest_id": "explicit_metric_export",
+        "name": "explicit metric export",
+        "mode": "stress_test",
+        "source": {
+            "type": "generator_grid",
+            "generators": [{"family": "fGn", "params": {"H": [0.5], "n": [128]}, "replicates": 2}],
+        },
+        "contamination": {"operators": [{"name": "step_change", "params": {"shift": [1.0]}}]},
+        "estimators": [
+            {
+                "name": "GHE",
+                "family": "geometric",
+                "target_estimand": "hurst_scaling_proxy",
+                "supports_ci": True,
+                "params": {
+                    "input_representation": "increments",
+                    "q": 1,
+                    "h_max": 16,
+                    "n_bootstrap": 8,
+                    "bootstrap_block_len": 16,
+                },
+            }
+        ],
+        "metrics": [
+            "mae",
+            "validity_rate",
+            "persistence_exceedance_rate",
+            "coverage",
+            *sorted(STRESS_PAIR_METRICS),
+        ],
+        "uncertainty": {"n_bootstrap": 8, "metrics": ["mae", "absolute_estimate_drift"]},
+        "seeds": {"global_seed": 3},
+    }
+    out = run_manifest_mapping(data)
+    run_dir = Path(out.report_bundle.summary_table_path or "").parent.parent
+    assert validate_output_contract(run_dir) == []
+    exported = pd.read_csv(run_dir / "tables" / "stress_metrics.csv")
+    assert set(exported.metric_name) == STRESS_PAIR_METRICS
+    assert len(exported) == 2 * len(STRESS_PAIR_METRICS)
+    ratios = [m for m in out.metrics.aggregate if m.metric_name == "paired_mae_ratio"]
+    assert ratios and all(m.value is not None and m.metadata["n_included"] == 2 for m in ratios)
+    raw = pd.read_csv(run_dir / "raw" / "metrics.csv")
+    components = raw[raw.metric_name == "paired_mae_ratio"].metadata_json.str.contains(
+        "clean_absolute_error"
+    )
+    assert components.any()
+    failures = pd.read_csv(run_dir / "tables" / "failures.csv")
+    assert failures.n_missing_values.sum() == 0  # Components awaiting division are available.
+
+
+@pytest.mark.integration
 def test_smoke_nonstationary_lrd_yaml(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, repo_root: Path
 ) -> None:
@@ -157,8 +219,16 @@ def test_smoke_nonstationary_lrd_yaml(
     assert out.run_id
     assert len(out.records) == 5
     cases = {r.annotations.get("nonstationary_case") for r in out.records}
-    assert {"pure_short", "pure_lrd", "short_regime_switch", "lrd_randomwalk_gain", "lrd_qsoc"} <= cases
-    target_values = {r.annotations["nonstationary_case"]: r.truth.target_value for r in out.records if r.truth}
+    assert {
+        "pure_short",
+        "pure_lrd",
+        "short_regime_switch",
+        "lrd_randomwalk_gain",
+        "lrd_qsoc",
+    } <= cases
+    target_values = {
+        r.annotations["nonstationary_case"]: r.truth.target_value for r in out.records if r.truth
+    }
     assert target_values["pure_short"] == 0.5
     assert target_values["short_regime_switch"] == 0.5
     assert target_values["pure_lrd"] == 0.7

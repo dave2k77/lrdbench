@@ -1,0 +1,27 @@
+{
+  "status": "development_only_not_confirmation",
+  "completed_records": 448,
+  "complete": true,
+  "expected": {
+    "cells": 7,
+    "independent_records": 448,
+    "model_fits": 448,
+    "point_statistics": 1344,
+    "physical_bootstrap_records": 178304,
+    "bootstrap_statistic_attempts": 534912,
+    "interval_rows": 5824
+  },
+  "model_failures": 0,
+  "model_boundary_hits": 127,
+  "generated_bootstrap_records": 178304,
+  "elapsed_record_seconds": 147.37097489999542,
+  "artifact_sha256": {
+    "coverage_summary.csv": "2bae6ead3d8608a042271dec2d6a86b20b5a5112addedb69c27e1bf4d3ec94aa",
+    "draw_accounting.csv": "50067a8ac495ab144601f13b63e8d3ebcd250a1d34b6cdc1f6686c60f92acf3a",
+    "fitted_models.csv": "9df0c98b5758f642125ea4ce6fa6dbfb14b115c23fbe742384cfff1594506584",
+    "input_index.csv": "5e308094de14cbf100e8c01a16f741b561ba14551bf1146bdfc86dd0135d0eca",
+    "intervals.csv": "5b9e9bdf9233e64e19dbc540bce2de120238033226ebd00d16c435fd01a6cc39",
+    "paired_comparisons.csv": "c5f85ae3189c57db5237f9e0779b77335eb24c44821617e74a0d9c768d0bc232",
+    "records.jsonl": "847a18400bf50e00d01ef882a67599e921bf731d28944b2e12f44176cf498053"
+  }
+}

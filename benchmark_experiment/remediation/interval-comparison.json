@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "stage": "development_interval_comparison",
+  "seed_namespace": "lrdbench-interval-candidates-v1",
+  "global_seed": 20260910,
+  "lengths": [512],
+  "processes": {"fGn": [0.25, 0.5, 0.75, 0.85], "ARFIMA": [0.25], "AR1": [0.8, 0.95]},
+  "repetitions": 64,
+  "bootstrap_draws": 199,
+  "nominal": 0.95,
+  "block_divisor": 16,
+  "methods": ["GPH", "Higuchi", "GHE"],
+  "fgn_model": "stationary_gaussian_fgn_known_zero_mean"
+}

@@ -1,0 +1,36 @@
+{
+  "status": "development_only_not_confirmation",
+  "completed_records": 1344,
+  "complete": true,
+  "expected": {
+    "cells": 21,
+    "independent_records": 1344,
+    "model_fits": 2688,
+    "point_statistics": 8064,
+    "offset_probe_statistics": 8064,
+    "physical_bootstrap_records": 802368,
+    "bootstrap_statistic_attempts": 4011840,
+    "interval_rows": 26880
+  },
+  "model_failures": 0,
+  "model_boundary_hits": {
+    "zero": 366,
+    "unknown": 366
+  },
+  "generated_bootstrap_records": 802368,
+  "elapsed_record_seconds": 1799.4202642000218,
+  "artifact_sha256": {
+    "coverage_summary.csv": "83dc0ede7a80924cc87340bad3624d0c3fbbfbf33f1a6a4dd382b332a474070e",
+    "draw_accounting.csv": "dfac2465765ed481747be5bbe9061a3807aa17ee32639aa62e0269b01c17ff95",
+    "fitted_models.csv": "b14d89253c9dcdab29153ccb3c23ab2ed3ed32ad8af557fb69a0038672fca172",
+    "input_index.csv": "029c1291662f7d52c63d17bc63e683ebb3bd1ff9bdc12cdf882442b35bc6a698",
+    "intervals.csv": "240a5c2a056496d57aa20505a806992fd45216ba76a1440d9c0f3cded1087936",
+    "mean_model_comparisons.csv": "f252a8076cb7cf496612dcf6748b6243a4c60ec84c98190e4d195d2d45574d90",
+    "offset_probes.csv": "38724c868ae76c75fcedf48d40abbfc775b8badc49ef082035cd86efee59799f",
+    "paired_comparisons.csv": "2afd3ec91a2c62d1b521fc6c882acfc436fc3bed5f2d16e23b04a4ba041fd0b5",
+    "paired_offset_bootstrap_draws.csv": "bf9f8dee855a806da1808f4c31f4f262a74ddb46f864293354334e77d362a3f0",
+    "paired_offset_parent_accounting.csv": "9729f1577b87b531a146146aa0d6176143d5c7b3c8e75a6fad8a61654b02350b",
+    "paired_offset_summary.csv": "a48ce9d90f9aba930d9233b69417aee41e5396b451e79957f2c40ae900ae5371",
+    "records.jsonl": "ef9621d2f5db98ce9136563015b875227d59b1a38ed2d7ff9b23582a50e6c5ea"
+  }
+}

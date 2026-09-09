@@ -1,0 +1,170 @@
+[
+  {
+    "page": 1,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 2188,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     1\nBenchmarking classical memory and scaling \nestimators under "
+  },
+  {
+    "page": 2,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 4200,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     2\n1 Introduction\nTemporal scaling is often summarized by a Hur"
+  },
+  {
+    "page": 3,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 3755,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     3\na step, trend or outliers has its own well-defined H equal t"
+  },
+  {
+    "page": 4,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 4415,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     4\naverage (DMA). R/S fitted the scaling of the mean rescaled r"
+  },
+  {
+    "page": 5,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 3794,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     5\nfor a  {0.25,0.5,1}. Thus the order-two condition contains b"
+  },
+  {
+    "page": 6,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 3989,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     6\n2.7 Performance measures and Monte Carlo uncertainty\nClean e"
+  },
+  {
+    "page": 7,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 4132,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     7\nFor summary resampling, the audit inspected all stored cell "
+  },
+  {
+    "page": 8,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 4114,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     8\nAR(1) contrasts were -0.0026 [-0.0027, -0.0024] and -0.0055 "
+  },
+  {
+    "page": 9,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 4117,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     9\n3.5 Model mismatch and the length sensitivity analysis\nThe f"
+  },
+  {
+    "page": 10,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 3954,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     10\nwere not optimized for each generating family or matched ac"
+  },
+  {
+    "page": 11,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 3518,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     11\nFinally, implementation verification and summary auditing r"
+  },
+  {
+    "page": 12,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 1320,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     12\n[9] Robinson PM. Gaussian semiparametric estimation of long"
+  },
+  {
+    "page": 13,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 1410,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     13\nTables\nTable 1 Experimental design and units of replication"
+  },
+  {
+    "page": 14,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 2293,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     14\nTable 2 Clean domain mean absolute error\nPipeline fGn ARFIM"
+  },
+  {
+    "page": 15,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 1417,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     15\nTable 3 Illustrative paired contamination effects on fracti"
+  },
+  {
+    "page": 16,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 1813,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     16\nTable 4 Coverage and width at fGn H of 0.85 and n of 512\nSt"
+  },
+  {
+    "page": 17,
+    "width_pt": 841.889763779528,
+    "height_pt": 595.303937007874,
+    "text_characters": 491,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     17\nFigure 1 Clean accuracy across every process and record len"
+  },
+  {
+    "page": 18,
+    "width_pt": 841.889763779528,
+    "height_pt": 595.303937007874,
+    "text_characters": 593,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     18\nFigure 2 Coverage of all interval candidates\nEntries are pe"
+  },
+  {
+    "page": 19,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 2346,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     19\nAppendix A Reproducibility and supplementary material\nThe s"
+  },
+  {
+    "page": 20,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 2035,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     20\nTable S1 Evaluated pipelines and exact settings\nManuscript "
+  },
+  {
+    "page": 21,
+    "width_pt": 595.303937007874,
+    "height_pt": 841.889763779528,
+    "text_characters": 3115,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     21\nTable S1 Evaluated pipelines and exact settings continued\nM"
+  },
+  {
+    "page": 22,
+    "width_pt": 841.889763779528,
+    "height_pt": 595.303937007874,
+    "text_characters": 731,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     22\nFigure S1 Complete contamination profile for fGn\nEqual cell"
+  },
+  {
+    "page": 23,
+    "width_pt": 841.889763779528,
+    "height_pt": 595.303937007874,
+    "text_characters": 734,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     23\nFigure S2 Complete contamination profile for ARFIMA\nEqual c"
+  },
+  {
+    "page": 24,
+    "width_pt": 841.889763779528,
+    "height_pt": 595.303937007874,
+    "text_characters": 733,
+    "start": "Memory and scaling estimator benchmark\nDraft · 8 September 2026     24\nFigure S3 Complete contamination profile for AR(1)\nEqual ce"
+  }
+]

@@ -7,7 +7,7 @@ from typing import Any
 import numpy as np
 
 from lrdbench.enums import SourceType
-from lrdbench.generators._signal import simulate_fbm
+from lrdbench.generators._signal import GAUSSIAN_COVARIANCE_JITTER, simulate_fbm
 from lrdbench.interfaces import BaseGenerator
 from lrdbench.schema import ProvenanceRecord, SeriesRecord, TruthSpec
 
@@ -19,7 +19,7 @@ class FBMGenerator(BaseGenerator):
 
     @property
     def version(self) -> str:
-        return "0.1.0"
+        return "0.2.0"
 
     def generate(
         self,
@@ -56,6 +56,9 @@ class FBMGenerator(BaseGenerator):
             "n": n,
             "H": hurst,
             "sigma": sigma,
+            "simulation_method": "path_covariance_cholesky",
+            "covariance_diagonal_jitter": GAUSSIAN_COVARIANCE_JITTER,
+            "sigma_interpretation": "unit_increment_standard_deviation_before_jitter",
         }
         return SeriesRecord(
             record_id=record_id,

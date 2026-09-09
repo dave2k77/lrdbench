@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from lrdbench.contaminations import (
+    ConstantOffsetContamination,
     HeavyTailNoiseContamination,
     LevelShiftContamination,
     OutliersContamination,
     PolynomialTrendContamination,
+    StepChangeContamination,
 )
 from lrdbench.estimators.data_driven import (
     MLCNNEstimator,
@@ -83,6 +85,8 @@ def build_default_contamination_registry() -> ContaminationRegistry:
     reg.register("polynomial_trend", PolynomialTrendContamination())
     reg.register("outliers", OutliersContamination())
     reg.register("level_shift", LevelShiftContamination())
+    reg.register("constant_offset", ConstantOffsetContamination())
+    reg.register("step_change", StepChangeContamination())
     reg.register("heavy_tail_noise", HeavyTailNoiseContamination())
     return reg
 

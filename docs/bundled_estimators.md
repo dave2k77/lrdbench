@@ -32,7 +32,7 @@ These estimators target `hurst_scaling_proxy`.
 | `DMA` | Detrended moving-average fluctuation scaling. | `min_scale`, `max_scale`, bootstrap parameters |
 | `AbsoluteMoment` | Log-log slope of aggregation level versus absolute first moment of block-aggregated series. | `min_scale`, `max_scale`, `scale_ratio`, bootstrap parameters |
 | `Variance` | Log-log slope of sample variance versus block size for block-aggregated series. | `min_scale`, `max_scale`, `scale_ratio`, bootstrap parameters |
-| `VarianceResidual` | Log-log slope of aggregation level versus average within-block residual variance after local detrending. | `min_scale`, `max_scale`, `scale_ratio`, `detrend_order`, bootstrap parameters |
+| `VarianceResidual` | Half the log-log slope of average sample variance of detrended cumulative-profile residuals versus block size. Closely related to DFA; uses a different scale grid and residual divisor. | `min_scale`, `max_scale`, `scale_ratio`, `detrend_order`, bootstrap parameters |
 
 The aggregation estimators map their fitted slopes onto a bounded Hurst-style proxy:
 

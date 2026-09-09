@@ -1,0 +1,244 @@
+{
+  "status": "passed",
+  "recorded_utc": "2026-09-08T02:06:39.159814+00:00",
+  "docx_sha256": "46a354b477291f6c559fbdc3469522f4ba70c44d0820c74156f2433325135557",
+  "rendered_pdf_sha256": "f348e574e81104daa282497b80405e006a798d79d2334952f22494a1e7eb89e7",
+  "pages": 24,
+  "dpi": 160,
+  "all_pages_visually_reviewed": true,
+  "previous_render_visually_inspected_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "final_render_opened_pages": [
+    4,
+    5,
+    6,
+    18
+  ],
+  "checks": [
+    "Readable text and plot labels",
+    "No clipping or overlap",
+    "Native equation notation",
+    "Table pagination and headers",
+    "No unintended blank pages",
+    "Portrait and landscape layouts"
+  ],
+  "page_reviews": [
+    {
+      "page": 1,
+      "status": "passed",
+      "current_png_sha256": "852cffc5bdd04f50b8ff45d7f2af42b4f1df0bb738c43173a99d172a9b30a968",
+      "previous_png_sha256": "852cffc5bdd04f50b8ff45d7f2af42b4f1df0bb738c43173a99d172a9b30a968",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 2,
+      "status": "passed",
+      "current_png_sha256": "ac673cf8e3a9b658e8c484ffd4e9b701f9207c4a27e1028c821745a42e6630ac",
+      "previous_png_sha256": "ac673cf8e3a9b658e8c484ffd4e9b701f9207c4a27e1028c821745a42e6630ac",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 3,
+      "status": "passed",
+      "current_png_sha256": "a4dc6c8fc948c39dfbc757e133ca11d701aa027647f05598874b04743a97fc85",
+      "previous_png_sha256": "a4dc6c8fc948c39dfbc757e133ca11d701aa027647f05598874b04743a97fc85",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 4,
+      "status": "passed",
+      "current_png_sha256": "8ad211f3813c694f3e2e874e5706945bd263834e694fd250e119c89622aad150",
+      "previous_png_sha256": "bf7615bdb5a81250d2100129f59a15dae858f40a30f6ead5ead77df627e23578",
+      "pixel_identical_to_previous": false,
+      "review_basis": "Opened at original 160-DPI resolution in final render"
+    },
+    {
+      "page": 5,
+      "status": "passed",
+      "current_png_sha256": "d8203bdf56721dd6185bcf5fd1d5742372b859c63b947e16bee5491d552a0124",
+      "previous_png_sha256": "464262d6962235d4e318ff2d1dfc62776fb3c352eda12e2eab0735fda25bc883",
+      "pixel_identical_to_previous": false,
+      "review_basis": "Opened at original 160-DPI resolution in final render"
+    },
+    {
+      "page": 6,
+      "status": "passed",
+      "current_png_sha256": "c93740b1323d98fac7c315735a00a60d72e8b632474eb34cc4cc45d22957416a",
+      "previous_png_sha256": "52c2d6e54dcd468fe27717091c6e8f4b6b058e13232e3e873fc19369324af149",
+      "pixel_identical_to_previous": false,
+      "review_basis": "Opened at original 160-DPI resolution in final render"
+    },
+    {
+      "page": 7,
+      "status": "passed",
+      "current_png_sha256": "d3c3e33dab86bb45f89bc6e1189a14779e1cb661010ea70f7a854307322984bc",
+      "previous_png_sha256": "d3c3e33dab86bb45f89bc6e1189a14779e1cb661010ea70f7a854307322984bc",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 8,
+      "status": "passed",
+      "current_png_sha256": "11d8f60dbbeda578a303fb42f780ac0957246000e5e3a172e7bd4c9770425f89",
+      "previous_png_sha256": "11d8f60dbbeda578a303fb42f780ac0957246000e5e3a172e7bd4c9770425f89",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 9,
+      "status": "passed",
+      "current_png_sha256": "a1e20a1ad921d94eb590674521cef3c3850c65e6c96cd0fd9ab4fda34fea65a6",
+      "previous_png_sha256": "a1e20a1ad921d94eb590674521cef3c3850c65e6c96cd0fd9ab4fda34fea65a6",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 10,
+      "status": "passed",
+      "current_png_sha256": "d10aa039a81a4ad5c4adf9e7741e9db59843d3b764c3ffe73257c02b584f9fc5",
+      "previous_png_sha256": "d10aa039a81a4ad5c4adf9e7741e9db59843d3b764c3ffe73257c02b584f9fc5",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 11,
+      "status": "passed",
+      "current_png_sha256": "5613b5825e5e61ea96828856d60cf1b5a45bf7504337d38a95a338557595e85b",
+      "previous_png_sha256": "5613b5825e5e61ea96828856d60cf1b5a45bf7504337d38a95a338557595e85b",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 12,
+      "status": "passed",
+      "current_png_sha256": "0505c1df32fcfe7c140d9c210573dac387ddc20772de90d7f695878544022cf8",
+      "previous_png_sha256": "0505c1df32fcfe7c140d9c210573dac387ddc20772de90d7f695878544022cf8",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 13,
+      "status": "passed",
+      "current_png_sha256": "8ad9adcf2eae3f1aa91f3aad0af158077aae852cdd945cceaeeef50b941fc860",
+      "previous_png_sha256": "8ad9adcf2eae3f1aa91f3aad0af158077aae852cdd945cceaeeef50b941fc860",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 14,
+      "status": "passed",
+      "current_png_sha256": "34a0d0dfc4092dbf266f300652f80d80e7fac385889bdec6b60839241c752a45",
+      "previous_png_sha256": "34a0d0dfc4092dbf266f300652f80d80e7fac385889bdec6b60839241c752a45",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 15,
+      "status": "passed",
+      "current_png_sha256": "ed34d671ff054b7b1b6ad93fdc08b51dfb9e217b91dda26b86f544d4c1b34473",
+      "previous_png_sha256": "ed34d671ff054b7b1b6ad93fdc08b51dfb9e217b91dda26b86f544d4c1b34473",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 16,
+      "status": "passed",
+      "current_png_sha256": "68288ecab0a154e7ea9400bb6e5643e3ad80a14bf7c56554ad6999a4e9b2be46",
+      "previous_png_sha256": "68288ecab0a154e7ea9400bb6e5643e3ad80a14bf7c56554ad6999a4e9b2be46",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 17,
+      "status": "passed",
+      "current_png_sha256": "abf3c6dc5deaf53c9a16d730ed8f9ca00cf0768a015e562c3c21050275eeff12",
+      "previous_png_sha256": "abf3c6dc5deaf53c9a16d730ed8f9ca00cf0768a015e562c3c21050275eeff12",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 18,
+      "status": "passed",
+      "current_png_sha256": "bd398974eb5ba58a790aa4ad3d749e8d2bb72ea7951a73546d160e53d1ca7af8",
+      "previous_png_sha256": "f5ff62c3358cea26a413393545e919b22a8224f0c4755f032a620136385a6805",
+      "pixel_identical_to_previous": false,
+      "review_basis": "Opened at original 160-DPI resolution in final render"
+    },
+    {
+      "page": 19,
+      "status": "passed",
+      "current_png_sha256": "568127e81f57fabd195b58b40e0c7e65407b4a2e174750dffab5856af13f3985",
+      "previous_png_sha256": "568127e81f57fabd195b58b40e0c7e65407b4a2e174750dffab5856af13f3985",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 20,
+      "status": "passed",
+      "current_png_sha256": "c809affd1cfed6cff3563252fe9b656f906acb2f2babc5f8ac487fffd3869067",
+      "previous_png_sha256": "c809affd1cfed6cff3563252fe9b656f906acb2f2babc5f8ac487fffd3869067",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 21,
+      "status": "passed",
+      "current_png_sha256": "5e55daf9b8faa22999730a784d2e5967dbf88a2d3728274750ff18f7c389f07f",
+      "previous_png_sha256": "5e55daf9b8faa22999730a784d2e5967dbf88a2d3728274750ff18f7c389f07f",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 22,
+      "status": "passed",
+      "current_png_sha256": "f82186faf885b58c47b8d4cd8b390415020c1402d2e58bb227b2a7a6552cee04",
+      "previous_png_sha256": "f82186faf885b58c47b8d4cd8b390415020c1402d2e58bb227b2a7a6552cee04",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 23,
+      "status": "passed",
+      "current_png_sha256": "4ff49a285d9f3a7525d4d6485843e707b3049696edbba5bb49f31dfa2cf461b3",
+      "previous_png_sha256": "4ff49a285d9f3a7525d4d6485843e707b3049696edbba5bb49f31dfa2cf461b3",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    },
+    {
+      "page": 24,
+      "status": "passed",
+      "current_png_sha256": "b89e17f090672fbe57938e4b3ce9bb53f5b57a8a36f809d497d45c258da63866",
+      "previous_png_sha256": "b89e17f090672fbe57938e4b3ce9bb53f5b57a8a36f809d497d45c258da63866",
+      "pixel_identical_to_previous": true,
+      "review_basis": "Pixel-identical to the previous render, whose every page was opened and visually inspected"
+    }
+  ],
+  "qa_artifacts": "Retained locally under tmp/manuscript-qa; excluded from delivery archive"
+}

@@ -1,0 +1,36 @@
+{
+  "status": "rehearsal_not_confirmation",
+  "workload": {
+    "clean_parents": 66,
+    "clean_point_fits": 1386,
+    "stress_descendants": 644,
+    "stressed_point_fits": 13524,
+    "interval_parents": 12,
+    "interval_model_fits": 24,
+    "physical_bootstrap_records": 143952,
+    "bootstrap_statistic_attempts": 647784,
+    "confirmation_inputs": 0
+  },
+  "valid_clean_points": 1386,
+  "valid_stressed_points": 13524,
+  "verified_descendants": 644,
+  "generated_bootstrap_records": 143952,
+  "bootstrap_statistic_attempts": 647784,
+  "interval_rows": 576,
+  "available_interval_rows": 576,
+  "model_failures": 0,
+  "boundary_hits": 8,
+  "endpoint_stability_rule_passed": true,
+  "endpoint_stability_thresholds": {
+    "refinement_90pct_absolute_change_limit": 0.01,
+    "independent_repeat_90pct_absolute_change_limit": 0.02,
+    "largest_absolute_change_limit": 0.05,
+    "failure_action": "retain_counts_and_revisit_draw_budget_before_design_lock_no_method_selection"
+  },
+  "projected_clean_fit_hours": 1.0163836666621744,
+  "projected_stress_fit_hours": 1.8456672569434178,
+  "projected_interval_fit_hours": 19.162695817130192,
+  "projected_compute_hours": 22.024746740735782,
+  "planning_hours_with_2x_allowance": 44.049493481471565,
+  "timing_limit": "Small rehearsal; excludes full-scale output I/O, final summary analysis, verification and thermal/load changes. No completion-time guarantee."
+}
