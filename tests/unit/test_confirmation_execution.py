@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -10,6 +11,62 @@ from benchmark_experiment.remediation import confirmation_analysis as analysis
 from benchmark_experiment.remediation import confirmation_store as store
 from benchmark_experiment.remediation import run_confirmation as engine
 from benchmark_experiment.remediation import summarize_confirmation as reporting
+
+
+@pytest.fixture
+def portable_rehearsal_runtime(monkeypatch):
+    """Exercise real rehearsal chunks without claiming a validated production runtime."""
+    source = Path(engine.__file__).resolve()
+
+    def runtime_lock(frozen):
+        return {
+            "scientific_design_sha256": frozen["sha256"],
+            "execution": engine.EXECUTION,
+            "environment": engine.shared.environment(),
+            "source_sha256": {
+                source.relative_to(engine.shared.ROOT).as_posix(): engine.shared.file_hash(source)
+            },
+            "test_runtime": "portable_rehearsal_fixture",
+        }
+
+    monkeypatch.setattr(engine, "runtime_lock", runtime_lock)
+
+
+@pytest.fixture
+def runtime_guard_environment(tmp_path, monkeypatch):
+    (tmp_path / "environment-py314-win64.lock").write_text("numpy==2.4.0\n", encoding="utf-8")
+    env = {"python": "3.14.5", "machine": "AMD64", "packages": {"NumPy": "2.4.0"}}
+    monkeypatch.setattr(engine, "HERE", tmp_path)
+    monkeypatch.setattr(engine.shared, "environment", lambda: env)
+    monkeypatch.setattr(engine, "source_paths", lambda: [Path(engine.__file__).resolve()])
+    return env
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("python", "3.12.14", "validated Python"),
+        ("machine", "arm64", "validated Python"),
+        ("packages", {"NumPy": "2.3.0"}, "pinned versions"),
+        ("packages", {}, "pinned versions"),
+    ],
+)
+def test_runtime_guard_rejects_unvalidated_environments(
+    runtime_guard_environment, field, value, message
+):
+    runtime_guard_environment[field] = value
+    with pytest.raises(ValueError, match=message):
+        engine.runtime_lock({"sha256": "test_design"})
+
+
+def test_runtime_guard_accepts_exact_environment_and_hashes_sources(runtime_guard_environment):
+    result = engine.runtime_lock({"sha256": "test_design"})
+    source = Path(engine.__file__).resolve()
+    assert result["environment"] == runtime_guard_environment
+    assert result["scientific_design_sha256"] == "test_design"
+    assert result["source_sha256"] == {
+        source.relative_to(engine.shared.ROOT).as_posix(): engine.shared.file_hash(source)
+    }
 
 
 def get(result, metric, method="Higuchi", condition="clean", contrast=""):
@@ -311,7 +368,7 @@ def test_production_release_cannot_be_reused_after_runtime_change(tmp_path):
 
 
 def test_runner_resume_preserves_committed_bytes_and_rejects_changed_identity(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, portable_rehearsal_runtime
 ):
     frozen = engine.load_lock()
     plan = engine.chunk_plan(frozen, True)[:2]
@@ -356,7 +413,9 @@ def test_summary_roundtrip_keeps_labels_and_unavailable_draws(tmp_path):
     ]
 
 
-def test_real_interval_chunk_loads_all_attempts_and_model_boundary_flags(tmp_path, monkeypatch):
+def test_real_interval_chunk_loads_all_attempts_and_model_boundary_flags(
+    tmp_path, monkeypatch, portable_rehearsal_runtime
+):
     frozen = engine.load_lock()
     spec = next(s for s in engine.chunk_plan(frozen, True) if s["cell"]["cell"] == "fGn_0.5_n512")
     monkeypatch.setattr(engine, "chunk_plan", lambda *args: [spec])
