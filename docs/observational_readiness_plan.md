@@ -1,6 +1,14 @@
+---
+search:
+  exclude: true
+---
+
 # Observational Mode Readiness Plan
 
-Last updated: 2026-05-29
+Historical plan dated 2026-05-29. Its "current" and "missing" statements describe that date.
+Time/sampling metadata, source hashes, QC and deeper entry validation have since been implemented.
+Use the [observational tutorial](tutorials/observational_data.md) for current behavior and
+[current next steps](current_research_next_steps.md) for remaining work.
 
 This page defines what remains before `lrdbench` observational mode is ready for real neural or
 biomedical time-series studies. The current implementation is useful for smoke tests and simple

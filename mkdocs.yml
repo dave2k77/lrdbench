@@ -24,8 +24,12 @@ theme:
   features:
     - navigation.tabs
     - navigation.footer
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
     - content.code.copy
     - search.suggest
+    - search.highlight
 
 plugins:
   - search
@@ -36,18 +40,30 @@ plugins:
           options:
             docstring_style: google
             show_root_heading: true
+            heading_level: 3
             show_source: true
             members_order: source
 
 markdown_extensions:
   - admonition
+  - attr_list
   - pymdownx.details
+  - pymdownx.arithmatex:
+      generic: true
   - pymdownx.superfences
   - pymdownx.snippets:
       check_paths: true
       base_path: [.]
   - toc:
       permalink: true
+      toc_depth: 3
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Home: index.md
@@ -55,48 +71,54 @@ nav:
       - Quickstart: tutorials/quickstart.md
       - Ground-truth benchmark: tutorials/ground_truth_benchmark.md
       - Stress testing: tutorials/stress_testing.md
-      - Estimand triangle and LRD discrimination: tutorials/estimand_triangle_and_discrimination.md
+      - Estimands and discrimination: tutorials/estimand_triangle_and_discrimination.md
       - Observational data: tutorials/observational_data.md
       - Custom estimator: tutorials/custom_estimator.md
       - Reading outputs: tutorials/reading_outputs.md
       - Reproducibility checklist: tutorials/reproducibility_checklist.md
   - User guide:
-      - Installation: installation.md
-      - Research usage: research_usage.md
-      - Design specification: design_specification.md
-      - Benchmark protocol: benchmark_protocol.md
+      - Getting started:
+          - Installation: installation.md
+          - Research usage: research_usage.md
+          - FAQ: faq.md
+      - Methods and interpretation:
+          - Benchmark protocol: benchmark_protocol.md
+          - Interpretation semantics: interpretation_semantics.md
+          - Bundled estimators: bundled_estimators.md
+          - Parameter glossary: parameter_glossary.md
+          - Estimator status: estimator_status.md
+          - Data-driven estimators: data_driven_estimators.md
+          - Known limitations: known_limitations.md
+      - Outputs and reproduction:
+          - Output contract: output_contract.md
+          - Reproducibility: reproducibility.md
+          - Failure mode taxonomy: failure_mode_taxonomy.md
+          - Public small outputs: public_small_outputs.md
+          - Public medium outputs: public_medium_outputs.md
+          - Migration notes: migration.md
+  - Research:
       - Audited confirmation benchmark: confirmation_benchmark.md
-      - Interpretation semantics: interpretation_semantics.md
-      - Output contract: output_contract.md
-      - Reproducibility: reproducibility.md
-      - Research notebooks: research_notebooks.md
-      - Release candidate freeze: release_candidate_freeze.md
-      - Migration notes: migration.md
-      - Citation guidance: citation.md
-      - Public small outputs: public_small_outputs.md
-      - Public medium outputs: public_medium_outputs.md
-      - Failure mode taxonomy: failure_mode_taxonomy.md
-      - Known limitations: known_limitations.md
-      - FAQ: faq.md
       - Paper workflow: paper_workflow.md
-      - Bundled estimators: bundled_estimators.md
-      - Data-driven estimators: data_driven_estimators.md
-      - Adding estimators: adding_estimators.md
-      - Third-party estimator workflow: third_party_estimators.md
-      - Estimator contract: estimator_contract.md
-      - Estimator status: estimator_status.md
-      - Parameter glossary: parameter_glossary.md
-  - Architecture: architecture.md
-  - Reference:
+      - Current next steps: current_research_next_steps.md
+      - Citation guidance: citation.md
+      - Research notebooks: research_notebooks.md
+  - Development:
+      - Design specification: design_specification.md
+      - Architecture: architecture.md
+      - Extensions:
+          - Adding estimators: adding_estimators.md
+          - Estimator contract: estimator_contract.md
+          - Third-party workflow: third_party_estimators.md
       - Python API: reference/api.md
-  - Read the Docs: readthedocs.md
-  - Meta:
-      - Public release roadmap: public_release_roadmap.md
-      - Current research next steps: current_research_next_steps.md
+      - Contributing: contributing.md
+      - Contributor checklist: contributor_checklist.md
+      - Documentation maintenance: readthedocs.md
+      - September documentation review: documentation_review.md
+      - Governance: governance.md
+      - Leaderboard submissions: leaderboard_submission_policy.md
+  - History:
+      - Changelog: changelog.md
+      - Release candidate freeze: release_candidate_freeze.md
+      - Release roadmap: public_release_roadmap.md
       - Observational readiness plan: observational_readiness_plan.md
       - Development handoff: development_handoff.md
-      - Contributor checklist: contributor_checklist.md
-      - Leaderboard submission policy: leaderboard_submission_policy.md
-      - Governance and maintenance: governance.md
-      - Contributing: contributing.md
-      - Changelog: changelog.md

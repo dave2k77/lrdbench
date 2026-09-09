@@ -1,0 +1,11 @@
+/* Long equations scroll within the article, including narrow mobile viewports. */
+.md-typeset div.arithmatex {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+}
+/* Keep parameter and estimator identifiers legible; wide tables scroll as a unit. */
+.md-typeset table:not([class]) td:first-child code {
+  white-space: nowrap;
+  word-break: normal;
+}

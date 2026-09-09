@@ -26,9 +26,11 @@ store squared error and aggregate rows report the square root of the mean square
 
 Coverage error is derived from aggregate coverage rows:
 
-```text
-coverage_error = abs(empirical_coverage - nominal_level)
-```
+$$
+\operatorname{coverage\_error} = \left|\widehat{C} - c\right|,
+$$
+
+where $\widehat{C}$ is empirical coverage and $c$ is the requested nominal level.
 
 Balanced-global rows use `stratum_json` equal to `{"level": "balanced_global"}`. They are computed
 as the mean of available stratum-level aggregate rows, so each represented stratum contributes
@@ -39,18 +41,21 @@ and raw estimate exports necessary companions to accuracy summaries.
 
 ## Estimator Uncertainty
 
-Estimator uncertainty is produced by an estimator itself. It appears in `EstimateResult` fields and
-raw estimate exports:
+Estimator uncertainty is produced by an estimator itself. Public raw estimate exports retain:
 
 - `ci_low` and `ci_high`;
 - `bootstrap_cis_json`;
-- uncertainty-related diagnostics such as bootstrap replicate counts when available.
 
-Metrics such as `coverage`, `ci_width`, and `coverage_error` evaluate these estimator-provided
+Bootstrap counts and other diagnostics can be present in the returned `EstimateResult`, but
+are not serialized in `raw/estimates.csv`; see [persistence boundaries](output_contract.md).
+
+`ci_low`/`ci_high` represent the default 95% interval; other levels remain labelled in
+`bootstrap_cis_json`. Metrics such as `coverage`, `ci_width`, and `coverage_error` evaluate these estimator-provided
 intervals. If an interval is missing, the corresponding metric row has `value=null` and
 `metadata_json` includes `missing_ci=true`.
 
-Estimator intervals are not automatically benchmark-level confidence intervals. They describe the
+Public coverage is conditional on valid points and available finite ordered intervals. Report
+`ci_availability` and `validity_rate` alongside it. Estimator intervals are not automatically benchmark-level confidence intervals. They describe the
 estimator's uncertainty output for one fitted record.
 
 ## Benchmark Uncertainty

@@ -67,7 +67,7 @@ records, but does not train models, fit estimators or write reports.
 | `result_store` | `CsvResultStore` — persists signal arrays as `.npy`, selected fields as CSV, and run metadata as JSON/YAML. |
 | `output_contract` | Required file/header checks and the public export schema. |
 | `registries` | Estimator, generator, contamination and preprocessing look-up tables. |
-| `plugin_loader` | Safe, failure-transparent loading of third-party estimator plugins via environment variables. |
+| `plugin_loader` | Discovery and ordinary import-failure reporting for trusted third-party estimator plugins. |
 | `schema` | Immutable dataclasses (`SeriesRecord`, `EstimateResult`, `MetricSpec`, …) that form the public data contract. |
 | `interfaces` | Abstract base classes (`BaseEstimator`, `BaseGenerator`, `BaseContamination`, …) that define extension points. |
 

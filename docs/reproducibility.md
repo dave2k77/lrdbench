@@ -24,8 +24,10 @@ paths under `configs/suites/` work as well.
 ## Seeds
 
 The manifest `seeds.global_seed` controls synthetic record generation and benchmark-level
-uncertainty defaults. Individual records derive stable per-record seeds from the global seed and
-record identity.
+uncertainty defaults. Synthetic records derive stable per-record seeds from the global seed and record identity.
+The observational loader currently derives its record seeds from record identity without using
+the supplied global seed; changing `global_seed` alone therefore does not change those record
+seeds. Record this limitation when comparing resampling behavior on observational inputs.
 
 When a manifest includes an `uncertainty.seed`, benchmark-level bootstrap intervals use that value.
 Otherwise they default to `seeds.global_seed`.

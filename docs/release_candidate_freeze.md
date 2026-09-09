@@ -1,3 +1,8 @@
+---
+search:
+  exclude: true
+---
+
 # Release Candidate Freeze Review
 
 This page records the public surfaces reviewed for `0.9.0rc1`. The intent is to make the release

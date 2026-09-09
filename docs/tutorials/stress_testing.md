@@ -41,7 +41,8 @@ and `training_summary.json` are written under `reports/<run_id>/ml_models/`.
 
 ## Read the manifest
 
-The central stress-test block is:
+This fragment shows the central stress-test fields; retain IDs, source and estimators from
+the full smoke manifest. `relative_degradation_ratio` also requires `mae`:
 
 ```yaml
 mode: stress_test
@@ -51,9 +52,11 @@ contamination:
       params:
         shift: [0.25]
 metrics:
+  - mae
   - estimate_drift
   - relative_degradation_ratio
   - validity_rate
+  - runtime
 ```
 
 `estimate_drift` describes how much the estimate moves under contamination. Degradation metrics

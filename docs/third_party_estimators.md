@@ -51,6 +51,10 @@ export LRD_BENCH_ESTIMATOR_PLUGIN_PATH="/path/to/my_estimator.py"
 export LRD_BENCH_ESTIMATOR_PLUGIN="pkg1.estimators:pkg2.estimators"
 ```
 
+For PowerShell, set a variable with `$env:LRD_BENCH_ESTIMATOR_PLUGIN = "my_package.my_estimator"`.
+Module lists use colons on all platforms. File-path lists use `os.pathsep`: semicolons on Windows,
+colons on Unix, so Windows drive letters remain intact.
+
 3. Run the benchmark normally:
 
 ```bash
@@ -90,8 +94,9 @@ runner = BenchmarkRunner(estimators=registry, discover_plugins=False)
 
 ## Safety
 
-Plugin loading is safe by default: a broken plugin cannot crash the benchmark loop. Import failures
-and invalid `ENTRY_POINTS` are captured as structured warnings in `BenchmarkRunOutput.plugin_provenance`.
+Plugin modules execute Python code, so load trusted implementations. Ordinary import failures
+and invalid `ENTRY_POINTS` are captured in `BenchmarkRunOutput.plugin_provenance`; this is
+failure reporting, not a sandbox or a guarantee against arbitrary plugin behavior.
 Built-in estimators always take precedence when a plugin name collides with a built-in registry entry.
 
 ## Data-Driven Built-ins

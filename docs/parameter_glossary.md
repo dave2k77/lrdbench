@@ -7,15 +7,17 @@ This page explains the most common parameters you will see in manifest `estimato
 Every estimator declares a `target_estimand`. Truth-based metrics are only computed for an estimator
 against a record that carries a matching truth (`raw/truths.csv`).
 
-| Estimand | Kind | Range | Meaning |
+| Estimand | Kind | Model range | Meaning |
 |----------|------|-------|---------|
 | `hurst_scaling_proxy` | regression | `(0, 1)` | Hurst-like scaling exponent `H`. |
-| `long_memory_parameter` | regression | `(-0.5, 0.5)` | ARFIMA fractional-integration parameter `d = H − 0.5`. |
-| `spectral_exponent_beta` | regression | `~(-1, 1)` | Low-frequency spectral slope `β`, where `S(f) ~ f^(-β)`; `β = 2H − 1`. |
+| `long_memory_parameter` | regression | `(-0.5, 0.5)` | Fractional-integration parameter; $d=H-1/2$ only under compatible stationary finite-variance scaling assumptions. |
+| `spectral_exponent_beta` | regression | `~(-1, 1)` | Low-frequency spectral slope $\beta$, where $S(f) \propto f^{-\beta}$; $\beta=2H-1$ for fGn. Other models can have different ranges. |
 | `timescale_tau` | regression | `> 0` | Autocorrelation-decay time constant `τ₀` in samples. Undefined (`None`) for power-law LRD. |
-| `lrd_class` | classification | `[0, 1]` | Decision score: probability/evidence that the series is long-range dependent (`is_lrd` truth is `0` or `1`). |
+| `lrd_class` | classification | `[0, 1]` | Experimental decision score, not necessarily a calibrated probability; `lrd_class` truth is `0` or `1`. |
 
-## Temporal estimators (RS, DFA, DMA, AbsoluteMoment, Variance, VarianceResidual)
+## Temporal estimators {#temporal-estimators-rs-dfa-dma-absolutemoment-variance-varianceresidual}
+
+Applies to: RS, DFA, DMA, AbsoluteMoment, Variance, VarianceResidual.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -28,7 +30,9 @@ against a record that carries a matching truth (`raw/truths.csv`).
 | `scale_ratio` | float | 1.5 | Geometric spacing factor between consecutive aggregation scales. |
 | `use_anis_lloyd_correction` | bool | `False` | *(RS only)* Divide each scale's average R/S value by the Anis-Lloyd white-noise expectation before fitting the slope. |
 
-## Spectral estimators (GPH, Periodogram, WhittleMLE, ModifiedLocalWhittle)
+## Spectral estimators {#spectral-estimators-gph-periodogram-whittlemle-modifiedlocalwhittle}
+
+Applies to: GPH, Periodogram, WhittleMLE, ModifiedLocalWhittle.
 
 `ModifiedLocalWhittle` is the historical registry name for an ordinary Gaussian
 local Whittle objective. It has no implemented nonstationary correction. Both it
@@ -42,9 +46,11 @@ band, not an exact time-domain likelihood or the exact fGn spectrum.
 | `bootstrap_block_len` | int | `max(4, n//10)` | Block length for the circular block bootstrap. |
 | `ci_levels` | list[float] | `[0.95]` | Nominal coverage levels. |
 | `m` | int | varies | Number of low-frequency Fourier frequencies used. GPH and Periodogram default to `n^0.5`; WhittleMLE defaults to `n//8`; ModifiedLocalWhittle defaults to `n^0.55`. |
-| `taper` | str | `"none"` | Spectral taper. `"none"` uses the raw periodogram; `"cosine"` applies a cosine bell (Hann-type) window to reduce spectral leakage. |
+| `taper` | str | `"none"` | GPH/Periodogram taper. `"none"` uses the raw periodogram; `"cosine"` uses a Hann window. WhittleMLE and ModifiedLocalWhittle do not consume this parameter. |
 
-## Geometric estimators (Higuchi, GHE)
+## Geometric estimators {#geometric-estimators-higuchi-ghe}
+
+Applies to: Higuchi, GHE.
 
 Both methods analyse a path. Declare `input_representation: increments` for fGn
 records: the adapter constructs a path by prepending zero to their cumulative sum,
@@ -82,7 +88,9 @@ The RS `use_anis_lloyd_correction` option divides by the Gaussian white-noise
 expectation before regression and adds 0.5. This is an implementation-specific
 normalization using that expectation, not a general unbiased estimator.
 
-## Wavelet estimators (WaveletOLS, WaveletAbryVeitch, WaveletBardet, WaveletJensen, WaveletWhittle)
+## Wavelet estimators {#wavelet-estimators-waveletols-waveletabryveitch-waveletbardet-waveletjensen-waveletwhittle}
+
+Applies to: WaveletOLS, WaveletAbryVeitch, WaveletBardet, WaveletJensen, WaveletWhittle.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -90,9 +98,17 @@ normalization using that expectation, not a general unbiased estimator.
 | `bootstrap_block_len` | int | `max(4, n//10)` | Block length for the circular block bootstrap. |
 | `ci_levels` | list[float] | `[0.95]` | Nominal coverage levels. |
 | `wavelet` | str | `"db4"` | Wavelet family passed to `pywt.wavedec`. |
-| `max_level` | int | varies | Maximum decomposition level. Defaults to the largest usable level minus boundary scales. |
+| `j_drop_high` | int | AbryVeitch: 2; OLS/Bardet/Whittle: 1 | Number of finest (highest-frequency) levels removed. |
+| `j_drop_low` | int | AbryVeitch/Bardet: 2; OLS/Whittle: 1 | Number of coarsest (lowest-frequency) levels removed. |
+| `fine_band`, `coarse_band` | pair[int, int] | `[2, 4]`, `[4, 6]` | Jensen level bands. |
 
-## Data-driven estimators (MLRandomForest, MLSVR, MLCNN, MLLSTM)
+Maximum DWT depth is computed from record length and the wavelet filter. `max_level` is not
+a consumed estimator parameter. At least three retained detail levels are required by the
+regression helpers; length alone does not guarantee a fit.
+
+## Data-driven estimators {#data-driven-estimators-mlrandomforest-mlsvr-mlcnn-mllstm}
+
+Applies to: MLRandomForest, MLSVR, MLCNN, MLLSTM.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -109,23 +125,27 @@ normalization using that expectation, not a general unbiased estimator.
 | `conv2_channels` | int | 32 | *(MLCNN)* Second convolution channel count. |
 | `hidden_size` | int | 32 | *(MLLSTM)* LSTM hidden size per layer. |
 | `num_layers` | int | 1 | *(MLLSTM)* Number of stacked LSTM layers. Values >1 trigger inter-layer dropout. |
-| `dropout` | float | 0.2 | *(MLCNN, MLLSTM)* Dropout probability applied after conv/LSTM layers and in the MLP head. Set to `0.0` to disable (LSTM will still use 0.2 when `num_layers > 1` to avoid PyTorch errors). |
+| `dropout` | float | 0.2 | *(MLCNN, MLLSTM)* Dropout probability applied after conv/LSTM layers and in the MLP head. Set to `0.0` to disable (LSTM will still use 0.2 when `num_layers > 1` because the implementation uses a fallback at that setting). |
 | `learning_rate` | float | 0.001 | *(MLCNN, MLLSTM)* Adam learning rate. |
 | `weight_decay` | float | 1e-4 | *(MLCNN, MLLSTM)* Adam weight-decay (L2 regularization). |
 | `batch_size` | int | 16 | *(MLCNN, MLLSTM)* Training mini-batch size. |
 | `epochs` | int | 8 | *(MLCNN, MLLSTM)* Number of training epochs. |
 
-## Spectral-exponent and timescale estimators (PeriodogramBeta, ACFDecay)
+## Spectral-exponent and timescale estimators {#spectral-exponent-and-timescale-estimators-periodogrambeta-acfdecay}
+
+Applies to: PeriodogramBeta, ACFDecay.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `m` | int | `n^0.5` | *(PeriodogramBeta)* Number of low-frequency Fourier frequencies for the slope fit. |
 | `taper` | str | `"none"` | *(PeriodogramBeta)* Spectral taper (`"none"` or `"cosine"`). |
-| `max_lag` | int | first zero-crossing | *(ACFDecay)* Maximum lag included in the ACF fit. |
-| `rho_floor` | float | 0.1 | *(ACFDecay)* Only lags with autocorrelation above this floor are fit, excluding the noisy small-`ρ` tail that otherwise inflates `τ`. |
+| `max_lag` | int | automatic, capped at `n//4` | *(ACFDecay)* Automatic fitting stops before the first ACF value below `rho_floor`. An explicit cap instead retains positive ACF values above `1e-6` within that cap. |
+| `rho_floor` | float | 0.1 | *(ACFDecay)* Threshold used to end the automatic leading ACF band; an explicit `max_lag` overrides this stopping rule. |
 | `n_bootstrap`, `bootstrap_block_len`, `ci_levels` | | | Shared block-bootstrap CI parameters (see temporal estimators). |
 
-## LRD discriminators (ThresholdHurst / LowFreqSpectral / ScaleCrossover / ICModelSelect)
+## LRD discriminators {#lrd-discriminators-thresholdhurst-lowfreqspectral-scalecrossover-icmodelselect}
+
+Applies to: ThresholdHurst / LowFreqSpectral / ScaleCrossover / ICModelSelect.
 
 All target `lrd_class` and emit a `[0, 1]` score.
 

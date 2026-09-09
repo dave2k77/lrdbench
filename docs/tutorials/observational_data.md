@@ -25,8 +25,8 @@ csv_series_index`.
 For a stronger workflow rehearsal, run the multi-record fixture:
 
 ```bash
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/neural_observational_fixture.yaml
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main run configs/suites/neural_observational_fixture.yaml --no-plugins
+lrdbench validate configs/suites/neural_observational_fixture.yaml
+lrdbench run configs/suites/neural_observational_fixture.yaml --no-plugins
 ```
 
 This fixture contains eight non-sensitive CSV records across two subjects, two channels, and two
@@ -40,8 +40,8 @@ The repository also includes a small real-data observational pilot derived from 
 `ds002691` internal-attention EEG dataset:
 
 ```bash
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main validate configs/suites/openneuro_ds002691_pilot.yaml
-PYTHONPATH=src .venv/Scripts/python.exe -m lrdbench.cli.main run configs/suites/openneuro_ds002691_pilot.yaml --no-plugins
+lrdbench validate configs/suites/openneuro_ds002691_pilot.yaml
+lrdbench run configs/suites/openneuro_ds002691_pilot.yaml --no-plugins
 ```
 
 The committed pilot CSVs contain four subjects (`sub-001` to `sub-004`), four EEG channels (`E1`,
@@ -79,7 +79,8 @@ source:
       value_column: value
 ```
 
-Paths are resolved relative to the manifest file. Keep one numeric value column per listed series.
+This is a source-block fragment; retain the manifest IDs, estimator list and metrics from the
+complete smoke manifest. Paths are resolved relative to the manifest file. Keep one numeric value column per listed series.
 Use stable `record_id` values so reports and downstream analyses can be joined back to your study
 metadata.
 
@@ -110,6 +111,10 @@ Supported `missing_policy` values are:
 
 - `drop` (default): drop rows where the value or declared time column is missing or non-finite;
 - `error`: reject the record if any value or declared time entry is missing or non-finite.
+
+Dropping samples can create irregular time gaps. Most bundled estimators operate on the retained
+value sequence and assume regular sampling; preserving a time column does not make their fits
+time-aware. Segment or otherwise resolve gaps explicitly before scientific use.
 
 The loader preserves `time_column` as `SeriesRecord.time_axis`, stores `sampling_rate`, attaches the
 metadata to record annotations, and records a SHA-256 hash of each source CSV in
