@@ -150,6 +150,8 @@ include = [
   "/notebooks",
   "/configs",
   "/examples",
+  "/scripts/check_docs.py",
+  "/scripts/check_dist.py",
   "/.github",
   "/README.md",
   "/LICENSE",

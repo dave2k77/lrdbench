@@ -63,12 +63,15 @@ python -m pytest
 python -m mkdocs build --strict
 python scripts/check_docs.py site
 python -m build
+python -m twine check --strict dist/*
+python scripts/check_dist.py dist
 ```
 
-For packaging or CLI changes, also install the built wheel in a temporary environment and run:
+For packaging or CLI changes, also install the built wheel in a temporary environment and run
+these checks outside the checkout:
 
 ```bash
 lrdbench list-suites
 lrdbench run smoke_ground_truth
-lrdbench validate-output reports/<run_id>
+lrdbench validate-output <result_store_printed_by_run>
 ```

@@ -55,5 +55,15 @@ Public releases should:
 - tag the release in Git;
 - archive or DOI-tag release artefacts when an archive is available.
 
+Choose an unused package version in `src/lrdbench/__init__.py` before creating its matching
+`v<version>` tag. A merge does not create a package release. The release workflow builds the
+source distribution and a wheel from it, checks metadata and packaged assets, and smoke-tests
+the installed wheel outside the checkout. A mismatched version tag fails before publication.
+
+Manual dispatch of the release workflow builds and validates downloadable artefacts only.
+Publication requires a pushed version tag and uses the `pypi` GitHub environment with PyPI
+Trusted Publishing. The maintainer must configure that environment and the matching trusted
+publisher on PyPI before releasing.
+
 Releases are archived on Zenodo; cite the concept DOI `10.5281/zenodo.20937726`, which resolves to
 the latest archived version.
