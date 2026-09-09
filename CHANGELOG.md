@@ -16,6 +16,9 @@
   the unchanged production environment guard. Normal CI does not certify a production runtime.
 
 ### Documentation maintenance
+- Align architecture, preprocessing/training order and persistence boundaries with the public
+  runner, and distinguish its exports from the frozen confirmation archive. Embed the tracked
+  output contract in the guide and expand the source-generated API reference.
 - Add the [confirmation guide](https://github.com/dave2k77/lrdbench/blob/main/docs/confirmation_benchmark.md), refresh the current handoff,
   migration and paper workflow, and distinguish historical logs from active instructions.
 - Correct leaderboard tie semantics and interval-calibration status. Clarify published-source

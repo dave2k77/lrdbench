@@ -11,7 +11,9 @@ lrdbench run <suite-name>
 lrdbench validate-output reports/public_medium/<run_id>
 ```
 
-The row shapes are expected to remain valid under the `1.0.0` output contract.
+These are historical reference counts, not requirements of the current output contract.
+The [output specification](output_contract.md) defines current file/header requirements;
+it does not fix row counts across versions or configurations.
 
 | Suite | Run ID | Per-stratum rows | Benchmark uncertainty rows | Disagreement rows | Failure rows | Leaderboard rows | Suite-specific rows |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
