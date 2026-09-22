@@ -2,6 +2,13 @@
 
 Pull requests are welcome. Please keep changes focused and match the existing style in the files you touch.
 
+## Agent-assisted contributions
+
+Shared guidance for coding agents lives in [`AGENTS.md`](AGENTS.md). Keep project instructions
+and filenames independent of the agent or vendor used. Commit attribution belongs to human
+contributors: do not add AI tools, models, or vendors as authors, co-authors, or project
+contributors, and preserve existing human attribution.
+
 ## Quick start for contributors
 
 1. **Install in editable mode with dev dependencies:**
