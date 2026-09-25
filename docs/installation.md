@@ -29,7 +29,10 @@ pip install -e ".[docs]"
 mkdocs serve
 ```
 
-The site configuration is `mkdocs.yml` at the repository root. **Read the Docs** builds the same site using `.readthedocs.yaml`; the hosted site is [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/).
+The site configuration is `mkdocs.yml` at the repository root. **Read the Docs** builds it using
+`.readthedocs.yaml` at [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/).
+**GitHub Pages** builds it with `mkdocs.pages.yml` at
+[dave2k77.github.io/lrdbench](https://dave2k77.github.io/lrdbench/).
 
 ## Optional extras
 

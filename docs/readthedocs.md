@@ -3,6 +3,8 @@
 Read the Docs builds the MkDocs site from `.readthedocs.yaml`, installs the package with the
 `docs` extra, and uses `mkdocs.yml`. The hosted site is
 [lrdbench.readthedocs.io](https://lrdbench.readthedocs.io/).
+GitHub Pages builds the same content with `mkdocs.pages.yml` and publishes it at
+[dave2k77.github.io/lrdbench](https://dave2k77.github.io/lrdbench/).
 An open documentation PR does not by itself update the hosted default version; check the deployed
 page after merge and a successful Read the Docs build.
 
@@ -14,12 +16,15 @@ From the repository root:
 pip install -e ".[docs]"
 python -m mkdocs build --strict
 python scripts/check_docs.py site
+python -m mkdocs build --strict --config-file mkdocs.pages.yml
+python scripts/check_docs.py site /lrdbench/
 ```
 
 The strict build checks links and missing snippets. The additional audit checks navigation
 coverage, page titles, local link targets/anchors, the embedded output contract, math assets and
 historical-page search exclusions. CI runs both checks. Browser review is still required for
 layout, search behavior and actual equation typesetting; structural checks cannot certify those.
+The `/lrdbench/` audit argument resolves GitHub Pages links under the repository subpath.
 
 ## Mathematical notation
 
@@ -69,8 +74,14 @@ The [September review](documentation_review.md) records findings, fixes and vali
 
 ## Hosting changes
 
-If the project slug changes, update `site_url` in `mkdocs.yml`, the Documentation URL in
-`pyproject.toml`, and repository/docs links. Keep `.readthedocs.yaml` and the local build aligned;
-review the hosted Read the Docs build and version settings separately from GitHub Actions.
+GitHub Pages publishes through `.github/workflows/pages.yml` on pushes to `main` or a manual
+workflow run. Set **Settings → Pages → Build and deployment → Source** to **GitHub Actions** in the
+repository before the first deployment. The workflow builds and audits the site before uploading
+the Pages artifact. It does not commit generated files to the repository.
+
+If the project slug changes, update `site_url` in `mkdocs.yml` and `mkdocs.pages.yml`, the
+Documentation URL in `pyproject.toml`, the Pages audit subpath in the workflow, and repository/docs
+links. Keep `.readthedocs.yaml` and the local build aligned; review the hosted Read the Docs build
+and version settings separately from GitHub Actions.
 `mkdocs.fail_on_warning: true` makes Read the Docs treat MkDocs warnings as errors, following
 the [Read the Docs configuration reference](https://docs.readthedocs.com/platform/stable/config-file/v2.html#mkdocs).

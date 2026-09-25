@@ -52,7 +52,7 @@ def nav_paths(items):
                 yield from nav_paths(value)
 
 
-def check(site: Path) -> list[str]:
+def check(site: Path, base_path: str = "/") -> list[str]:
     root = Path(__file__).resolve().parents[1]
     config = yaml.safe_load((root / "mkdocs.yml").read_text(encoding="utf-8"))
     sources = {p.relative_to(root / "docs").as_posix() for p in (root / "docs").rglob("*.md")}
@@ -72,11 +72,14 @@ def check(site: Path) -> list[str]:
             url = urlsplit(href)
             if url.scheme or url.netloc:
                 continue
+            local_path = unquote(url.path)
+            if local_path.startswith(base_path) and base_path != "/":
+                local_path = "/" + local_path[len(base_path) :]
             target = (
                 (
-                    site / unquote(url.path).lstrip("/")
-                    if url.path.startswith("/")
-                    else path.parent / unquote(url.path)
+                    site / local_path.lstrip("/")
+                    if local_path.startswith("/")
+                    else path.parent / local_path
                 )
                 if url.path
                 else path
@@ -125,7 +128,10 @@ def check(site: Path) -> list[str]:
 
 if __name__ == "__main__":
     site = Path(sys.argv[1] if len(sys.argv) > 1 else "site").resolve()
-    errors = check(site)
+    base_path = sys.argv[2] if len(sys.argv) > 2 else "/"
+    if not (base_path.startswith("/") and base_path.endswith("/")):
+        raise SystemExit("Base path must start and end with '/'")
+    errors = check(site, base_path)
     for error in errors:
         print(error)
     if errors:

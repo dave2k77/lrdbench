@@ -1,0 +1,4 @@
+INHERIT: mkdocs.yml
+
+# Keep Read the Docs and GitHub Pages canonical URLs correct for each host.
+site_url: https://dave2k77.github.io/lrdbench/

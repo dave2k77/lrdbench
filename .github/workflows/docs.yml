@@ -18,3 +18,7 @@ jobs:
         run: mkdocs build --strict
       - name: Documentation structure and contract audit
         run: python scripts/check_docs.py site
+      - name: MkDocs GitHub Pages strict build
+        run: mkdocs build --strict --config-file mkdocs.pages.yml
+      - name: GitHub Pages structure and contract audit
+        run: python scripts/check_docs.py site /lrdbench/
