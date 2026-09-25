@@ -12,6 +12,7 @@
 
 /* Landing page. All other documentation keeps the Material defaults. */
 .lrd-home {
+  container-type: inline-size;
   --lrd-ink: #142640;
   --lrd-muted: #51627a;
   --lrd-line: #d9e4ec;
@@ -52,10 +53,11 @@
 .md-typeset .lrd-hero h1 {
   margin: 0 0 1.1rem;
   color: var(--lrd-ink);
-  font-size: clamp(2.1rem, 4.1vw, 3.6rem);
+  font-size: clamp(1.8rem, 2.8vw, 2.6rem);
   font-weight: 800;
-  letter-spacing: -.055em;
-  line-height: 1.08;
+  letter-spacing: -.04em;
+  line-height: 1.14;
+  text-wrap: balance;
 }
 
 .lrd-lede {
@@ -342,9 +344,12 @@
 .lrd-scope strong { color: var(--lrd-ink); }
 .lrd-footer-note { margin: 1.4rem 0 0; }
 
-@media (max-width: 760px) {
+@container (max-width: 55rem) {
   .lrd-hero,
   .lrd-start { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
   .lrd-mode-grid { grid-template-columns: 1fr; }
   .lrd-mode-card { min-height: 0; }
   .lrd-hero { padding-bottom: 2.2rem; }
